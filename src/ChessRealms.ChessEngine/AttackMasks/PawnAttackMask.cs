@@ -29,20 +29,20 @@ public static class PawnAttackMask
         Instance = masks.ToImmutableDictionary();
     }
 
-    private static ulong MaskPawnAttack(PieceColor color, SquareIndex pawnSquare)
+    private static ulong MaskPawnAttack(PieceColor color, SquareIndex index)
     {
-        ulong board = pawnSquare.BitBoard.Value;
+        ulong board = index.BitBoard.Value;
         ulong attacks = 0UL;
 
         if (color == PieceColor.White)
         {
-            if (((board << 7) & LerfConstants.NOT_H_FILE) > 0) attacks |= board << 7;
-            if (((board << 9) & LerfConstants.NOT_A_FILE) > 0) attacks |= board << 9;
+            attacks |= (board << 7) & LerfConstants.NOT_H_FILE;
+            attacks |= (board << 9) & LerfConstants.NOT_A_FILE;
         }
         else
         {
-            if (((board >> 7) & LerfConstants.NOT_A_FILE) > 0) attacks |= board >> 7;
-            if (((board >> 9) & LerfConstants.NOT_H_FILE) > 0) attacks |= board >> 9;
+            attacks |= (board >> 7) & LerfConstants.NOT_A_FILE;
+            attacks |= (board >> 9) & LerfConstants.NOT_H_FILE;
         }
 
         return attacks;

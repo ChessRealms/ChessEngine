@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Types;
+using ChessRealms.ChessEngine.Types.Enums;
 
 SquareIndex a4 = EnumSquare.a4;
 Print.Board(a4.BitBoard);

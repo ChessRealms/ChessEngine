@@ -2,7 +2,7 @@
 using ChessRealms.ChessEngine.Types;
 using ChessRealms.ChessEngine.Types.Enums;
 
-namespace ChessRealms.Tests.AttackMasks;
+namespace ChessRealms.ChessEngine.Tests.AttackMasks;
 
 public class PawnAttackMaskTests
 {
@@ -13,9 +13,9 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.b5;
        
         ulong attackMask = PawnAttackMask.Instance[PieceColor.White][attackFrom];
-        ulong xor = attackMask ^ attack.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -25,9 +25,9 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.b3;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.Black][attackFrom];
-        ulong xor = attackMask ^ attack.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -37,9 +37,9 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.g5;
        
         ulong attackMask = PawnAttackMask.Instance[PieceColor.White][attackFrom];
-        ulong xor = attackMask ^ attack.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -49,9 +49,9 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.g3;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.Black][attackFrom];
-        ulong xor = attackMask ^ attack.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -62,9 +62,9 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f6;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.White][attackFrom];
-        ulong xor = attackMask ^ attack1.BitBoard.Value ^ attack2.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -75,8 +75,8 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f4;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.Black][attackFrom];
-        ulong xor = attackMask ^ attack1.BitBoard.Value ^ attack2.BitBoard.Value;
+        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
 
-        Assert.That(xor, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 }
