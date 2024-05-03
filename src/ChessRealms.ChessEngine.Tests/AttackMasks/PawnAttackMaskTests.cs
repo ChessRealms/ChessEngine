@@ -7,7 +7,7 @@ namespace ChessRealms.ChessEngine.Tests.AttackMasks;
 public class PawnAttackMaskTests
 {
     [Test]
-    public void MaskAttackFromA4_AsWhitePawn()
+    public void From_A4_AsWhitePawn()
     {
         SquareIndex attackFrom = EnumSquare.a4;
         SquareIndex attack = EnumSquare.b5;
@@ -19,7 +19,7 @@ public class PawnAttackMaskTests
     }
 
     [Test]
-    public void MaskAttackFromA4_AsBlackPawn()
+    public void From_A4_AsBlackPawn()
     {
         SquareIndex attackFrom = EnumSquare.a4;
         SquareIndex attack = EnumSquare.b3;
@@ -31,7 +31,7 @@ public class PawnAttackMaskTests
     }
 
     [Test]
-    public void MaskAttackFromH4_AsWhitePawn()
+    public void From_H4_AsWhitePawn()
     {
         SquareIndex attackFrom = EnumSquare.h4;
         SquareIndex attack = EnumSquare.g5;
@@ -43,7 +43,7 @@ public class PawnAttackMaskTests
     }
 
     [Test]
-    public void MaskAttackFromH4_AsBlackPawn()
+    public void From_H4_AsBlackPawn()
     {
         SquareIndex attackFrom = EnumSquare.h4;
         SquareIndex attack = EnumSquare.g3;
@@ -55,7 +55,7 @@ public class PawnAttackMaskTests
     }
 
     [Test]
-    public void MaskAttackFromE5_AsWhitePawn()
+    public void From_E5_AsWhitePawn()
     {
         SquareIndex attackFrom = EnumSquare.e5;
         SquareIndex attack1 = EnumSquare.d6;
@@ -68,7 +68,7 @@ public class PawnAttackMaskTests
     }
 
     [Test]
-    public void MaskAttackFromE5_AsBlackPawn()
+    public void From_E5_AsBlackPawn()
     {
         SquareIndex attackFrom = EnumSquare.e5;
         SquareIndex attack1 = EnumSquare.d4;

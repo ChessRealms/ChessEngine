@@ -7,7 +7,7 @@ namespace ChessRealms.ChessEngine.Tests.AttackMasks;
 public class KingAttackMaskTests
 {
     [Test]
-    public void Test_D4()
+    public void From_D4()
     {
         SquareIndex attackFrom = EnumSquare.d4;
 
@@ -33,7 +33,7 @@ public class KingAttackMaskTests
     }
 
     [Test]
-    public void Test_A1()
+    public void From_A1()
     {
         SquareIndex attackFrom = EnumSquare.a1;
 
@@ -48,7 +48,7 @@ public class KingAttackMaskTests
     }
 
     [Test]
-    public void Test_A8()
+    public void From_A8()
     {
         SquareIndex attackFrom = EnumSquare.a8;
 
@@ -63,7 +63,7 @@ public class KingAttackMaskTests
     }
 
     [Test]
-    public void Test_H1()
+    public void From_H1()
     {
         SquareIndex attackFrom = EnumSquare.h1;
 
@@ -78,7 +78,7 @@ public class KingAttackMaskTests
     }
 
     [Test]
-    public void Test_H8()
+    public void From_H8()
     {
         SquareIndex attackFrom = EnumSquare.h8;
 
