@@ -49,7 +49,7 @@ public class RookAttackMaskTests
             EnumSquare.c1,
             EnumSquare.e1,
             EnumSquare.f1,
-            EnumSquare.g1,
+            EnumSquare.g1
         ];
 
         ulong attackMask = RookAttackMask.Instance[attackFrom];
