@@ -29,9 +29,9 @@ public static class PawnAttackMask
         Instance = masks.ToImmutableDictionary();
     }
 
-    private static ulong MaskPawnAttack(PieceColor color, SquareIndex index)
+    private static ulong MaskPawnAttack(PieceColor color, SquareIndex square)
     {
-        ulong board = index.BitBoard.Value;
+        ulong board = square.BitBoard;
         ulong attacks = 0UL;
 
         if (color == PieceColor.White)

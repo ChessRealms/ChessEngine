@@ -11,17 +11,17 @@ public static class KnightAttackMask
     {
         ulong[] masks = new ulong[64];
 
-        for (int i = 0; i < 64; ++i)
+        for (int square = 0; square < 64; ++square)
         {
-            masks[i] = MaskKnightAttack(i);
+            masks[square] = MaskKnightAttack(square);
         }
 
         Instance = [.. masks];
     }
 
-    private static ulong MaskKnightAttack(SquareIndex knightIndex)
+    private static ulong MaskKnightAttack(SquareIndex square)
     {
-        ulong board = knightIndex.BitBoard;
+        ulong board = square.BitBoard;
         ulong attacks = 0UL;
 
         attacks |= (board >> 17) & LerfConstants.NOT_H_FILE;
