@@ -1,12 +1,8 @@
 ﻿using ChessRealms.ChessEngine.Types;
 using ChessRealms.ChessEngine.Types.Enums;
-using System.Numerics;
 
 SquareIndex index = EnumSquare.e7;
 Print.Board(index.BitBoard);
-
-Console.WriteLine(BitOperations.PopCount(index.BitBoard));
-Console.WriteLine(BitOperations.TrailingZeroCount(index.BitBoard));
 
 class Print
 {
