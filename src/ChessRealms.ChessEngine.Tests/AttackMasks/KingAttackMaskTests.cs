@@ -25,9 +25,9 @@ public class KingAttackMaskTests
         ulong attackMask = KingAttackMask.Instance[attackFrom];
         ulong attackMatch = attackMask;
 
-        attackMatch ^= attack1.BitBoard ^ attack2.BitBoard;
-        attackMatch ^= attack3.BitBoard ^ attack4.BitBoard ^ attack5.BitBoard;
-        attackMatch ^= attack6.BitBoard ^ attack7.BitBoard ^ attack8.BitBoard;
+        attackMatch ^= attack1.BitBoard | attack2.BitBoard;
+        attackMatch ^= attack3.BitBoard | attack4.BitBoard | attack5.BitBoard;
+        attackMatch ^= attack6.BitBoard | attack7.BitBoard | attack8.BitBoard;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -42,7 +42,9 @@ public class KingAttackMaskTests
         SquareIndex attack3 = EnumSquare.b2;
 
         ulong attackMask = KingAttackMask.Instance[attackFrom];
-        ulong attackMatch = attackMask ^ attack1.BitBoard ^ attack2.BitBoard ^ attack3.BitBoard;
+        ulong attackMatch = attackMask;
+
+        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -57,7 +59,9 @@ public class KingAttackMaskTests
         SquareIndex attack3 = EnumSquare.b8;
 
         ulong attackMask = KingAttackMask.Instance[attackFrom];
-        ulong attackMatch = attackMask ^ attack1.BitBoard ^ attack2.BitBoard ^ attack3.BitBoard;
+        ulong attackMatch = attackMask;
+
+        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -72,7 +76,9 @@ public class KingAttackMaskTests
         SquareIndex attack3 = EnumSquare.g2;
 
         ulong attackMask = KingAttackMask.Instance[attackFrom];
-        ulong attackMatch = attackMask ^ attack1.BitBoard ^ attack2.BitBoard ^ attack3.BitBoard;
+        ulong attackMatch = attackMask;
+
+        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -87,7 +93,9 @@ public class KingAttackMaskTests
         SquareIndex attack3 = EnumSquare.g8;
 
         ulong attackMask = KingAttackMask.Instance[attackFrom];
-        ulong attackMatch = attackMask ^ attack1.BitBoard ^ attack2.BitBoard ^ attack3.BitBoard;
+        ulong attackMatch = attackMask;
+
+        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }

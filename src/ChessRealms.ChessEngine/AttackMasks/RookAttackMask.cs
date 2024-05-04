@@ -45,4 +45,59 @@ public static class RookAttackMask
 
         return attacks;
     }
+
+    internal static ulong MaskRookAttackOnTheFly(SquareIndex square, ulong blockers)
+    {
+        ulong attacks = 0UL;
+
+        for (int r = square.Rank + 1; r <= 7; ++r)
+        {
+            ulong board = SquareIndex.FromFileRank(square.File, r).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int r = square.Rank - 1; r >= 0; --r)
+        {
+            ulong board = SquareIndex.FromFileRank(square.File, r).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int f = square.File + 1; f <= 7; ++f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int f = square.File - 1; f >= 0; --f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        return attacks;
+    }
 }

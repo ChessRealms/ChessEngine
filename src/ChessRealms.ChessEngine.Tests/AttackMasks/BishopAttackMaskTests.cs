@@ -4,7 +4,7 @@ using ChessRealms.ChessEngine.Types.Enums;
 
 namespace ChessRealms.ChessEngine.Tests.AttackMasks;
 
-public class BishopAttaclMaskTests
+public class BishopAttackMaskTests
 {
     [Test]
     public void From_D4()
@@ -25,9 +25,8 @@ public class BishopAttaclMaskTests
         ];
 
         ulong attackMask = BishopAttackMask.Instance[attackFrom];
-        
-        attackMask ^= attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 ^ b2);
+        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
     
-        Assert.That(attackMask, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 }

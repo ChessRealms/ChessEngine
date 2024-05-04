@@ -26,10 +26,9 @@ public class RookAttackMaskTests
         ];
 
         ulong attackMask = RookAttackMask.Instance[attackFrom];
-        
-        attackMask ^= attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 ^ b2);
+        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
     
-        Assert.That(attackMask, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 
     [Test]
@@ -37,7 +36,7 @@ public class RookAttackMaskTests
     {
         SquareIndex attackFrom = EnumSquare.d1;
 
-        SquareIndex[] attacks = 
+        SquareIndex[] attacks =
         [
             EnumSquare.d2,
             EnumSquare.d3,
@@ -53,9 +52,8 @@ public class RookAttackMaskTests
         ];
 
         ulong attackMask = RookAttackMask.Instance[attackFrom];
-        
-        attackMask ^= attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 ^ b2);
+        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
     
-        Assert.That(attackMask, Is.EqualTo(0));
+        Assert.That(matchAttack, Is.EqualTo(0));
     }
 }

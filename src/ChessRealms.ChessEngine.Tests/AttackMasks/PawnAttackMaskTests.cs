@@ -62,7 +62,7 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f6;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.White][attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -75,7 +75,7 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f4;
         
         ulong attackMask = PawnAttackMask.Instance[PieceColor.Black][attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

@@ -24,8 +24,8 @@ public class KinghtAttackMaskTests
         ulong attackMask = KnightAttackMask.Instance[attackFrom];
         ulong matchAttack = attackMask;
 
-        matchAttack ^= attack1.BitBoard ^ attack2.BitBoard ^ attack3.BitBoard ^ attack4.BitBoard;
-        matchAttack ^= attack5.BitBoard ^ attack6.BitBoard ^ attack7.BitBoard ^ attack8.BitBoard;
+        matchAttack ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard | attack4.BitBoard;
+        matchAttack ^= attack5.BitBoard | attack6.BitBoard | attack7.BitBoard | attack8.BitBoard;
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -38,7 +38,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.c2;
 
         ulong attackMask = KnightAttackMask.Instance[attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -51,7 +51,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.c7;
 
         ulong attackMask = KnightAttackMask.Instance[attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -64,7 +64,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.g3;
 
         ulong attackMask = KnightAttackMask.Instance[attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -77,7 +77,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.g6;
 
         ulong attackMask = KnightAttackMask.Instance[attackFrom];
-        ulong matchAttack = attackMask ^ attack1.BitBoard ^ attack2.BitBoard;
+        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

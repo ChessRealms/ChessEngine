@@ -42,6 +42,61 @@ public static class BishopAttackMask
         {
             attacks |= SquareIndex.FromFileRank(f, r).BitBoard;
         }
+        
+        return attacks;
+    }
+
+    internal static ulong MaskBishopAttackOnTheFly(SquareIndex square, ulong blockers)
+    {
+        ulong attacks = 0UL;
+
+        for (int r = square.Rank + 1, f = square.File + 1; r <= 7 && f <= 7; ++r, ++f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            
+            attacks |= board;
+            
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int r = square.Rank - 1, f = square.File + 1; r >= 0 && f <= 7; --r, ++f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int r = square.Rank + 1, f = square.File - 1; r <= 7 && f >= 0; ++r, --f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
+
+        for (int r = square.Rank - 1, f = square.File - 1; r >= 0 && f >= 0; --r, --f)
+        {
+            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+
+            attacks |= board;
+
+            if ((board & blockers) > 0)
+            {
+                break;
+            }
+        }
 
         return attacks;
     }
