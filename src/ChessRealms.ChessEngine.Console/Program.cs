@@ -1,14 +1,11 @@
-﻿using ChessRealms.ChessEngine.Types;
-using ChessRealms.ChessEngine.Types.Enums;
+﻿using ChessRealms.ChessEngine.Core.Types;
 
-SquareIndex index = EnumSquare.e7;
+SquareIndex index = EnumSquare.d2;
 Print.Board(index.BitBoard);
 
 class Print
 {
-    public static void Board(BitBoard board) => Board((ulong)board);
-
-    public static void Board(ulong board)
+    public static void Board(BitBoard board)
     {
         for (int rank = 0; rank < 8; ++rank)
         {
@@ -16,8 +13,8 @@ class Print
 
             for (int file = 0; file < 8; ++file)
             {
-                int square = rank * 8 + file;
-                Console.Write(" {0}", (board & (1UL << square)) > 0 ? 1 : 0);
+                SquareIndex square = rank * 8 + file;
+                Console.Write(" {0}", Convert.ToInt32((board & square.BitBoard) > 0));
             }
 
             Console.WriteLine();

@@ -1,4 +1,4 @@
-﻿namespace ChessRealms.ChessEngine.Types.Enums;
+﻿namespace ChessRealms.ChessEngine.Core.Types;
 
 public enum PieceColor
 {

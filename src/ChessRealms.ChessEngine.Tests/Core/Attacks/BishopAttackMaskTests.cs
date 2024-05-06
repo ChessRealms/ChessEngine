@@ -1,8 +1,7 @@
-﻿using ChessRealms.ChessEngine.AttackMasks;
-using ChessRealms.ChessEngine.Types;
-using ChessRealms.ChessEngine.Types.Enums;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine.Tests.AttackMasks;
+namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
 public class BishopAttackMaskTests
 {
@@ -11,7 +10,7 @@ public class BishopAttackMaskTests
     {
         SquareIndex attackFrom = EnumSquare.d4;
 
-        SquareIndex[] attacks = 
+        SquareIndex[] attacks =
         [
             EnumSquare.b2,
             EnumSquare.c3,
@@ -24,9 +23,9 @@ public class BishopAttackMaskTests
             EnumSquare.b6
         ];
 
-        ulong attackMask = BishopAttackMask.Instance[attackFrom];
+        ulong attackMask = BishopLookups.AttackMasks[attackFrom];
         ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
-    
+
         Assert.That(matchAttack, Is.EqualTo(0));
     }
 }

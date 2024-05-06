@@ -1,8 +1,7 @@
-﻿using ChessRealms.ChessEngine.AttackMasks;
-using ChessRealms.ChessEngine.Types;
-using ChessRealms.ChessEngine.Types.Enums;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine.Tests.AttackMasks;
+namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
 public class RookAttackMaskTests
 {
@@ -10,8 +9,8 @@ public class RookAttackMaskTests
     public void From_D4()
     {
         SquareIndex attackFrom = EnumSquare.d4;
-        
-        SquareIndex[] attacks = 
+
+        SquareIndex[] attacks =
         [
             EnumSquare.d2,
             EnumSquare.d3,
@@ -25,9 +24,9 @@ public class RookAttackMaskTests
             EnumSquare.g4
         ];
 
-        ulong attackMask = RookAttackMask.Instance[attackFrom];
+        ulong attackMask = RookLookups.AttackMasks[attackFrom];
         ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
-    
+
         Assert.That(matchAttack, Is.EqualTo(0));
     }
 
@@ -51,9 +50,9 @@ public class RookAttackMaskTests
             EnumSquare.g1
         ];
 
-        ulong attackMask = RookAttackMask.Instance[attackFrom];
+        ulong attackMask = RookLookups.AttackMasks[attackFrom];
         ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
-    
+
         Assert.That(matchAttack, Is.EqualTo(0));
     }
 }

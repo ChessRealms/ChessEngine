@@ -1,6 +1,4 @@
-﻿using ChessRealms.ChessEngine.Types.Enums;
-
-namespace ChessRealms.ChessEngine.Types;
+﻿namespace ChessRealms.ChessEngine.Core.Types;
 
 /// <summary>
 /// Value that represents position at chess-board. Basically it is <see cref="int"/> readonly value.
@@ -13,9 +11,9 @@ public readonly struct SquareIndex(int square)
 
     public readonly int Square = square;
 
-    public SquareIndex() : this(0) {}
+    public SquareIndex() : this(0) { }
 
-    public SquareIndex(EnumSquare square) : this((int)square) {}
+    public SquareIndex(EnumSquare square) : this((int)square) { }
 
     /// <summary>
     /// Zero-based index of file.

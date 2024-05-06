@@ -1,8 +1,7 @@
-﻿using ChessRealms.ChessEngine.AttackMasks;
-using ChessRealms.ChessEngine.Types;
-using ChessRealms.ChessEngine.Types.Enums;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine.Tests.AttackMasks;
+namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
 public class KingAttackMaskTests
 {
@@ -22,7 +21,7 @@ public class KingAttackMaskTests
         SquareIndex attack7 = EnumSquare.e4;
         SquareIndex attack8 = EnumSquare.e5;
 
-        ulong attackMask = KingAttackMask.Instance[attackFrom];
+        ulong attackMask = KingLookups.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard;
@@ -41,7 +40,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.b1;
         SquareIndex attack3 = EnumSquare.b2;
 
-        ulong attackMask = KingAttackMask.Instance[attackFrom];
+        ulong attackMask = KingLookups.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -58,7 +57,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.b7;
         SquareIndex attack3 = EnumSquare.b8;
 
-        ulong attackMask = KingAttackMask.Instance[attackFrom];
+        ulong attackMask = KingLookups.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -75,7 +74,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.g1;
         SquareIndex attack3 = EnumSquare.g2;
 
-        ulong attackMask = KingAttackMask.Instance[attackFrom];
+        ulong attackMask = KingLookups.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -92,7 +91,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.g7;
         SquareIndex attack3 = EnumSquare.g8;
 
-        ulong attackMask = KingAttackMask.Instance[attackFrom];
+        ulong attackMask = KingLookups.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;

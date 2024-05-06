@@ -1,13 +1,13 @@
-﻿using ChessRealms.ChessEngine.Types;
+﻿using ChessRealms.ChessEngine.Core.Types;
 using System.Collections.Immutable;
 
-namespace ChessRealms.ChessEngine.AttackMasks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-public static class KingAttackMask
+public static class KingLookups
 {
-    public static readonly ImmutableArray<ulong> Instance;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
-    static KingAttackMask()
+    static KingLookups()
     {
         ulong[] masks = new ulong[64];
 
@@ -16,7 +16,7 @@ public static class KingAttackMask
             masks[square] = MaskKingAttack(square);
         }
 
-        Instance = [.. masks];
+        AttackMasks = [.. masks];
     }
 
     private static ulong MaskKingAttack(SquareIndex square)

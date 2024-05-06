@@ -1,10 +1,9 @@
-﻿using ChessRealms.ChessEngine.AttackMasks;
-using ChessRealms.ChessEngine.Types;
-using ChessRealms.ChessEngine.Types.Enums;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine.Tests.AttackMasks;
+namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
-public class RookAttackMaskOnTheFlyTests
+public class RookSliderAttackOnTheFlyTests
 {
     [Test]
     public void From_E4()
@@ -44,7 +43,7 @@ public class RookAttackMaskOnTheFlyTests
         };
 
         ulong blockers = blockerSquares.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
-        ulong attackMask = RookAttackMask.MaskRookAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
 
