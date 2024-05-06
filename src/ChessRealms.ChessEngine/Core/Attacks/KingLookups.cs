@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-public static class KingLookups
+internal static class KingLookups
 {
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    internal static readonly ImmutableArray<ulong> AttackMasks;
 
     static KingLookups()
     {

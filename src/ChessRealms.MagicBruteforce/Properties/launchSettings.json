@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ChessRealms.MagicBruteforce": {
+      "commandName": "Project",
+      "commandLineArgs": "\"-777\" 750000"
+    }
+  }
+}

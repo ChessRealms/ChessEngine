@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-public static class PawnLookups
+internal static class PawnLookups
 {
-    public static readonly ImmutableDictionary<PieceColor, ImmutableArray<ulong>> AttackMasks;
+    internal static readonly ImmutableDictionary<PieceColor, ImmutableArray<ulong>> AttackMasks;
 
     static PawnLookups()
     {

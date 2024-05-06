@@ -1,49 +1,15 @@
-﻿using ChessRealms.ChessEngine.Core;
-using ChessRealms.ChessEngine.Core.Attacks;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core;
 using System.Numerics;
 
-int seed = 1618033988;
-int iterations = 1000000000;
-
-Random rnd = new(seed);
-
-Console.WriteLine("Bishop:");
-for (int square = 0; square < 64; ++square)
-{
-    var magic = Magic.FindMagic(square, iterations, isBishop: true, rnd);
-    
-    if (magic == 0)
-    {
-        Console.Error.WriteLine("Error. Cannot find magic.");
-    }
-    else
-    {
-        Console.WriteLine("0x{0:X16}", magic);
-    }    
-}
-Console.WriteLine();
-
-Console.WriteLine("Rook:");
-for (int square = 0; square < 64; ++square)
-{
-    var magic = Magic.FindMagic(square, iterations, isBishop: false, rnd);
-    
-    if (magic == 0)
-    {
-        Console.Error.WriteLine("Error. Cannot find magic.");
-    }
-    else
-    {
-        Console.WriteLine("0x{0:X16}", magic);
-    }
-}
+namespace ChessRealms.MagicBruteforce;
 
 static class Magic
 {
     private static ulong NextMagic(Random rnd)
     {
-        return (ulong)rnd.NextInt64() & (ulong)rnd.NextInt64() & (ulong)rnd.NextInt64();
+        return (ulong)(rnd.NextInt64() & rnd.NextInt64() & rnd.NextInt64());
     }
 
     public static ulong FindMagic(SquareIndex square, int iterations, bool isBishop, Random rnd)
@@ -51,9 +17,20 @@ static class Magic
         ulong[] occupancies = new ulong[4096];
         ulong[] attacks = new ulong[4096];
         ulong[] usedAttacks = new ulong[4096];
-        
-        ulong attackMask = isBishop ? BishopLookups.AttackMasks[square] : RookLookups.AttackMasks[square];
-        int relevantBits = isBishop ? BishopLookups.RelevantBits[square] : RookLookups.RelevantBits[square];
+
+        ulong attackMask;
+        int relevantBits;
+
+        if (isBishop)
+        {
+            attackMask = BishopLookups.AttackMasks[square];
+            relevantBits = BishopLookups.RelevantBits[square];
+        }
+        else
+        {
+            attackMask = RookLookups.AttackMasks[square];
+            relevantBits = RookLookups.RelevantBits[square];
+        }
 
         int occupancyIndicies = 1 << relevantBits;
 
