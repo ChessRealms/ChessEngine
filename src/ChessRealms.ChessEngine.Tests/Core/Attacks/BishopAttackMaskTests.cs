@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
@@ -24,7 +25,7 @@ public class BishopAttackMaskTests
         ];
 
         ulong attackMask = BishopLookups.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong matchAttack = attackMask ^ attacks.ToBitBoard();
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

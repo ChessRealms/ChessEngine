@@ -3,8 +3,7 @@ using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
-
-public class RookSliderAttackOnTheFlyTests
+public class RookSliderAttackLookupTests
 {
     [Test]
     public void From_E4()
@@ -43,10 +42,10 @@ public class RookSliderAttackOnTheFlyTests
             EnumSquare.g4
         ];
 
-        ulong blockers = blockerSquares.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong blockers = blockerSquares.ToBitBoard();
+        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
 
-        ulong matchAttack = attackMask ^ expectedAttacks.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -80,7 +79,7 @@ public class RookSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -119,7 +118,7 @@ public class RookSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

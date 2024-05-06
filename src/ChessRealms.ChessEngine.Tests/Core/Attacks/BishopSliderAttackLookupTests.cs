@@ -4,7 +4,7 @@ using ChessRealms.ChessEngine.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
-public class BishopSliderAttackOnTheFlyTests
+public class BishopSliderAttackLookupTests
 {
     [Test]
     public void From_E4()
@@ -41,7 +41,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -82,7 +82,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -116,7 +116,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -153,7 +153,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

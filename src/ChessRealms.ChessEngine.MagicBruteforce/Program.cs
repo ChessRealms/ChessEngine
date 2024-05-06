@@ -19,7 +19,7 @@ for (int square = 0; square < 64; ++square)
     }
     else
     {
-        Console.WriteLine("0x{0:X16}", Magic.FindMagic(square, iterations, isBishop: true, rnd));
+        Console.WriteLine("0x{0:X16}", magic);
     }    
 }
 Console.WriteLine();
@@ -27,7 +27,7 @@ Console.WriteLine();
 Console.WriteLine("Rook:");
 for (int square = 0; square < 64; ++square)
 {
-    var magic = Magic.FindMagic(square, iterations, isBishop: true, rnd);
+    var magic = Magic.FindMagic(square, iterations, isBishop: false, rnd);
     
     if (magic == 0)
     {
@@ -35,10 +35,9 @@ for (int square = 0; square < 64; ++square)
     }
     else
     {
-        Console.WriteLine("0x{0:X16}", Magic.FindMagic(square, iterations, isBishop: false, rnd));
+        Console.WriteLine("0x{0:X16}", magic);
     }
 }
-
 
 static class Magic
 {
@@ -53,8 +52,8 @@ static class Magic
         ulong[] attacks = new ulong[4096];
         ulong[] usedAttacks = new ulong[4096];
         
-        ulong attackMask = BishopLookups.AttackMasks[square];
-        int relevantBits = BishopLookups.RelevantBits[square];
+        ulong attackMask = isBishop ? BishopLookups.AttackMasks[square] : RookLookups.AttackMasks[square];
+        int relevantBits = isBishop ? BishopLookups.RelevantBits[square] : RookLookups.RelevantBits[square];
 
         int occupancyIndicies = 1 << relevantBits;
 
@@ -76,7 +75,7 @@ static class Magic
         {
             ulong magicNum = NextMagic(rnd);
 
-            if (BitOperations.PopCount(attackMask * magicNum & 0xFF00000000000000) < 6)
+            if (BitOperations.PopCount((attackMask * magicNum) & 0xFF00000000000000) < 6)
             {
                 continue;
             }

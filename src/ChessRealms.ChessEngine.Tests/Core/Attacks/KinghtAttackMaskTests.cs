@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
@@ -10,21 +11,16 @@ public class KinghtAttackMaskTests
     {
         SquareIndex attackFrom = EnumSquare.d5;
 
-        SquareIndex attack1 = EnumSquare.e7;
-        SquareIndex attack2 = EnumSquare.f6;
-        SquareIndex attack3 = EnumSquare.f4;
-        SquareIndex attack4 = EnumSquare.e3;
-
-        SquareIndex attack5 = EnumSquare.c3;
-        SquareIndex attack6 = EnumSquare.b4;
-        SquareIndex attack7 = EnumSquare.b6;
-        SquareIndex attack8 = EnumSquare.c7;
+        SquareIndex[] attacks =
+        [
+            EnumSquare.e7, EnumSquare.c3,
+            EnumSquare.f6, EnumSquare.b4,
+            EnumSquare.f4, EnumSquare.b6,
+            EnumSquare.e3, EnumSquare.c7
+        ];
 
         ulong attackMask = KnightLookups.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask;
-
-        matchAttack ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard | attack4.BitBoard;
-        matchAttack ^= attack5.BitBoard | attack6.BitBoard | attack7.BitBoard | attack8.BitBoard;
+        ulong matchAttack = attackMask ^ attacks.ToBitBoard();
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
