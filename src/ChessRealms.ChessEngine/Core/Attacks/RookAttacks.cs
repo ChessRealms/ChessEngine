@@ -152,22 +152,22 @@ internal static class RookAttacks
 
         for (int r = square.Rank + 1; r <= 6; ++r)
         {
-            attacks |= SquareIndex.FromFileRank(square.File, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(square.File, r).Board;
         }
 
         for (int r = square.Rank - 1; r >= 1; --r)
         {
-            attacks |= SquareIndex.FromFileRank(square.File, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(square.File, r).Board;
         }
 
         for (int f = square.File + 1; f <= 6; ++f)
         {
-            attacks |= SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, square.Rank).Board;
         }
 
         for (int f = square.File - 1; f >= 1; --f)
         {
-            attacks |= SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, square.Rank).Board;
         }
 
         return attacks;
@@ -185,7 +185,7 @@ internal static class RookAttacks
 
         for (int r = square.Rank + 1; r <= 7; ++r)
         {
-            ulong board = SquareIndex.FromFileRank(square.File, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(square.File, r).Board;
 
             attacks |= board;
 
@@ -197,7 +197,7 @@ internal static class RookAttacks
 
         for (int r = square.Rank - 1; r >= 0; --r)
         {
-            ulong board = SquareIndex.FromFileRank(square.File, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(square.File, r).Board;
 
             attacks |= board;
 
@@ -209,7 +209,7 @@ internal static class RookAttacks
 
         for (int f = square.File + 1; f <= 7; ++f)
         {
-            ulong board = SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, square.Rank).Board;
 
             attacks |= board;
 
@@ -221,7 +221,7 @@ internal static class RookAttacks
 
         for (int f = square.File - 1; f >= 0; --f)
         {
-            ulong board = SquareIndex.FromFileRank(f, square.Rank).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, square.Rank).Board;
 
             attacks |= board;
 

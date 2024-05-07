@@ -12,7 +12,7 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.b5;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.White][attackFrom];
-        ulong matchAttack = attackMask ^ attack.BitBoard;
+        ulong matchAttack = attackMask ^ attack.Board;
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -24,7 +24,7 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.b3;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.Black][attackFrom];
-        ulong matchAttack = attackMask ^ attack.BitBoard;
+        ulong matchAttack = attackMask ^ attack.Board;
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -36,7 +36,7 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.g5;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.White][attackFrom];
-        ulong matchAttack = attackMask ^ attack.BitBoard;
+        ulong matchAttack = attackMask ^ attack.Board;
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -48,7 +48,7 @@ public class PawnAttackMaskTests
         SquareIndex attack = EnumSquare.g3;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.Black][attackFrom];
-        ulong matchAttack = attackMask ^ attack.BitBoard;
+        ulong matchAttack = attackMask ^ attack.Board;
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -61,7 +61,7 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f6;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.White][attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -74,7 +74,7 @@ public class PawnAttackMaskTests
         SquareIndex attack2 = EnumSquare.f4;
 
         ulong attackMask = PawnAttacks.AttackMasks[PieceColor.Black][attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

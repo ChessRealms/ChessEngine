@@ -21,7 +21,7 @@ internal static class KingAttacks
 
     private static ulong MaskKingAttack(SquareIndex square)
     {
-        ulong board = square.BitBoard;
+        ulong board = square.Board;
         ulong attacks = 0UL;
 
         attacks |= board << 8;

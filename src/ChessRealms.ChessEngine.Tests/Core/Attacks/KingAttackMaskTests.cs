@@ -36,7 +36,7 @@ public class KingAttackMaskTests
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
-        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
+        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -53,7 +53,7 @@ public class KingAttackMaskTests
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
-        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
+        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -70,7 +70,7 @@ public class KingAttackMaskTests
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
-        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
+        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }
@@ -87,7 +87,7 @@ public class KingAttackMaskTests
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
-        attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
+        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
 
         Assert.That(attackMatch, Is.EqualTo(0));
     }

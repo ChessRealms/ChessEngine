@@ -43,10 +43,10 @@ public class RookSliderAttackOnTheFlyTests
             EnumSquare.g4
         ];
 
-        ulong blockers = blockerSquares.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong blockers = blockerSquares.Select(x => x.Board).Aggregate((b1, b2) => b1 | b2);
         ulong attackMask = RookAttacks.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
 
-        ulong matchAttack = attackMask ^ expectedAttacks.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong matchAttack = attackMask ^ expectedAttacks.Select(x => x.Board).Aggregate((b1, b2) => b1 | b2);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

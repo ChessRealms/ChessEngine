@@ -21,7 +21,7 @@ internal static class KnightAttacks
 
     internal static ulong MaskKnightAttack(SquareIndex square)
     {
-        ulong board = square.BitBoard;
+        ulong board = square.Board;
         ulong attacks = 0UL;
 
         attacks |= board >> 17 & LerfConstants.NOT_H_FILE;

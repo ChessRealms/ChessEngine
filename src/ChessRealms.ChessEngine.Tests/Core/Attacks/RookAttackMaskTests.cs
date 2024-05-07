@@ -25,7 +25,7 @@ public class RookAttackMaskTests
         ];
 
         ulong attackMask = RookAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong matchAttack = attackMask ^ attacks.Select(a => a.Board).Aggregate((b1, b2) => b1 | b2);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -51,7 +51,7 @@ public class RookAttackMaskTests
         ];
 
         ulong attackMask = RookAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.Select(a => a.BitBoard).Aggregate((b1, b2) => b1 | b2);
+        ulong matchAttack = attackMask ^ attacks.Select(a => a.Board).Aggregate((b1, b2) => b1 | b2);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

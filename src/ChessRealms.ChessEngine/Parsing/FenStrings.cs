@@ -17,34 +17,34 @@ public static partial class FenStrings
 
         var groups = match.Groups;
 
-        ReadOnlySpan<char> piecePlacement   = groups["PiecePlacement"].ValueSpan;
-        ReadOnlySpan<char> sideToMove       = groups["SideToMove"].ValueSpan;
-        ReadOnlySpan<char> castling         = groups["Castling"].ValueSpan;
-        ReadOnlySpan<char> enPassant        = groups["EnPassant"].ValueSpan;
-        ReadOnlySpan<char> halfMoveClock    = groups["HalfMoveClock"].ValueSpan;
-        ReadOnlySpan<char> fullMoveNumber   = groups["FullMoveNumber"].ValueSpan;
+        ReadOnlySpan<char> piecePlacementSpan   = groups["PiecePlacement"].ValueSpan;
+        ReadOnlySpan<char> sideToMoveSpan       = groups["SideToMove"].ValueSpan;
+        ReadOnlySpan<char> castlingSpan         = groups["Castling"].ValueSpan;
+        ReadOnlySpan<char> enPassantSpan        = groups["EnPassant"].ValueSpan;
+        ReadOnlySpan<char> halfMoveClockSpan    = groups["HalfMoveClock"].ValueSpan;
+        ReadOnlySpan<char> fullMoveNumberSpan   = groups["FullMoveNumber"].ValueSpan;
 
         chessBoard = new ChessBoard();
 
         #region Read pieces
         SquareIndex squareIndex = EnumSquare.h8;
 
-        for (int i = 0; i < piecePlacement.Length && squareIndex >= 0; ++i)
+        for (int i = 0; i < piecePlacementSpan.Length && squareIndex >= 0; ++i)
         {
-            if (!char.IsLetterOrDigit(piecePlacement[i]))
+            if (!char.IsLetterOrDigit(piecePlacementSpan[i]))
             {
                 continue;
             }
 
-            if (char.IsDigit(piecePlacement[i]))
+            if (char.IsDigit(piecePlacementSpan[i]))
             {
-                int spaces = (int) char.GetNumericValue(piecePlacement[i]);
+                int spaces = (int) char.GetNumericValue(piecePlacementSpan[i]);
                 squareIndex -= spaces;
             }
             else
             {
-                PieceColor color = char.IsUpper(piecePlacement[i]) ? PieceColor.White : PieceColor.Black;
-                PieceType piece = char.ToLower(piecePlacement[i]) switch
+                PieceColor color = char.IsUpper(piecePlacementSpan[i]) ? PieceColor.White : PieceColor.Black;
+                PieceType piece = char.ToLower(piecePlacementSpan[i]) switch
                 {
                     'p' => PieceType.Pawn,
                     'n' => PieceType.Knight,
@@ -61,41 +61,48 @@ public static partial class FenStrings
         #endregion
 
         #region Side To Move
-        chessBoard.CurrentColor = sideToMove.Equals("w", StringComparison.OrdinalIgnoreCase) 
+        chessBoard.CurrentColor = sideToMoveSpan.Equals("w", StringComparison.OrdinalIgnoreCase) 
             ? PieceColor.White
             : PieceColor.Black;
         #endregion
 
         #region Castling
-        if (castling.Contains("K", StringComparison.Ordinal))
+        if (castlingSpan.Contains("K", StringComparison.Ordinal))
         {
             chessBoard.Castling |= Castling.WK;
         }
 
-        if (castling.Contains("Q", StringComparison.Ordinal))
+        if (castlingSpan.Contains("Q", StringComparison.Ordinal))
         {
             chessBoard.Castling |= Castling.WQ;
         }
 
-        if (castling.Contains("k", StringComparison.Ordinal))
+        if (castlingSpan.Contains("k", StringComparison.Ordinal))
         {
             chessBoard.Castling |= Castling.BK;
         }
 
-        if (castling.Contains("q", StringComparison.Ordinal))
+        if (castlingSpan.Contains("q", StringComparison.Ordinal))
         {
             chessBoard.Castling |= Castling.BQ;
         }
         #endregion
 
         #region EnPassant & HalfMoveClock & FullMoveNumber
-        if (enPassant.Length == 2)
+        if (SquareIndex.TryParse(enPassantSpan, out var enPassantSquare))
         {
-            chessBoard.Enpassant = SquareIndex.Parse(enPassant);
+            chessBoard.Enpassant = enPassantSquare;
         }
-
-        chessBoard.HalfMoveClock = int.Parse(halfMoveClock);
-        chessBoard.FullMoveNumber = int.Parse(fullMoveNumber);
+        
+        if (int.TryParse(halfMoveClockSpan, out var halfMoveClock))
+        {
+            chessBoard.HalfMoveClock = halfMoveClock;
+        }
+        
+        if (int.TryParse(fullMoveNumberSpan, out var fullMoveNumber))
+        {
+            chessBoard.FullMoveNumber = fullMoveNumber;
+        }
         #endregion
 
         return true;

@@ -10,27 +10,27 @@ public struct BitBoard(ulong value)
 
     public readonly BitBoard GetBitAt(SquareIndex index)
     {
-        return Value & index.BitBoard;
+        return Value & index.Board;
     }
 
     public void PopBitAt(SquareIndex index)
     {
         if (GetBitAt(index) > 0)
         {
-            Value ^= index.BitBoard;
+            Value ^= index.Board;
         }
     }
 
     public void SetBitAt(SquareIndex index)
     {
-        Value |= index.BitBoard;
+        Value |= index.Board;
     }
 
     public void SetBitsAt(IEnumerable<SquareIndex> indicies)
     {
         foreach (SquareIndex index in indicies)
         {
-            Value |= index.BitBoard;
+            Value |= index.Board;
         }
     }
 

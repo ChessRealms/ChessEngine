@@ -22,7 +22,7 @@ public struct ChessBoard
     private BitBoard _blackOccupancy;
     private BitBoard _allOccupancy;
 
-    public SquareIndex Enpassant { get; set; } = SquareIndex.Empty;
+    public SquareIndex Enpassant { get; set; }
 
     public PieceColor CurrentColor { get; set; }
 
@@ -34,101 +34,14 @@ public struct ChessBoard
 
     public ChessBoard()
     {
+        Enpassant = SquareIndex.None;
         CurrentColor = PieceColor.White;
         Castling = 0;
     }
 
     public void SetPieceAt(SquareIndex square, Piece piece)
     {
-        
-    }
-
-    public void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
-    {
-        switch (color)
-        {
-            case PieceColor.White: 
-                switch (piece)
-                {
-                    case PieceType.Pawn: 
-                        { 
-                            _whitePawn.SetBitAt(square); 
-                            break; 
-                        }
-                    case PieceType.Knight: 
-                        { 
-                            _whiteKnight.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.Bishop: 
-                        {
-                            _whiteBishop.SetBitAt(square);
-                            break;
-                        }
-                    case PieceType.Rook: 
-                        { 
-                            _whiteRook.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.Queen: 
-                        { 
-                            _whiteQueen.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.King: 
-                        { 
-                            _whiteKing.SetBitAt(square);
-                            break; 
-                        }
-                    default: break;
-                }
-
-                _whiteOccupancy.SetBitAt(square);
-                _allOccupancy.SetBitAt(square);
-                break;
-
-            case PieceColor.Black:
-                switch (piece) 
-                {
-                    case PieceType.Pawn: 
-                        { 
-                            _blackPawn.SetBitAt(square); 
-                            break; 
-                        }
-                    case PieceType.Knight: 
-                        { 
-                            _blackKnight.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.Bishop: 
-                        {
-                            _blackBishop.SetBitAt(square);
-                            break;
-                        }
-                    case PieceType.Rook: 
-                        { 
-                            _blackRook.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.Queen: 
-                        { 
-                            _blackQueen.SetBitAt(square);
-                            break; 
-                        }
-                    case PieceType.King: 
-                        { 
-                            _blackKing.SetBitAt(square);
-                            break; 
-                        }
-                    default: break;
-                }
-
-                _blackOccupancy.SetBitAt(square);
-                _allOccupancy.SetBitAt(square);
-                break;
-
-            default: break;
-        }
+        SetPieceAt(square, piece.Color, piece.Type);
     }
 
     public readonly Piece? GetPieceAt(SquareIndex square)
@@ -175,5 +88,88 @@ public struct ChessBoard
             Color = pieceColor,
             Type = pieceType
         };
+    }
+
+    public void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
+    {
+        switch (color)
+        {
+            case PieceColor.White: 
+                switch (piece)
+                {
+                    case PieceType.Pawn: _whitePawn.SetBitAt(square); break;
+                    case PieceType.Knight: _whiteKnight.SetBitAt(square); break; 
+                    case PieceType.Bishop: _whiteBishop.SetBitAt(square); break;
+                    case PieceType.Rook: _whiteRook.SetBitAt(square); break;
+                    case PieceType.Queen: _whiteQueen.SetBitAt(square); break;
+                    case PieceType.King: _whiteKing.SetBitAt(square); break; 
+                    default: break;
+                }
+
+                _whiteOccupancy.SetBitAt(square);
+                _allOccupancy.SetBitAt(square);
+                break;
+
+            case PieceColor.Black:
+                switch (piece)
+                {
+                    case PieceType.Pawn: _blackPawn.SetBitAt(square); break;
+                    case PieceType.Knight: _blackKnight.SetBitAt(square); break; 
+                    case PieceType.Bishop: _blackBishop.SetBitAt(square); break;
+                    case PieceType.Rook: _blackRook.SetBitAt(square); break;
+                    case PieceType.Queen: _blackQueen.SetBitAt(square); break;
+                    case PieceType.King: _blackKing.SetBitAt(square); break; 
+                    default: break;
+                }
+
+                _blackOccupancy.SetBitAt(square);
+                _allOccupancy.SetBitAt(square);
+                break;
+
+            default: break;
+        }
+    }
+
+    public void RemovePieceAt(SquareIndex square)
+    {
+        Piece? piece = GetPieceAt(square);
+        if (piece == null)
+        {
+            return;
+        }
+
+        switch (piece.Color)
+        {
+            case PieceColor.White:
+                switch (piece.Type)
+                {
+                    case PieceType.Pawn: _whitePawn.PopBitAt(square); break;
+                    case PieceType.Knight: _whiteKnight.PopBitAt(square); break;
+                    case PieceType.Bishop: _whiteBishop.PopBitAt(square); break;
+                    case PieceType.Rook: _whiteRook.PopBitAt(square); break;
+                    case PieceType.Queen: _whiteQueen.PopBitAt(square); break;
+                    case PieceType.King: _whiteKing.PopBitAt(square); break;
+                    default: break;
+                }
+                _whiteOccupancy.PopBitAt(square); 
+                break;
+            case PieceColor.Black:
+                switch (piece.Type)
+                {
+                    case PieceType.Pawn: _blackPawn.PopBitAt(square); break;
+                    case PieceType.Knight: _blackKnight.PopBitAt(square); break;
+                    case PieceType.Bishop: _blackBishop.PopBitAt(square); break;
+                    case PieceType.Rook: _blackRook.PopBitAt(square); break;
+                    case PieceType.Queen: _blackQueen.PopBitAt(square); break;
+                    case PieceType.King: _blackKing.PopBitAt(square); break;
+                    default: break;
+                }
+                _blackOccupancy.PopBitAt(square); 
+                break;
+
+            default: break;
+        }
+
+        _allOccupancy.PopBitAt(square);
     }
 }

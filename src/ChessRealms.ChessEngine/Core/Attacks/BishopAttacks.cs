@@ -152,22 +152,22 @@ internal static class BishopAttacks
 
         for (int r = square.Rank + 1, f = square.File + 1; r <= 6 && f <= 6; ++r, ++f)
         {
-            attacks |= SquareIndex.FromFileRank(f, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, r).Board;
         }
 
         for (int r = square.Rank - 1, f = square.File + 1; r >= 1 && f <= 6; --r, ++f)
         {
-            attacks |= SquareIndex.FromFileRank(f, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, r).Board;
         }
 
         for (int r = square.Rank + 1, f = square.File - 1; r <= 6 && f >= 1; ++r, --f)
         {
-            attacks |= SquareIndex.FromFileRank(f, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, r).Board;
         }
 
         for (int r = square.Rank - 1, f = square.File - 1; r >= 1 && f >= 1; --r, --f)
         {
-            attacks |= SquareIndex.FromFileRank(f, r).BitBoard;
+            attacks |= SquareIndex.FromFileRank(f, r).Board;
         }
 
         return attacks;
@@ -185,7 +185,7 @@ internal static class BishopAttacks
 
         for (int r = square.Rank + 1, f = square.File + 1; r <= 7 && f <= 7; ++r, ++f)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, r).Board;
 
             attacks |= board;
 
@@ -197,7 +197,7 @@ internal static class BishopAttacks
 
         for (int r = square.Rank - 1, f = square.File + 1; r >= 0 && f <= 7; --r, ++f)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, r).Board;
 
             attacks |= board;
 
@@ -209,7 +209,7 @@ internal static class BishopAttacks
 
         for (int r = square.Rank + 1, f = square.File - 1; r <= 7 && f >= 0; ++r, --f)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, r).Board;
 
             attacks |= board;
 
@@ -221,7 +221,7 @@ internal static class BishopAttacks
 
         for (int r = square.Rank - 1, f = square.File - 1; r >= 0 && f >= 0; --r, --f)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).BitBoard;
+            ulong board = SquareIndex.FromFileRank(f, r).Board;
 
             attacks |= board;
 

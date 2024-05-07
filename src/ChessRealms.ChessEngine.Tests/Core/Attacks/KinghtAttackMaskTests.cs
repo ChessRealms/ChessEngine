@@ -33,7 +33,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.c2;
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -46,7 +46,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.c7;
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -59,7 +59,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.g3;
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }
@@ -72,7 +72,7 @@ public class KinghtAttackMaskTests
         SquareIndex attack2 = EnumSquare.g6;
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.BitBoard | attack2.BitBoard);
+        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
 
         Assert.That(matchAttack, Is.EqualTo(0));
     }

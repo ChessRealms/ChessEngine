@@ -29,7 +29,7 @@ internal static class PawnAttacks
 
     private static ulong MaskPawnAttack(PieceColor color, SquareIndex square)
     {
-        ulong board = square.BitBoard;
+        ulong board = square.Board;
         ulong attacks = 0UL;
 
         if (color == PieceColor.White)
