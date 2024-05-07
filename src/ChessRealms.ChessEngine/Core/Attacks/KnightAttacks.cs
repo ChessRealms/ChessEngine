@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static partial class KnightAttacks
+internal static class KnightAttacks
 {
     internal static readonly ImmutableArray<ulong> AttackMasks;
 
