@@ -43,7 +43,7 @@ public class RookSliderAttackLookupTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -79,7 +79,7 @@ public class RookSliderAttackLookupTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -118,7 +118,7 @@ public class RookSliderAttackLookupTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = RookLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

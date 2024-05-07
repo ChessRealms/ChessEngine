@@ -18,7 +18,7 @@ public class KingAttackMaskTests
             EnumSquare.e3, EnumSquare.e4, EnumSquare.e5
         ];
 
-        ulong attackMask = KingLookups.AttackMasks[attackFrom];
+        ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask ^ attacks.ToBitBoard();
 
         Assert.That(attackMatch, Is.EqualTo(0));
@@ -33,7 +33,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.b1;
         SquareIndex attack3 = EnumSquare.b2;
 
-        ulong attackMask = KingLookups.AttackMasks[attackFrom];
+        ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -50,7 +50,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.b7;
         SquareIndex attack3 = EnumSquare.b8;
 
-        ulong attackMask = KingLookups.AttackMasks[attackFrom];
+        ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -67,7 +67,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.g1;
         SquareIndex attack3 = EnumSquare.g2;
 
-        ulong attackMask = KingLookups.AttackMasks[attackFrom];
+        ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;
@@ -84,7 +84,7 @@ public class KingAttackMaskTests
         SquareIndex attack2 = EnumSquare.g7;
         SquareIndex attack3 = EnumSquare.g8;
 
-        ulong attackMask = KingLookups.AttackMasks[attackFrom];
+        ulong attackMask = KingAttacks.AttackMasks[attackFrom];
         ulong attackMatch = attackMask;
 
         attackMatch ^= attack1.BitBoard | attack2.BitBoard | attack3.BitBoard;

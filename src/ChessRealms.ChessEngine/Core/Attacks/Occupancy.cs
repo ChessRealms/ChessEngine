@@ -1,6 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine.Core;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
 public static class Occupancy
 {

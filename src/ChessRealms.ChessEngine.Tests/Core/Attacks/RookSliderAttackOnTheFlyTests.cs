@@ -44,7 +44,7 @@ public class RookSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookAttacks.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.Select(x => x.BitBoard).Aggregate((b1, b2) => b1 | b2);
 
@@ -80,7 +80,7 @@ public class RookSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookAttacks.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -119,7 +119,7 @@ public class RookSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = RookLookups.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = RookAttacks.MaskRookSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

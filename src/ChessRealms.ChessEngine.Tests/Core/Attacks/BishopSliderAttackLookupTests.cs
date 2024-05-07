@@ -41,7 +41,7 @@ public class BishopSliderAttackLookupTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -82,7 +82,7 @@ public class BishopSliderAttackLookupTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -116,7 +116,7 @@ public class BishopSliderAttackLookupTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -153,7 +153,7 @@ public class BishopSliderAttackLookupTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.GetSliderAttack(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.GetSliderAttack(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

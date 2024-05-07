@@ -10,7 +10,7 @@ public struct BitBoard(ulong value)
 
     public readonly BitBoard GetBitAt(SquareIndex index)
     {
-        return Value | index.BitBoard;
+        return Value & index.BitBoard;
     }
 
     public void PopBitAt(SquareIndex index)

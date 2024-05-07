@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class RookLookups
+internal static class RookAttacks
 {
     /// <summary>
     /// Pre-calculated rook slider attacks. Shape of array is <c>[64][4096]</c>.
@@ -101,7 +101,7 @@ internal static class RookLookups
         0x0821002C81040042
     ];
 
-    static RookLookups()
+    static RookAttacks()
     {
         ulong[] attackMasks = new ulong[64];
         ulong[][] sliderAttacks = new ulong[64][];

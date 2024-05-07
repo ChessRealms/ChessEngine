@@ -3,11 +3,11 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class KingLookups
+internal static class KingAttacks
 {
     internal static readonly ImmutableArray<ulong> AttackMasks;
 
-    static KingLookups()
+    static KingAttacks()
     {
         ulong[] masks = new ulong[64];
 

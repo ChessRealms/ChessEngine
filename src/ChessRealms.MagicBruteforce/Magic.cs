@@ -1,6 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core;
 using System.Numerics;
 
 namespace ChessRealms.MagicBruteforce;
@@ -23,13 +22,13 @@ static class Magic
 
         if (isBishop)
         {
-            attackMask = BishopLookups.AttackMasks[square];
-            relevantBits = BishopLookups.RelevantBits[square];
+            attackMask = BishopAttacks.AttackMasks[square];
+            relevantBits = BishopAttacks.RelevantBits[square];
         }
         else
         {
-            attackMask = RookLookups.AttackMasks[square];
-            relevantBits = RookLookups.RelevantBits[square];
+            attackMask = RookAttacks.AttackMasks[square];
+            relevantBits = RookAttacks.RelevantBits[square];
         }
 
         int occupancyIndicies = 1 << relevantBits;
@@ -40,11 +39,11 @@ static class Magic
 
             if (isBishop)
             {
-                attacks[i] = BishopLookups.MaskBishopSliderAttackOnTheFly(square, occupancies[i]);
+                attacks[i] = BishopAttacks.MaskBishopSliderAttackOnTheFly(square, occupancies[i]);
             }
             else
             {
-                attacks[i] = RookLookups.MaskRookSliderAttackOnTheFly(square, occupancies[i]);
+                attacks[i] = RookAttacks.MaskRookSliderAttackOnTheFly(square, occupancies[i]);
             }
         }
 

@@ -3,11 +3,11 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class KnightLookups
+internal static partial class KnightAttacks
 {
     internal static readonly ImmutableArray<ulong> AttackMasks;
 
-    static KnightLookups()
+    static KnightAttacks()
     {
         ulong[] masks = new ulong[64];
 
@@ -19,7 +19,7 @@ internal static class KnightLookups
         AttackMasks = [.. masks];
     }
 
-    private static ulong MaskKnightAttack(SquareIndex square)
+    internal static ulong MaskKnightAttack(SquareIndex square)
     {
         ulong board = square.BitBoard;
         ulong attacks = 0UL;

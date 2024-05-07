@@ -88,6 +88,8 @@ public readonly struct SquareIndex(int square)
         return rank - '1';
     }
 
+    public static readonly SquareIndex Empty = -1;
+
     public static implicit operator SquareIndex(int square) => new(square);
 
     public static implicit operator int(SquareIndex squareIndex) => squareIndex.Square;

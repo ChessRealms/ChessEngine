@@ -41,7 +41,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -82,7 +82,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -116,7 +116,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = 0UL;
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 
@@ -153,7 +153,7 @@ public class BishopSliderAttackOnTheFlyTests
         ];
 
         ulong blockers = blockerSquares.ToBitBoard();
-        ulong attackMask = BishopLookups.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
 
         ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
 

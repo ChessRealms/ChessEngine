@@ -3,11 +3,11 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class PawnLookups
+internal static class PawnAttacks
 {
     internal static readonly ImmutableDictionary<PieceColor, ImmutableArray<ulong>> AttackMasks;
 
-    static PawnLookups()
+    static PawnAttacks()
     {
         ulong[] white = new ulong[64];
         ulong[] black = new ulong[64];

@@ -24,7 +24,7 @@ public class BishopAttackMaskTests
             EnumSquare.b6
         ];
 
-        ulong attackMask = BishopLookups.AttackMasks[attackFrom];
+        ulong attackMask = BishopAttacks.AttackMasks[attackFrom];
         ulong matchAttack = attackMask ^ attacks.ToBitBoard();
 
         Assert.That(matchAttack, Is.EqualTo(0));

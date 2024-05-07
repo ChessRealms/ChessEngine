@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class BishopLookups
+internal static class BishopAttacks
 {
     /// <summary>
     /// Pre-calculated bishop slider attacks. Shape of array is <c>[64][512].</c>
@@ -101,7 +101,7 @@ internal static class BishopLookups
         0x0010E008004C4441
     ];
 
-    static BishopLookups()
+    static BishopAttacks()
     {
         ulong[] attackMasks = new ulong[64];
         ulong[][] sliderAttacks = new ulong[64][];
