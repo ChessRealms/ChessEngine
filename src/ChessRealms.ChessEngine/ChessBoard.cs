@@ -100,6 +100,17 @@ public struct ChessBoard
         _allOccupancies.PopBitAt(square);
     }
 
+    public readonly bool IsSquareAttacked(SquareIndex square, PieceColor attackerColor)
+    {
+        int attacker = (int)attackerColor;
+
+        return (PawnAttacks.AttackMasks[attackerColor.Opposite()][square] & _pieces[attacker, (int)PieceType.Pawn]) > 0
+            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, (int)PieceType.Knight]) > 0
+            || (BishopAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, (int)PieceType.Bishop]) > 0
+            || (RookAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, (int)PieceType.Rook]) > 0
+            || (KingAttacks.AttackMasks[square] & _pieces[attacker, (int)PieceType.King]) > 0;
+    }
+
     public readonly SquareIndex[] GetBishopMoves(SquareIndex from, PieceColor sideToMoveColor)
     {
         BitBoard attack = BishopAttacks.GetSliderAttack(from, _allOccupancies);

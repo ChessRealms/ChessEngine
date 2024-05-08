@@ -17,6 +17,10 @@ var moves = chessBoard.GetBishopMoves(EnumSquare.e2, PieceColor.White);
 Console.WriteLine();
 Console.WriteLine(string.Join(' ', moves));
 
+SquareIndex s = EnumSquare.f7;
+Console.WriteLine();
+Console.WriteLine("{0} is attacked: {1}", s, chessBoard.IsSquareAttacked(s, PieceColor.White));
+
 class Print
 {
     public static void Board(in ChessBoard chessBoard)
