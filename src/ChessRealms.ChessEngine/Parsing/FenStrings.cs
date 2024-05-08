@@ -27,19 +27,24 @@ public static partial class FenStrings
         chessBoard = new ChessBoard();
 
         #region Read pieces
-        SquareIndex squareIndex = EnumSquare.h8;
+        // Fen string represented as piece in next positions a8-h8/a7-h8/.../a1-h1.
+        // So we setup a8 as start index.
+        SquareIndex squareIndex = EnumSquare.a8;
 
-        for (int i = 0; i < piecePlacementSpan.Length && squareIndex >= 0; ++i)
+        for (int i = 0; i < piecePlacementSpan.Length; ++i)
         {
             if (!char.IsLetterOrDigit(piecePlacementSpan[i]))
             {
+                // Move to next rank. '-16' insted of '-8' related to ordering
+                // from 'a' to 'h' and next increments of 'squareIndex'.
+                squareIndex -= 16;
                 continue;
             }
 
             if (char.IsDigit(piecePlacementSpan[i]))
             {
                 int spaces = (int) char.GetNumericValue(piecePlacementSpan[i]);
-                squareIndex -= spaces;
+                squareIndex += spaces;
             }
             else
             {
@@ -55,7 +60,7 @@ public static partial class FenStrings
                 };
 
                 chessBoard.SetPieceAt(squareIndex, color, piece);
-                --squareIndex;
+                ++squareIndex;
             }
         }
         #endregion

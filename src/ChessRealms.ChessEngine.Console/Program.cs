@@ -11,7 +11,11 @@ if (!FenStrings.TryParse(fen, out ChessBoard chessBoard))
     return;
 }
 
-Print.Board(in chessBoard!);
+chessBoard.RemovePieceAt(EnumSquare.h8);
+chessBoard.RemovePieceAt(EnumSquare.h1);
+chessBoard.SetPieceAt(EnumSquare.h6, PieceColor.Black, PieceType.Rook);
+
+Print.Board(in chessBoard);
 
 class Print
 {
@@ -21,7 +25,7 @@ class Print
         {
             Console.Write(" {0}", rank + 1);
 
-            for (int file = 7; file >= 0; --file)
+            for (int file = 0; file < 8; ++file)
             {
                 SquareIndex square = SquareIndex.FromFileRank(file, rank);
                 Piece? piece = chessBoard.GetPieceAt(square);
