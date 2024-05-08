@@ -18,7 +18,7 @@ public static class Occupancy
 
         for (int i = 0; i < bitsCount; ++i)
         {
-            SquareIndex s = attackMask.LeastSignificantFirstBit();
+            SquareIndex s = attackMask.TrailingZeroCount();
 
             attackMask.PopBitAt(s);
 

@@ -3,7 +3,7 @@ using ChessRealms.ChessEngine.Console;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Parsing;
 
-var fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+var fen = FenStrings.TrickyPosition;
 
 if (!FenStrings.TryParse(fen, out ChessBoard chessBoard))
 {
@@ -11,11 +11,11 @@ if (!FenStrings.TryParse(fen, out ChessBoard chessBoard))
     return;
 }
 
-chessBoard.RemovePieceAt(EnumSquare.h8);
-chessBoard.RemovePieceAt(EnumSquare.h1);
-chessBoard.SetPieceAt(EnumSquare.h6, PieceColor.Black, PieceType.Rook);
-
 Print.Board(in chessBoard);
+
+var moves = chessBoard.GetBishopMoves(EnumSquare.e2, PieceColor.White);
+Console.WriteLine();
+Console.WriteLine(string.Join(' ', moves));
 
 class Print
 {

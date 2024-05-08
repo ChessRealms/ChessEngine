@@ -34,7 +34,7 @@ public struct BitBoard(ulong value)
         }
     }
 
-    public readonly SquareIndex LeastSignificantFirstBit()
+    public readonly SquareIndex TrailingZeroCount()
     {
         return BitOperations.TrailingZeroCount(Value);
     }

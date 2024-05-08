@@ -43,6 +43,11 @@ public readonly struct SquareIndex(int square)
     {
     }
 
+    public override string ToString()
+    {
+        return string.Format("{0}{1}", (char)('a' + File), (char)('1' + Rank));
+    }
+
     /// <summary>
     /// Parse square from file-rank string.
     /// </summary>

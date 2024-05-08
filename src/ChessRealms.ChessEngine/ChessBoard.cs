@@ -1,4 +1,7 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Extensions;
+using ChessRealms.ChessEngine.Core.Types;
+using System.Numerics;
 
 namespace ChessRealms.ChessEngine;
 
@@ -7,7 +10,7 @@ public struct ChessBoard
     private readonly BitBoard[,] _pieces;    
     private readonly BitBoard[] _occupancies;
 
-    private BitBoard _allOccupancy;
+    private BitBoard _allOccupancies;
 
     public SquareIndex Enpassant { get; set; }
 
@@ -36,7 +39,7 @@ public struct ChessBoard
 
     public readonly Piece? GetPieceAt(SquareIndex square)
     {
-        if (_allOccupancy.GetBitAt(square) == 0)
+        if (_allOccupancies.GetBitAt(square) == 0)
         {
             return null;
         }
@@ -77,7 +80,7 @@ public struct ChessBoard
         
         _pieces[colorIndex, pieceIndex].SetBitAt(square);
         _occupancies[colorIndex].SetBitAt(square);
-        _allOccupancy.SetBitAt(square);
+        _allOccupancies.SetBitAt(square);
     }
 
     public void RemovePieceAt(SquareIndex square)
@@ -94,6 +97,39 @@ public struct ChessBoard
 
         _pieces[colorIndex, pieceIndex].PopBitAt(square);
         _occupancies[colorIndex].PopBitAt(square);
-        _allOccupancy.PopBitAt(square);
+        _allOccupancies.PopBitAt(square);
+    }
+
+    public readonly SquareIndex[] GetBishopMoves(SquareIndex from, PieceColor sideToMoveColor)
+    {
+        BitBoard attack = BishopAttacks.GetSliderAttack(from, _allOccupancies);
+
+        // Remove our pieces from attacks.
+        attack ^= 0UL ^ (attack & _occupancies[(int)sideToMoveColor]);
+        // Finally we could set exact size for output array.
+        // 💪💪💪 Every bit and memory allocation is matter when this is Chess Engine!!! 💪💪💪.
+        // We could replace Array with List(capacity: precalculatedSize) too.
+        var moves = new SquareIndex[BitOperations.PopCount(attack)];
+
+        int opposite = (int)sideToMoveColor.Opposite();
+        int index = 0;
+
+        while (attack > 0)
+        {
+            SquareIndex to = attack.TrailingZeroCount();
+            BitBoard toBitboard = to.Board;
+            
+            if ((toBitboard & _occupancies[opposite]) > 0)
+            {
+                // TODO: set some flag 'is capture = true'
+                moves[index] = to;
+            }
+            
+            moves[index] = to;
+            attack.PopBitAt(to);
+            ++index;
+        }
+
+        return moves;
     }
 }
