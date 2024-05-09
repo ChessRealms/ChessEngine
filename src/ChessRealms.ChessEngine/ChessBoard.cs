@@ -100,6 +100,12 @@ public struct ChessBoard
         _allOccupancies.PopBitAt(square);
     }
 
+    /// <summary>
+    /// Determine if square is attacked by specified side.
+    /// </summary>
+    /// <param name="square"> Square to check. </param>
+    /// <param name="attackerColor"> Attacker color. </param>
+    /// <returns> <see langword="true"/> if attacked, otherwise <see langword="false"/>. </returns>
     public readonly bool IsSquareAttacked(SquareIndex square, PieceColor attackerColor)
     {
         int attacker = (int)attackerColor;
@@ -111,18 +117,26 @@ public struct ChessBoard
             || (KingAttacks.AttackMasks[square] & _pieces[attacker, (int)PieceType.King]) > 0;
     }
 
-    public readonly SquareIndex[] GetBishopMoves(SquareIndex from, PieceColor sideToMoveColor)
+    /// <summary>
+    /// Get potential bishop moves.
+    /// </summary>
+    /// <param name="square"> Square from where bishop going move. </param>
+    /// <param name="pieceColor"> Color of piece to move. </param>
+    /// <returns> Array with moves. </returns>
+    public readonly SquareIndex[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
     {
-        BitBoard attack = BishopAttacks.GetSliderAttack(from, _allOccupancies);
+        BitBoard attack = BishopAttacks.GetSliderAttack(square, _allOccupancies);
 
         // Remove our pieces from attacks.
-        attack ^= 0UL ^ (attack & _occupancies[(int)sideToMoveColor]);
+        attack ^= 0UL ^ (attack & _occupancies[(int)pieceColor]);
         // Finally we could set exact size for output array.
         // 💪💪💪 Every bit and memory allocation is matter when this is Chess Engine!!! 💪💪💪.
         // We could replace Array with List(capacity: precalculatedSize) too.
         var moves = new SquareIndex[BitOperations.PopCount(attack)];
 
-        int opposite = (int)sideToMoveColor.Opposite();
+        // TODO: Create 'Move' struct and its encoding to ulong (int64).
+
+        int opposite = (int)pieceColor.Opposite();
         int index = 0;
 
         while (attack > 0)
