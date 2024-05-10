@@ -28,37 +28,37 @@ public readonly struct BinaryMove(int encodedValue)
 
     public PieceType TargetPieceType
     {
-        get => (PieceType)((EncodedValue & TRG_PIECE_TYPE) >> 16);
+        get => (PieceType)((EncodedValue & TRG_PIECE_TYPE) >> 17);
     }
 
     public PieceColor TargetPieceColor
     {
-        get => (PieceColor)((EncodedValue & TRG_PIECE_COLOR) >> 19);
+        get => (PieceColor)((EncodedValue & TRG_PIECE_COLOR) >> 20);
     }
 
     public PromotePiece Promote
     {
-        get => (PromotePiece)((EncodedValue & PROMOTE) >> 20);
+        get => (PromotePiece)((EncodedValue & PROMOTE_TO) >> 22);
     }
 
     public bool IsCapture
     {
-        get => ((EncodedValue & CAPTURE) >> 23) != 0;
+        get => ((EncodedValue & IS_CAPTURE) >> 25) != 0;
     }
 
     public bool IsDoublePush
     {
-        get => ((EncodedValue & DOUBLE_PUSH) >> 24) != 0;
+        get => ((EncodedValue & IS_DOUBLE_PUSH) >> 26) != 0;
     }
 
     public bool IsEnpassant
     {
-        get => ((EncodedValue & ENPASSANT) >> 25) != 0;
+        get => ((EncodedValue & IS_ENPASSANT) >> 27) != 0;
     }
 
     public bool IsCastling
     {
-        get => ((EncodedValue & CASTLING) >> 26) != 0;
+        get => ((EncodedValue & IS_CASTLING) >> 28) != 0;
     }
 
     public BinaryMove() : this(0)

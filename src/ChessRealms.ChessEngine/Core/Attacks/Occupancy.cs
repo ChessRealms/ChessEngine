@@ -22,7 +22,7 @@ public static class Occupancy
 
             attackMask.PopBitAt(s);
 
-            if ((occupancyIndex & 1 << i) > 0)
+            if ((occupancyIndex & 1 << i) != 0)
             {
                 occupancy.SetBitAt(s);
             }

@@ -46,37 +46,37 @@ public struct ChessBoard
 
         BitBoard whiteOcc = _occupancies[(int)PieceColor.White];
 
-        int color = (int)(whiteOcc.GetBitAt(square) > 0 
+        int colorIndex = (whiteOcc.GetBitAt(square) != 0 
             ? PieceColor.White 
-            : PieceColor.Black);
+            : PieceColor.Black).ToIndex();
         
-        int piece = -1;
+        int pieceIndex = -1;
 
-        for (int pieceIndex = 0; pieceIndex < 6; ++pieceIndex)
+        for (int piece = 0; piece < 6; ++piece)
         {
-            if (_pieces[color, pieceIndex].GetBitAt(square) > 0)
+            if (_pieces[colorIndex, piece].GetBitAt(square) != 0)
             {
-                piece = pieceIndex;
+                pieceIndex = piece;
                 break;
             }
         }
 
-        if (piece == -1)
+        if (pieceIndex == -1)
         {
             return null;
         }
 
         return new Piece
         {
-            Color = (PieceColor)color,
-            Type = (PieceType)piece
+            Color = colorIndex.ToColor(),
+            Type = pieceIndex.ToPiece()
         };
     }
 
     public void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
     {
-        int colorIndex = (int)color;
-        int pieceIndex = (int)piece;
+        int colorIndex = color.ToIndex();
+        int pieceIndex = piece.ToIndex();
         
         _pieces[colorIndex, pieceIndex].SetBitAt(square);
         _occupancies[colorIndex].SetBitAt(square);
@@ -92,8 +92,8 @@ public struct ChessBoard
             return;
         }
 
-        int colorIndex = (int)piece.Color;
-        int pieceIndex = (int)piece.Type;
+        int colorIndex = piece.Color.ToIndex();
+        int pieceIndex = piece.Type.ToIndex();
 
         _pieces[colorIndex, pieceIndex].PopBitAt(square);
         _occupancies[colorIndex].PopBitAt(square);
@@ -108,13 +108,13 @@ public struct ChessBoard
     /// <returns> <see langword="true"/> if attacked, otherwise <see langword="false"/>. </returns>
     public readonly bool IsSquareAttacked(SquareIndex square, PieceColor attackerColor)
     {
-        int attacker = (int)attackerColor;
+        int attacker = attackerColor.ToIndex();
 
-        return (PawnAttacks.AttackMasks[attackerColor.Opposite()][square] & _pieces[attacker, (int)PieceType.Pawn]) > 0
-            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, (int)PieceType.Knight]) > 0
-            || (BishopAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, (int)PieceType.Bishop]) > 0
-            || (RookAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, (int)PieceType.Rook]) > 0
-            || (KingAttacks.AttackMasks[square] & _pieces[attacker, (int)PieceType.King]) > 0;
+        return (PawnAttacks.AttackMasks[attackerColor.Opposite()][square] & _pieces[attacker, PieceType.Pawn.ToIndex()]) != 0
+            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, PieceType.Knight.ToIndex()]) != 0
+            || (BishopAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, PieceType.Bishop.ToIndex()]) != 0
+            || (RookAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, PieceType.Rook.ToIndex()]) != 0
+            || (KingAttacks.AttackMasks[square] & _pieces[attacker, PieceType.King.ToIndex()]) != 0;
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public struct ChessBoard
         BitBoard attack = BishopAttacks.GetSliderAttack(square, _allOccupancies);
 
         // Remove our pieces from attacks.
-        attack ^= 0UL ^ (attack & _occupancies[(int)pieceColor]);
+        attack ^= 0UL ^ (attack & _occupancies[pieceColor.ToIndex()]);
         // Finally we could set exact size for output array.
         // 💪💪💪 Every bit and memory allocation is matter when this is Chess Engine!!! 💪💪💪.
         // We could replace Array with List(capacity: precalculatedSize) too.
@@ -136,23 +136,23 @@ public struct ChessBoard
 
         // TODO: Create 'Move' struct and its encoding to ulong (int64).
 
-        int opposite = (int)pieceColor.Opposite();
-        int index = 0;
+        int opposite = pieceColor.Opposite().ToIndex();
+        int moveIndex = 0;
 
-        while (attack > 0)
+        while (attack != 0)
         {
             SquareIndex to = attack.TrailingZeroCount();
             BitBoard toBitboard = to.Board;
             
-            if ((toBitboard & _occupancies[opposite]) > 0)
+            if ((toBitboard & _occupancies[opposite]) != 0)
             {
                 // TODO: set some flag 'is capture = true'
-                moves[index] = to;
+                moves[moveIndex] = to;
             }
             
-            moves[index] = to;
+            moves[moveIndex] = to;
             attack.PopBitAt(to);
-            ++index;
+            ++moveIndex;
         }
 
         return moves;

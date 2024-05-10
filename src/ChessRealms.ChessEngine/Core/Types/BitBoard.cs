@@ -15,7 +15,7 @@ public struct BitBoard(ulong value)
 
     public void PopBitAt(SquareIndex index)
     {
-        if (GetBitAt(index) > 0)
+        if (GetBitAt(index) != 0)
         {
             Value ^= index.Board;
         }

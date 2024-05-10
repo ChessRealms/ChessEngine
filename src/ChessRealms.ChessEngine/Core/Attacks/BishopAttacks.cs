@@ -189,7 +189,7 @@ internal static class BishopAttacks
 
             attacks |= board;
 
-            if ((board & blockers) > 0)
+            if ((board & blockers) != 0)
             {
                 break;
             }
@@ -201,7 +201,7 @@ internal static class BishopAttacks
 
             attacks |= board;
 
-            if ((board & blockers) > 0)
+            if ((board & blockers) != 0)
             {
                 break;
             }
@@ -213,7 +213,7 @@ internal static class BishopAttacks
 
             attacks |= board;
 
-            if ((board & blockers) > 0)
+            if ((board & blockers) != 0)
             {
                 break;
             }
@@ -225,7 +225,7 @@ internal static class BishopAttacks
 
             attacks |= board;
 
-            if ((board & blockers) > 0)
+            if ((board & blockers) != 0)
             {
                 break;
             }

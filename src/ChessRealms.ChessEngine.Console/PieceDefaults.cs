@@ -10,7 +10,7 @@ public static class PieceCharset
 
     public static char GetAsciiPiece(PieceType type, PieceColor color)
     {
-        int index = (int)type + (color == PieceColor.White ? 0 : 6);
+        int index = (int)type - 1 + (color == PieceColor.White ? 0 : 6);
         return ASCII[index];
     }
 }

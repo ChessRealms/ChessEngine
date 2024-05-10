@@ -15,9 +15,9 @@ JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
 };
 
 BinaryMove move = new BinaryMoveBuilder()
-    .WithSource(EnumSquare.a1)
+    .WithSourceSquare(EnumSquare.a1)
     .WithSourcePiece(PieceType.Queen, PieceColor.White)
-    .WithTarget(EnumSquare.h8)
+    .WithTargetSquare(EnumSquare.h8)
     .WithTargetPiece(PieceType.Bishop, PieceColor.Black)
     .WithCapture()
     .Build();
