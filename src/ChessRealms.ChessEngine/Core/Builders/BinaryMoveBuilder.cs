@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
+using System.Drawing;
 
 namespace ChessRealms.ChessEngine.Core.Builders;
 
@@ -45,6 +46,13 @@ public class BinaryMoveBuilder()
     {
         _encodedMove |= unchecked((uint)piece) << 17;
         _encodedMove |= unchecked((uint)color) << 20;
+        return this;
+    }
+
+    public BinaryMoveBuilder WithTargetPiece(in Piece piece)
+    {
+        _encodedMove |= unchecked((uint)piece.Type) << 17;
+        _encodedMove |= unchecked((uint)piece.Color) << 20;
         return this;
     }
 

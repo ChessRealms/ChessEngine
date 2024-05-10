@@ -1,5 +1,7 @@
-﻿using ChessRealms.ChessEngine.Core.Builders;
+﻿using ChessRealms.ChessEngine.Console;
+using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,16 +17,16 @@ JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
     },
 };
 
-BinaryMove move = new BinaryMoveBuilder()
-    .WithSourceSquare(EnumSquare.a1)
-    .WithSourcePiece(PieceType.Queen, PieceColor.White)
-    .WithTargetSquare(EnumSquare.h8)
-    .WithTargetPiece(PieceType.Bishop, PieceColor.Black)
-    .WithCapture()
-    .Build();
+if (!FenStrings.TryParse(FenStrings.TrickyPosition, out var chessBoard))
+{
+    return;
+}
 
+Print.Board(chessBoard);
+
+BinaryMove[] moves = chessBoard.GetBishopMoves(EnumSquare.e2, PieceColor.White);
 string JSON = JsonSerializer.Serialize(
-    move,
+    moves,
     options: jsonOptions);
 
 Console.WriteLine(JSON);

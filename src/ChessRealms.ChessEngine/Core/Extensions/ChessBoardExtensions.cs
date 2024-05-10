@@ -2,7 +2,7 @@
 
 namespace ChessRealms.ChessEngine.Core.Extensions;
 
-internal static class ChessBoardExtensions
+public static class ChessBoardExtensions
 {
     public static int ToIndex(this PieceColor color)
     {

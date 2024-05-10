@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
 using System.Numerics;
@@ -37,14 +38,15 @@ public struct ChessBoard
         SetPieceAt(square, piece.Color, piece.Type);
     }
 
-    public readonly Piece? GetPieceAt(SquareIndex square)
+    public readonly bool TryGetPieceAt(SquareIndex square, out Piece piece)
     {
         if (_allOccupancies.GetBitAt(square) == 0)
         {
-            return null;
+            piece = Piece.Empty;
+            return false;
         }
 
-        BitBoard whiteOcc = _occupancies[(int)PieceColor.White];
+        BitBoard whiteOcc = _occupancies[PieceColor.White.ToIndex()];
 
         int colorIndex = (whiteOcc.GetBitAt(square) != 0 
             ? PieceColor.White 
@@ -52,25 +54,23 @@ public struct ChessBoard
         
         int pieceIndex = -1;
 
-        for (int piece = 0; piece < 6; ++piece)
+        for (int i = 0; i < 6; ++i)
         {
-            if (_pieces[colorIndex, piece].GetBitAt(square) != 0)
+            if (_pieces[colorIndex, i].GetBitAt(square) != 0)
             {
-                pieceIndex = piece;
+                pieceIndex = i;
                 break;
             }
         }
 
         if (pieceIndex == -1)
         {
-            return null;
+            piece = Piece.Empty;
+            return false;
         }
 
-        return new Piece
-        {
-            Color = colorIndex.ToColor(),
-            Type = pieceIndex.ToPiece()
-        };
+        piece = new Piece(pieceIndex.ToPiece(), colorIndex.ToColor());
+        return true;
     }
 
     public void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
@@ -85,9 +85,7 @@ public struct ChessBoard
 
     public void RemovePieceAt(SquareIndex square)
     {
-        Piece? piece = GetPieceAt(square);
-
-        if (piece == null)
+        if (!TryGetPieceAt(square, out Piece piece))
         {
             return;
         }
@@ -123,7 +121,7 @@ public struct ChessBoard
     /// <param name="square"> Square from where bishop going move. </param>
     /// <param name="pieceColor"> Color of piece to move. </param>
     /// <returns> Array with moves. </returns>
-    public readonly SquareIndex[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
+    public readonly BinaryMove[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
     {
         BitBoard attack = BishopAttacks.GetSliderAttack(square, _allOccupancies);
 
@@ -132,26 +130,31 @@ public struct ChessBoard
         // Finally we could set exact size for output array.
         // 💪💪💪 Every bit and memory allocation is matter when this is Chess Engine!!! 💪💪💪.
         // We could replace Array with List(capacity: precalculatedSize) too.
-        var moves = new SquareIndex[BitOperations.PopCount(attack)];
-
-        // TODO: Create 'Move' struct and its encoding to ulong (int64).
+        var moves = new BinaryMove[BitOperations.PopCount(attack)];
+        var moveBuilder = new BinaryMoveBuilder();
 
         int opposite = pieceColor.Opposite().ToIndex();
         int moveIndex = 0;
 
         while (attack != 0)
         {
-            SquareIndex to = attack.TrailingZeroCount();
-            BitBoard toBitboard = to.Board;
+            SquareIndex target = attack.TrailingZeroCount();
+            BitBoard toBitboard = target.Board;
             
-            if ((toBitboard & _occupancies[opposite]) != 0)
+            if ((toBitboard & _occupancies[opposite]) != 0 && TryGetPieceAt(target, out Piece targetPiece))
             {
-                // TODO: set some flag 'is capture = true'
-                moves[moveIndex] = to;
+                moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
             }
-            
-            moves[moveIndex] = to;
-            attack.PopBitAt(to);
+
+            moveBuilder
+                .WithSourceSquare(square)
+                .WithSourcePiece(PieceType.Bishop, pieceColor)
+                .WithTargetSquare(target);
+
+            moves[moveIndex] = moveBuilder.Build();
+
+            moveBuilder.Reset();
+            attack.PopBitAt(target);
             ++moveIndex;
         }
 

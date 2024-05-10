@@ -1,7 +1,9 @@
 ﻿namespace ChessRealms.ChessEngine.Core.Types;
 
-public record Piece
+public readonly struct Piece(PieceType type, PieceColor color)
 {
-    public PieceType Type { get; init; }
-    public PieceColor Color { get; init; }
+    public readonly PieceType Type = type;
+    public readonly PieceColor Color = color;
+
+    public static readonly Piece Empty = new(PieceType.None, PieceColor.None);
 }

@@ -1,5 +1,5 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
-using System.Numerics;
+﻿using ChessRealms.ChessEngine.Core.Extensions;
+using ChessRealms.ChessEngine.Core.Types;
 using static System.Console;
 
 namespace ChessRealms.ChessEngine.Console;
@@ -15,15 +15,14 @@ public static class Print
             for (int file = 0; file < 8; ++file)
             {
                 SquareIndex square = SquareIndex.FromFileRank(file, rank);
-                Piece? piece = chessBoard.GetPieceAt(square);
                 
-                if (piece == null)
+                if (!chessBoard.TryGetPieceAt(square, out Piece piece))
                 {
                     Write(" .");
                 }
                 else
                 {
-                    int index = (int)piece.Type + (piece.Color == PieceColor.Black ? 6 : 0);
+                    int index = piece.Type.ToIndex() + (piece.Color == PieceColor.Black ? 6 : 0);
 
                     Write(" {0}", PieceCharset.ASCII[index]);
                 }
