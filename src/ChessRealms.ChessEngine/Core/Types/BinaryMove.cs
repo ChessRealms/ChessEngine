@@ -2,9 +2,9 @@
 
 namespace ChessRealms.ChessEngine.Core.Types;
 
-public readonly struct BinaryMove(int encodedValue)
+public readonly struct BinaryMove(uint encodedValue)
 {
-    public readonly int EncodedValue = encodedValue;
+    public readonly uint EncodedValue = encodedValue;
 
     public SquareIndex SourceSquare
     {
@@ -56,16 +56,24 @@ public readonly struct BinaryMove(int encodedValue)
         get => ((EncodedValue & IS_ENPASSANT) >> 27) != 0;
     }
 
-    public bool IsCastling
+    public Castling Castling
     {
-        get => ((EncodedValue & IS_CASTLING) >> 28) != 0;
+        get => (Castling)((EncodedValue & CASTLING) >> 28);
     }
 
     public BinaryMove() : this(0)
     {
     }
 
-    public static implicit operator int(BinaryMove move) => move.EncodedValue;
+    public BinaryMove(int value) : this(unchecked((uint)value))
+    {
+    }
+
+    public static implicit operator uint(BinaryMove move) => move.EncodedValue;
+
+    public static implicit operator BinaryMove(uint value) => new(value);
+
+    public static implicit operator int(BinaryMove move) => unchecked((int)move.EncodedValue);
 
     public static implicit operator BinaryMove(int value) => new(value);
 }

@@ -4,23 +4,23 @@ namespace ChessRealms.ChessEngine.Core.Builders;
 
 public class BinaryMoveBuilder()
 {
-    public const int SRC_SQUARE                 = 0x3f;         // 6 first bits filled with ones (63 as hexdecimal)
-    public const int TRG_SQUARE                 = 0xfc0;        // 6 bits (63 << 6)
+    public const uint SRC_SQUARE                 = 0x3f;         // 6 first bits filled with ones (63 as hexdecimal)
+    public const uint TRG_SQUARE                 = 0xfc0;        // 6 bits (63 << 6)
 
-    public const int SRC_PIECE_TYPE             = 0x7000;       // 3 bits (7 << 12)
-    public const int SRC_PIECE_COLOR            = 0x18000;      // 2 bit (3 << 15)
+    public const uint SRC_PIECE_TYPE             = 0x7000;       // 3 bits (7 << 12)
+    public const uint SRC_PIECE_COLOR            = 0x18000;      // 2 bit (3 << 15)
 
-    public const int TRG_PIECE_TYPE             = 0xe0000;      // 3 bits (7 << 17)
-    public const int TRG_PIECE_COLOR            = 0x300000;     // 2 bit (3 << 20)
+    public const uint TRG_PIECE_TYPE             = 0xe0000;      // 3 bits (7 << 17)
+    public const uint TRG_PIECE_COLOR            = 0x300000;     // 2 bit (3 << 20)
 
-    public const int PROMOTE_TO                 = 0x1c00000;    // 3 bits (7 << 22)
-    public const int IS_CAPTURE                 = 0x2000000;    // 1 bit (1 << 25)
+    public const uint PROMOTE_TO                 = 0x1c00000;    // 3 bits (7 << 22)
+    public const uint IS_CAPTURE                 = 0x2000000;    // 1 bit (1 << 25)
 
-    public const int IS_DOUBLE_PUSH             = 0x4000000;    // 1 bit (1 << 26)
-    public const int IS_ENPASSANT               = 0x8000000;    // 1 bit (1 << 27)
-    public const int IS_CASTLING                = 0x10000000;   // 1 bit (1 << 28)
-
-    private int _encodedMove = 0;
+    public const uint IS_DOUBLE_PUSH             = 0x4000000;    // 1 bit (1 << 26)
+    public const uint IS_ENPASSANT               = 0x8000000;    // 1 bit (1 << 27)
+    public const uint CASTLING                   = 0xb0000000;   // 4 bit (11 << 28)
+    
+    private uint _encodedMove = 0u;
 
     public BinaryMoveBuilder WithSourceSquare(SquareIndex square)
     {
@@ -30,57 +30,57 @@ public class BinaryMoveBuilder()
 
     public BinaryMoveBuilder WithTargetSquare(SquareIndex square)
     {
-        _encodedMove |= square << 6;
+        _encodedMove |= (uint)square << 6;
         return this;
     }
 
     public BinaryMoveBuilder WithSourcePiece(PieceType piece, PieceColor color)
     {
-        _encodedMove |= ((int)piece) << 12;
-        _encodedMove |= ((int)color) << 15;
+        _encodedMove |= unchecked((uint)piece) << 12;
+        _encodedMove |= unchecked((uint)color) << 15;
         return this;
     }
 
     public BinaryMoveBuilder WithTargetPiece(PieceType piece, PieceColor color)
     {
-        _encodedMove |= ((int)piece) << 17;
-        _encodedMove |= ((int)color) << 20;
+        _encodedMove |= unchecked((uint)piece) << 17;
+        _encodedMove |= unchecked((uint)color) << 20;
         return this;
     }
 
     public BinaryMoveBuilder WithPromote(PromotePiece promote)
     {
-        _encodedMove |= (int)promote << 22;
+        _encodedMove |= unchecked((uint)promote) << 22;
         return this;
     }
 
     public BinaryMoveBuilder WithCapture()
     {
-        _encodedMove |= 1 << 25;
+        _encodedMove |= 1u << 25;
         return this;
     }
 
     public BinaryMoveBuilder WithDoublePush()
     {
-        _encodedMove |= 1 << 26;
+        _encodedMove |= 1u << 26;
         return this;
     }
 
     public BinaryMoveBuilder WithEnpassant()
     {
-        _encodedMove |= 1 << 27;
+        _encodedMove |= 1u << 27;
         return this;
     }
 
-    public BinaryMoveBuilder WithCastling()
+    public BinaryMoveBuilder WithCastling(Castling castling)
     {
-        _encodedMove |= 1 << 28;
+        _encodedMove |= (unchecked((uint)castling)) << 28;
         return this;
     }
 
     public void Reset()
     {
-        _encodedMove &= 0;
+        _encodedMove &= 0u;
     }
 
     public BinaryMove Build()

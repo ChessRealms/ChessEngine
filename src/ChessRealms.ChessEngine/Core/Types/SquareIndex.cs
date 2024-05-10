@@ -39,6 +39,10 @@ public readonly struct SquareIndex(int square)
     {
     }
 
+    public SquareIndex(uint square) : this(unchecked((int)square)) 
+    {
+    }
+
     public SquareIndex(EnumSquare square) : this((int)square) 
     {
     }
@@ -153,5 +157,9 @@ public readonly struct SquareIndex(int square)
 
     public static implicit operator SquareIndex(EnumSquare square) => new(square);
 
-    public static implicit operator EnumSquare(SquareIndex squareIndex) => (EnumSquare)squareIndex.Square;
+    public static implicit operator EnumSquare(SquareIndex squareIndex) => unchecked((EnumSquare)squareIndex.Square);
+
+    public static implicit operator uint(SquareIndex squareIndex) => unchecked((uint)squareIndex.Square);
+
+    public static implicit operator SquareIndex(uint squareIndex) => new(squareIndex);
 }

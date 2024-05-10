@@ -10,7 +10,8 @@ JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
     Converters = 
     { 
         new SquareIndexConverter(), new PieceTypeConverter(), 
-        new PieceColorConverter(), new PromotePieceConverter()
+        new PieceColorConverter(), new PromotePieceConverter(),
+        new CastlingConverter()
     },
 };
 
@@ -79,6 +80,20 @@ class PromotePieceConverter : JsonConverter<PromotePiece>
     }
 
     public override void Write(Utf8JsonWriter writer, PromotePiece value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
+    }
+}
+
+class CastlingConverter : JsonConverter<Castling>
+{
+    public override Castling Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        _ = Enum.TryParse<Castling>(reader.GetString(), out var castling);
+        return castling;
+    }
+
+    public override void Write(Utf8JsonWriter writer, Castling value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
     }
