@@ -42,6 +42,13 @@ public class BinaryMoveBuilder()
         return this;
     }
 
+    public BinaryMoveBuilder WithSourcePiece(in Piece piece)
+    {
+        _encodedMove |= unchecked((uint)piece.Type) << 12;
+        _encodedMove |= unchecked((uint)piece.Color) << 15;
+        return this;
+    }
+
     public BinaryMoveBuilder WithTargetPiece(PieceType piece, PieceColor color)
     {
         _encodedMove |= unchecked((uint)piece) << 17;

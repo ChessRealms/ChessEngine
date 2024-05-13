@@ -118,9 +118,9 @@ public struct ChessBoard
     {
         List<BinaryMove> pawnMoves = GetPawnMoves(side);
         List<BinaryMove> knightMoves = GetKnightMoves(side);
-        List<BinaryMove> bishopMoves = GetSlidingMoves(BishopAttacks.GetSliderAttack, PieceType.Bishop, side);
-        List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, PieceType.Rook, side);
-        List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, PieceType.Queen, side);
+        List<BinaryMove> bishopMoves = GetSlidingMoves(BishopAttacks.GetSliderAttack, new Piece(PieceType.Bishop, side));
+        List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, new Piece(PieceType.Rook, side));
+        List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, new Piece(PieceType.Queen, side));
         
         return pawnMoves
             .Concat(knightMoves)
@@ -247,25 +247,24 @@ public struct ChessBoard
 
     internal readonly List<BinaryMove> GetSlidingMoves(
         Func<SquareIndex, ulong, BitBoard> getSliderAttackFunc,
-        PieceType pieceType, 
-        PieceColor color)
+        in Piece piece)
     {
-        if (!ValidateSlidingPiece(pieceType))
+        if (!ValidateSlidingPiece(piece.Type))
         {
-            throw new ArgumentException("Invalid sliding piece type.", nameof(pieceType));
+            throw new ArgumentException("Invalid sliding piece type.", nameof(piece));
         }
 
         var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
         
-        BitBoard pieces = _pieces[color.ToIndex(), pieceType.ToIndex()];
-        BitBoard oppositeOccupancies = _occupancies[color.Opposite().ToIndex()];
+        BitBoard pieces = _pieces[piece.Color.ToIndex(), piece.Type.ToIndex()];
+        BitBoard oppositeOccupancies = _occupancies[piece.Color.Opposite().ToIndex()];
 
         while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare))
         {
             BitBoard attack = ClearMaskFromOccupancies(
                 getSliderAttackFunc.Invoke(sourceSquare, _allOccupancies),
-                occupanciesColor: color);
+                occupanciesColor: piece.Color);
 
             while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
             {
@@ -278,7 +277,7 @@ public struct ChessBoard
 
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
-                    .WithSourcePiece(pieceType, color)
+                    .WithSourcePiece(in piece)
                     .WithTargetSquare(targetSquare);
 
                 moves.Add(moveBuilder.Build());
