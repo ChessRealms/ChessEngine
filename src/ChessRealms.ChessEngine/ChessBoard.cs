@@ -123,15 +123,15 @@ public struct ChessBoard
         List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, new Piece(PieceType.Rook, side));
         List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, new Piece(PieceType.Queen, side));
         List<BinaryMove> kingMoves = GetLeapingMoves(KingAttacks.AttackMasks, new Piece(PieceType.King, side));
-        
-        // TODO: Get castling moves.
+        List<BinaryMove> castlingMoves = GetCastlingMoves(side);
 
         return pawnMoves
             .Concat(knightMoves)
             .Concat(bishopMoves)
             .Concat(rookMoves)
             .Concat(queenMoves)
-            .Concat(kingMoves);
+            .Concat(kingMoves)
+            .Concat(castlingMoves);
     }
 
     internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
@@ -347,6 +347,94 @@ public struct ChessBoard
                     .WithSourceSquare(sourceSquare)
                     .WithSourcePiece(in piece)
                     .WithTargetSquare(targetSquare);
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
+            }
+        }
+
+        return moves;
+    }
+
+    internal readonly List<BinaryMove> GetCastlingMoves(PieceColor color)
+    {
+        var moves = new List<BinaryMove>(capacity: 2);
+        var moveBuilder = new BinaryMoveBuilder();
+
+        if (color == PieceColor.Black)
+        {
+            bool BK_CastlingAvailable = Castling.HasFlag(Castling.BK) &&
+                _allOccupancies.GetBitAt(EnumSquare.f8) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.g8) == 0 &&
+                !IsSquareAttacked(EnumSquare.e8, PieceColor.White) &&
+                !IsSquareAttacked(EnumSquare.g8, PieceColor.White);
+
+            if (BK_CastlingAvailable)
+            {
+                moveBuilder
+                    .WithSourceSquare(EnumSquare.e8)
+                    .WithSourcePiece(PieceType.King, PieceColor.Black)
+                    .WithTargetSquare(EnumSquare.g8)
+                    .WithCastling(Castling.BK);
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
+            }
+
+            bool BQ_CastlingAvailable = Castling.HasFlag(Castling.BQ) &&
+                _allOccupancies.GetBitAt(EnumSquare.b8) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.c8) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.d8) == 0 &&
+                !IsSquareAttacked(EnumSquare.e8, PieceColor.White) &&
+                !IsSquareAttacked(EnumSquare.c8, PieceColor.White);
+
+            if (BQ_CastlingAvailable)
+            {
+                moveBuilder
+                    .WithSourceSquare(EnumSquare.e8)
+                    .WithSourcePiece(PieceType.King, PieceColor.Black)
+                    .WithTargetSquare(EnumSquare.c8)
+                    .WithCastling(Castling.BQ);
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
+            }
+        }
+
+        else
+        {
+            bool WK_CastlingAvailable = Castling.HasFlag(Castling.WK) &&
+                _allOccupancies.GetBitAt(EnumSquare.f1) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.g1) == 0 &&
+                !IsSquareAttacked(EnumSquare.e1, PieceColor.Black) &&
+                !IsSquareAttacked(EnumSquare.g1, PieceColor.Black);
+
+            if (WK_CastlingAvailable)
+            {
+                moveBuilder
+                    .WithSourceSquare(EnumSquare.e1)
+                    .WithSourcePiece(PieceType.King, PieceColor.White)
+                    .WithTargetSquare(EnumSquare.g1)
+                    .WithCastling(Castling.WK);
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
+            }
+
+            bool WQ_CastlingAvailable = Castling.HasFlag(Castling.WQ) &&
+                _allOccupancies.GetBitAt(EnumSquare.b1) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.c1) == 0 &&
+                _allOccupancies.GetBitAt(EnumSquare.d1) == 0 &&
+                !IsSquareAttacked(EnumSquare.e1, PieceColor.Black) &&
+                !IsSquareAttacked(EnumSquare.c1, PieceColor.Black);
+
+            if (WQ_CastlingAvailable)
+            {
+                moveBuilder
+                    .WithSourceSquare(EnumSquare.e1)
+                    .WithSourcePiece(PieceType.King, PieceColor.White)
+                    .WithTargetSquare(EnumSquare.c1)
+                    .WithCastling(Castling.WQ);
 
                 moves.Add(moveBuilder.Build());
                 moveBuilder.Reset();

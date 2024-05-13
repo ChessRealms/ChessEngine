@@ -1,5 +1,4 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
-using System.Drawing;
 
 namespace ChessRealms.ChessEngine.Core.Builders;
 
@@ -19,7 +18,7 @@ public class BinaryMoveBuilder()
 
     public const uint IS_DOUBLE_PUSH             = 0x4000000;    // 1 bit (1 << 26)
     public const uint IS_ENPASSANT               = 0x8000000;    // 1 bit (1 << 27)
-    public const uint CASTLING                   = 0xb0000000;   // 4 bit (11 << 28)
+    public const uint CASTLING                   = 0xf0000000;   // 4 bit (15 << 28)
     
     private uint _encodedMove = 0u;
 

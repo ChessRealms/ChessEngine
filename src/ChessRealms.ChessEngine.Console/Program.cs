@@ -24,13 +24,14 @@ if (!FenStrings.TryParse(FenStrings.TrickyPosition, out ChessBoard chessBoard))
 
 Print.Board(chessBoard);
 
-IEnumerable<BinaryMove> moves = chessBoard.GetMoves(PieceColor.Black);
+IEnumerable<BinaryMove> moves = chessBoard.GetMoves(PieceColor.White);
 string JSON = JsonSerializer.Serialize(
     moves,
     options: jsonOptions);
 
 Console.WriteLine(JSON);
 Console.WriteLine();
+Console.WriteLine("Total moves: {0}", moves.Count());
 
 class SquareIndexConverter : JsonConverter<SquareIndex>
 {
