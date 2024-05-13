@@ -115,21 +115,121 @@ public struct ChessBoard
             || (KingAttacks.AttackMasks[square] & _pieces[attacker, PieceType.King.ToIndex()]) != 0;
     }
 
+    internal readonly List<BinaryMove> GetMoves(PieceColor side)
+    {
+        List<BinaryMove> pawnMoves = GetPawnMoves(side);
+        return pawnMoves;
+    }
+
+    internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
+    {
+        var moves = new List<BinaryMove>();
+        var moveBuilder = new BinaryMoveBuilder();
+
+        BitBoard pawns = _pieces[color.ToIndex(), PieceType.Pawn.ToIndex()];
+        BitBoard empty = _allOccupancies ^ LerfConstants.ALL_SQUARES;
+        BitBoard singlePush;
+        BitBoard doublePush;
+        int rankOffset;
+
+        if (color == PieceColor.White)
+        {
+            rankOffset = -1;
+            singlePush = (pawns << 8) & empty;
+            doublePush = (pawns << 16) & empty & LerfConstants.RANK_4;
+        }
+        else
+        {
+            rankOffset = 1;
+            singlePush = (pawns >> 8) & empty;
+            doublePush = (pawns >> 16) & empty & LerfConstants.RANK_5;
+        }
+
+        while (singlePush != 0)
+        {
+            SquareIndex targetSquare = singlePush.TrailingZeroCount();
+            SquareIndex sourceSquare = SquareIndex.FromFileRank(
+                targetSquare.File,
+                targetSquare.Rank + (1 * rankOffset));
+
+            BinaryMove move = moveBuilder
+                .WithSourceSquare(sourceSquare)
+                .WithSourcePiece(PieceType.Pawn, color)
+                .WithTargetSquare(targetSquare)
+                .Build();
+
+            moves.Add(move);
+
+            moveBuilder.Reset();
+            singlePush.PopBitAt(targetSquare);
+        }
+
+        while (doublePush != 0)
+        {
+            SquareIndex targetSquare = doublePush.TrailingZeroCount();
+            SquareIndex sourceSquare = SquareIndex.FromFileRank(
+                targetSquare.File,
+                targetSquare.Rank + (2 * rankOffset));
+
+            BinaryMove move = moveBuilder
+                .WithSourceSquare(sourceSquare)
+                .WithSourcePiece(PieceType.Pawn, color)
+                .WithTargetSquare(targetSquare)
+                .WithDoublePush()
+                .Build();
+
+            moves.Add(move);
+
+            moveBuilder.Reset();
+            doublePush.PopBitAt(targetSquare);
+        }
+
+        while (pawns != 0)
+        {
+            SquareIndex sourceSquare = pawns.TrailingZeroCount();
+
+            BitBoard mask = PawnAttacks.AttackMasks[color][sourceSquare];
+            BitBoard captures = mask & _occupancies[color.Opposite().ToIndex()];
+
+            while (captures != 0)
+            {
+                SquareIndex targetSquare = captures.TrailingZeroCount();
+
+                if (TryGetPieceAt(targetSquare, out Piece piece))
+                {
+                    BinaryMove move = moveBuilder
+                        .WithSourceSquare(sourceSquare)
+                        .WithSourcePiece(PieceType.Pawn, color)
+                        .WithTargetSquare(targetSquare)
+                        .WithTargetPiece(in piece)
+                        .WithCapture()
+                        .Build();
+
+                    moves.Add(move);
+                    moveBuilder.Reset();
+                }
+
+                captures.PopBitAt(targetSquare);
+            }
+
+            pawns.PopBitAt(sourceSquare);
+        }
+
+        return moves;
+    }
+
     /// <summary>
     /// Get potential bishop moves.
     /// </summary>
     /// <param name="square"> Square from where bishop going move. </param>
     /// <param name="pieceColor"> Color of piece to move. </param>
     /// <returns> Array with moves. </returns>
-    public readonly BinaryMove[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
+    internal readonly BinaryMove[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
     {
         BitBoard attack = BishopAttacks.GetSliderAttack(square, _allOccupancies);
 
         // Remove our pieces from attacks.
         attack ^= 0UL ^ (attack & _occupancies[pieceColor.ToIndex()]);
-        // Finally we could set exact size for output array.
-        // 💪💪💪 Every bit and memory allocation is matter when this is Chess Engine!!! 💪💪💪.
-        // We could replace Array with List(capacity: precalculatedSize) too.
         var moves = new BinaryMove[BitOperations.PopCount(attack)];
         var moveBuilder = new BinaryMoveBuilder();
 

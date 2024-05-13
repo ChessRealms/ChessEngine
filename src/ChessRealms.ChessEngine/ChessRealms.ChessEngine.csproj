@@ -9,6 +9,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="ChessRealms.ChessEngine.Tests" />
     <InternalsVisibleTo Include="ChessRealms.MagicBruteforce" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Console" />
   </ItemGroup>
 
 </Project>

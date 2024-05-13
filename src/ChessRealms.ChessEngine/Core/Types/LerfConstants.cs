@@ -24,6 +24,10 @@ internal static class LerfConstants
 
     public const ulong RANK_8 = 0xFF00000000000000;
 
+    public const ulong RANK_4 = RANK_1 << 24;
+
+    public const ulong RANK_5 = RANK_8 >> 24;
+
     public const ulong A1_H8_DIAGONAL = 0x8040201008040201;
 
     public const ulong H1_A8_ANTIDIAGONAL = 0x0102040810204080;
@@ -31,4 +35,6 @@ internal static class LerfConstants
     public const ulong LIGHT_SQUARES = 0x55AA55AA55AA55AA;
 
     public const ulong DARK_SQUARES = 0xAA55AA55AA55AA55;
+
+    public const ulong ALL_SQUARES = LIGHT_SQUARES | DARK_SQUARES;
 }
