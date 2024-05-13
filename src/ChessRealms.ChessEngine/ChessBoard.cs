@@ -149,13 +149,13 @@ public struct ChessBoard
         {
             rankOffset = -1;
             singlePush = (pawns << 8) & empty;
-            doublePush = (pawns << 16) & empty & LerfConstants.RANK_4;
+            doublePush = (singlePush << 8) & empty & LerfConstants.RANK_4;
         }
         else
         {
             rankOffset = 1;
             singlePush = (pawns >> 8) & empty;
-            doublePush = (pawns >> 16) & empty & LerfConstants.RANK_5;
+            doublePush = (singlePush >> 8) & empty & LerfConstants.RANK_5;
         }
 
         while (singlePush.TryPopFirstSquare(out SquareIndex targetSquare))
