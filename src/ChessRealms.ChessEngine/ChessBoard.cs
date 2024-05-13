@@ -2,7 +2,6 @@
 using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
-using System.Numerics;
 
 namespace ChessRealms.ChessEngine;
 
@@ -115,13 +114,19 @@ public struct ChessBoard
             || (KingAttacks.AttackMasks[square] & _pieces[attacker, PieceType.King.ToIndex()]) != 0;
     }
 
-    internal readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
+    public readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
     {
         List<BinaryMove> pawnMoves = GetPawnMoves(side);
         List<BinaryMove> knightMoves = GetKnightMoves(side);
-        List<BinaryMove> bishopMoves = GetBishopMoves(side);
+        List<BinaryMove> bishopMoves = GetSlidingMoves(BishopAttacks.GetSliderAttack, PieceType.Bishop, side);
+        List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, PieceType.Rook, side);
+        List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, PieceType.Queen, side);
         
-        return pawnMoves.Concat(knightMoves).Concat(bishopMoves);
+        return pawnMoves
+            .Concat(knightMoves)
+            .Concat(bishopMoves)
+            .Concat(rookMoves)
+            .Concat(queenMoves);
     }
 
     internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
@@ -240,18 +245,26 @@ public struct ChessBoard
         return moves;
     }
 
-    internal readonly List<BinaryMove> GetBishopMoves(PieceColor color)
+    internal readonly List<BinaryMove> GetSlidingMoves(
+        Func<SquareIndex, ulong, BitBoard> getSliderAttackFunc,
+        PieceType pieceType, 
+        PieceColor color)
     {
+        if (!ValidateSlidingPiece(pieceType))
+        {
+            throw new ArgumentException("Invalid sliding piece type.", nameof(pieceType));
+        }
+
         var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
         
-        BitBoard bishops = _pieces[color.ToIndex(), PieceType.Bishop.ToIndex()];
+        BitBoard pieces = _pieces[color.ToIndex(), pieceType.ToIndex()];
         BitBoard oppositeOccupancies = _occupancies[color.Opposite().ToIndex()];
 
-        while (bishops.TryPopFirstSquare(out SquareIndex sourceSquare))
+        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare))
         {
             BitBoard attack = ClearMaskFromOccupancies(
-                BishopAttacks.GetSliderAttack(sourceSquare, _allOccupancies),
+                getSliderAttackFunc.Invoke(sourceSquare, _allOccupancies),
                 occupanciesColor: color);
 
             while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
@@ -265,7 +278,7 @@ public struct ChessBoard
 
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
-                    .WithSourcePiece(PieceType.Bishop, color)
+                    .WithSourcePiece(pieceType, color)
                     .WithTargetSquare(targetSquare);
 
                 moves.Add(moveBuilder.Build());
@@ -279,5 +292,10 @@ public struct ChessBoard
     private readonly BitBoard ClearMaskFromOccupancies(BitBoard mask, PieceColor occupanciesColor)
     {
         return mask ^ (0UL ^ (mask & _occupancies[occupanciesColor.ToIndex()]));
+    }
+
+    private static bool ValidateSlidingPiece(PieceType pieceType)
+    {
+        return pieceType == PieceType.Bishop || pieceType == PieceType.Rook || pieceType == PieceType.Queen;
     }
 }
