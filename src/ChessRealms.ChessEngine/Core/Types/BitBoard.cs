@@ -21,6 +21,19 @@ public struct BitBoard(ulong value)
         }
     }
 
+    public bool TryPopFirstSquare(out SquareIndex squareIndex)
+    {
+        if (Value != 0)
+        {
+            squareIndex = TrailingZeroCount();
+            PopBitAt(squareIndex);
+            return true;
+        }
+
+        squareIndex = SquareIndex.None;
+        return false;
+    }
+
     public void SetBitAt(SquareIndex index)
     {
         Value |= index.Board;

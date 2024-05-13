@@ -33,7 +33,7 @@ public struct ChessBoard
         Castling = 0;
     }
 
-    public void SetPieceAt(SquareIndex square, Piece piece)
+    public void SetPieceAt(SquareIndex square, in Piece piece)
     {
         SetPieceAt(square, piece.Color, piece.Type);
     }
@@ -118,7 +118,9 @@ public struct ChessBoard
     internal readonly List<BinaryMove> GetMoves(PieceColor side)
     {
         List<BinaryMove> pawnMoves = GetPawnMoves(side);
-        return pawnMoves;
+        List<BinaryMove> knightMoves = GetKnightMoves(side);
+        
+        return Enumerable.Concat(pawnMoves, knightMoves).ToList();
     }
 
     internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
@@ -145,9 +147,8 @@ public struct ChessBoard
             doublePush = (pawns >> 16) & empty & LerfConstants.RANK_5;
         }
 
-        while (singlePush != 0)
+        while (singlePush.TryPopFirstSquare(out SquareIndex targetSquare))
         {
-            SquareIndex targetSquare = singlePush.TrailingZeroCount();
             SquareIndex sourceSquare = SquareIndex.FromFileRank(
                 targetSquare.File,
                 targetSquare.Rank + (1 * rankOffset));
@@ -159,14 +160,11 @@ public struct ChessBoard
                 .Build();
 
             moves.Add(move);
-
             moveBuilder.Reset();
-            singlePush.PopBitAt(targetSquare);
         }
 
-        while (doublePush != 0)
+        while (doublePush.TryPopFirstSquare(out SquareIndex targetSquare))
         {
-            SquareIndex targetSquare = doublePush.TrailingZeroCount();
             SquareIndex sourceSquare = SquareIndex.FromFileRank(
                 targetSquare.File,
                 targetSquare.Rank + (2 * rankOffset));
@@ -179,22 +177,18 @@ public struct ChessBoard
                 .Build();
 
             moves.Add(move);
-
             moveBuilder.Reset();
-            doublePush.PopBitAt(targetSquare);
         }
 
-        while (pawns != 0)
+        BitBoard oppositeOccupancy = _occupancies[color.Opposite().ToIndex()];
+
+        while (pawns.TryPopFirstSquare(out SquareIndex sourceSquare))
         {
-            SquareIndex sourceSquare = pawns.TrailingZeroCount();
-
             BitBoard mask = PawnAttacks.AttackMasks[color][sourceSquare];
-            BitBoard captures = mask & _occupancies[color.Opposite().ToIndex()];
+            BitBoard captures = mask & oppositeOccupancy;
 
-            while (captures != 0)
+            while (captures.TryPopFirstSquare(out SquareIndex targetSquare))
             {
-                SquareIndex targetSquare = captures.TrailingZeroCount();
-
                 if (TryGetPieceAt(targetSquare, out Piece piece))
                 {
                     BinaryMove move = moveBuilder
@@ -208,11 +202,38 @@ public struct ChessBoard
                     moves.Add(move);
                     moveBuilder.Reset();
                 }
-
-                captures.PopBitAt(targetSquare);
             }
+        }
 
-            pawns.PopBitAt(sourceSquare);
+        return moves;
+    }
+
+    internal readonly List<BinaryMove> GetKnightMoves(PieceColor color)
+    {
+        var moves = new List<BinaryMove>();
+        var moveBuilder = new BinaryMoveBuilder();
+
+        BitBoard knights = _pieces[color.ToIndex(), PieceType.Knight.ToIndex()];
+        
+        while (knights.TryPopFirstSquare(out SquareIndex sourceSquare))
+        {
+            BitBoard attackMask = ClearMaskFromOccupancies(KnightAttacks.AttackMasks[sourceSquare], color);
+            
+            while (attackMask.TryPopFirstSquare(out SquareIndex targetSquare))
+            {
+                moveBuilder
+                    .WithSourceSquare(sourceSquare)
+                    .WithSourcePiece(PieceType.Knight, color)
+                    .WithTargetSquare(targetSquare);
+
+                if (TryGetPieceAt(targetSquare, out Piece piece))
+                {
+                    moveBuilder.WithCapture().WithTargetPiece(in piece);
+                }
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
+            }
         }
 
         return moves;
@@ -226,22 +247,21 @@ public struct ChessBoard
     /// <returns> Array with moves. </returns>
     internal readonly BinaryMove[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
     {
-        BitBoard attack = BishopAttacks.GetSliderAttack(square, _allOccupancies);
+        BitBoard attack = ClearMaskFromOccupancies(
+            BishopAttacks.GetSliderAttack(square, _allOccupancies),
+            occupanciesColor: pieceColor);
 
-        // Remove our pieces from attacks.
-        attack ^= 0UL ^ (attack & _occupancies[pieceColor.ToIndex()]);
         var moves = new BinaryMove[BitOperations.PopCount(attack)];
         var moveBuilder = new BinaryMoveBuilder();
 
         int opposite = pieceColor.Opposite().ToIndex();
         int moveIndex = 0;
 
-        while (attack != 0)
+        while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
         {
-            SquareIndex target = attack.TrailingZeroCount();
-            BitBoard toBitboard = target.Board;
+            BitBoard toBitboard = targetSquare.Board;
             
-            if ((toBitboard & _occupancies[opposite]) != 0 && TryGetPieceAt(target, out Piece targetPiece))
+            if ((toBitboard & _occupancies[opposite]) != 0 && TryGetPieceAt(targetSquare, out Piece targetPiece))
             {
                 moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
             }
@@ -249,15 +269,19 @@ public struct ChessBoard
             moveBuilder
                 .WithSourceSquare(square)
                 .WithSourcePiece(PieceType.Bishop, pieceColor)
-                .WithTargetSquare(target);
+                .WithTargetSquare(targetSquare);
 
             moves[moveIndex] = moveBuilder.Build();
 
             moveBuilder.Reset();
-            attack.PopBitAt(target);
             ++moveIndex;
         }
 
         return moves;
+    }
+
+    private readonly BitBoard ClearMaskFromOccupancies(BitBoard mask, PieceColor occupanciesColor)
+    {
+        return mask ^ (0UL ^ (mask & _occupancies[occupanciesColor.ToIndex()]));
     }
 }
