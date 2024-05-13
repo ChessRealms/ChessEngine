@@ -24,7 +24,7 @@ if (!FenStrings.TryParse(FenStrings.TrickyPosition, out ChessBoard chessBoard))
 
 Print.Board(chessBoard);
 
-IEnumerable<BinaryMove> moves = chessBoard.GetMoves(PieceColor.White);
+IEnumerable<BinaryMove> moves = chessBoard.GetMoves(PieceColor.Black);
 string JSON = JsonSerializer.Serialize(
     moves,
     options: jsonOptions);

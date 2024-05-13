@@ -2,6 +2,7 @@
 using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
+using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine;
 
@@ -117,16 +118,20 @@ public struct ChessBoard
     public readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
     {
         List<BinaryMove> pawnMoves = GetPawnMoves(side);
-        List<BinaryMove> knightMoves = GetKnightMoves(side);
+        List<BinaryMove> knightMoves = GetLeapingMoves(KnightAttacks.AttackMasks, new Piece(PieceType.Knight, side));
         List<BinaryMove> bishopMoves = GetSlidingMoves(BishopAttacks.GetSliderAttack, new Piece(PieceType.Bishop, side));
         List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, new Piece(PieceType.Rook, side));
         List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, new Piece(PieceType.Queen, side));
+        List<BinaryMove> kingMoves = GetLeapingMoves(KingAttacks.AttackMasks, new Piece(PieceType.King, side));
         
+        // TODO: Get castling moves.
+
         return pawnMoves
             .Concat(knightMoves)
             .Concat(bishopMoves)
             .Concat(rookMoves)
-            .Concat(queenMoves);
+            .Concat(queenMoves)
+            .Concat(kingMoves);
     }
 
     internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
@@ -211,30 +216,45 @@ public struct ChessBoard
             }
         }
 
+        // TODO: Check and add enpassant move.
+
         return moves;
     }
 
-    internal readonly List<BinaryMove> GetKnightMoves(PieceColor color)
+    /// <summary>
+    /// Get leaping moves by specified piece and attack masks.
+    /// Allowed piece types are <see cref="PieceType.Knight"/> and <see cref="PieceType.King"/>.
+    /// </summary>
+    /// <param name="attackMasks"> Immutable array with pre-allocated leaping attack masks. </param>
+    /// <param name="piece"> Piece to generate moves. </param>
+    /// <returns> Generated moves. </returns>
+    /// <exception cref="ArgumentException"></exception>
+    internal readonly List<BinaryMove> GetLeapingMoves(ImmutableArray<ulong> attackMasks, in Piece piece)
     {
+        if (!ValidateLeapingPiece(piece.Type))
+        {
+            throw new ArgumentException("Invalid leaping piece type.", nameof(piece));
+        }
+
         var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
 
-        BitBoard knights = _pieces[color.ToIndex(), PieceType.Knight.ToIndex()];
+        BitBoard pieces = _pieces[piece.Color.ToIndex(), piece.Type.ToIndex()];
         
-        while (knights.TryPopFirstSquare(out SquareIndex sourceSquare))
+        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare))
         {
-            BitBoard attackMask = ClearMaskFromOccupancies(KnightAttacks.AttackMasks[sourceSquare], color);
+            BitBoard attackMask = ClearMaskFromOccupancies(attackMasks[sourceSquare], piece.Color);
             
             while (attackMask.TryPopFirstSquare(out SquareIndex targetSquare))
             {
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
-                    .WithSourcePiece(PieceType.Knight, color)
+                    .WithSourcePiece(in piece)
                     .WithTargetSquare(targetSquare);
 
-                if (TryGetPieceAt(targetSquare, out Piece piece))
+                if (TryGetPieceAt(targetSquare, out Piece targetPiece))
                 {
-                    moveBuilder.WithCapture().WithTargetPiece(in piece);
+                    moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
                 }
 
                 moves.Add(moveBuilder.Build());
@@ -245,6 +265,14 @@ public struct ChessBoard
         return moves;
     }
 
+    /// <summary>
+    /// Get sliding moves by specified piece and related sliderAttackFunc.
+    /// Allowed piece types are <see cref="PieceType.Bishop"/>, <see cref="PieceType.Rook"/> and <see cref="PieceType.Queen"/>.
+    /// </summary>
+    /// <param name="getSliderAttackFunc"> Slider attack method that will be used to get attack/move masks. </param>
+    /// <param name="piece"> Piece to generate movess. </param>
+    /// <returns> Generated moves. </returns>
+    /// <exception cref="ArgumentException"></exception>
     internal readonly List<BinaryMove> GetSlidingMoves(
         Func<SquareIndex, ulong, BitBoard> getSliderAttackFunc,
         in Piece piece)
@@ -296,5 +324,10 @@ public struct ChessBoard
     private static bool ValidateSlidingPiece(PieceType pieceType)
     {
         return pieceType == PieceType.Bishop || pieceType == PieceType.Rook || pieceType == PieceType.Queen;
+    }
+
+    private static bool ValidateLeapingPiece(PieceType pieceType)
+    {
+        return pieceType == PieceType.Knight || pieceType == PieceType.King;
     }
 }
