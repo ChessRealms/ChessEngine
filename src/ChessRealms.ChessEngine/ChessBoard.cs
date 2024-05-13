@@ -115,12 +115,13 @@ public struct ChessBoard
             || (KingAttacks.AttackMasks[square] & _pieces[attacker, PieceType.King.ToIndex()]) != 0;
     }
 
-    internal readonly List<BinaryMove> GetMoves(PieceColor side)
+    internal readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
     {
         List<BinaryMove> pawnMoves = GetPawnMoves(side);
         List<BinaryMove> knightMoves = GetKnightMoves(side);
+        List<BinaryMove> bishopMoves = GetBishopMoves(side);
         
-        return Enumerable.Concat(pawnMoves, knightMoves).ToList();
+        return pawnMoves.Concat(knightMoves).Concat(bishopMoves);
     }
 
     internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
@@ -239,42 +240,37 @@ public struct ChessBoard
         return moves;
     }
 
-    /// <summary>
-    /// Get potential bishop moves.
-    /// </summary>
-    /// <param name="square"> Square from where bishop going move. </param>
-    /// <param name="pieceColor"> Color of piece to move. </param>
-    /// <returns> Array with moves. </returns>
-    internal readonly BinaryMove[] GetBishopMoves(SquareIndex square, PieceColor pieceColor)
+    internal readonly List<BinaryMove> GetBishopMoves(PieceColor color)
     {
-        BitBoard attack = ClearMaskFromOccupancies(
-            BishopAttacks.GetSliderAttack(square, _allOccupancies),
-            occupanciesColor: pieceColor);
-
-        var moves = new BinaryMove[BitOperations.PopCount(attack)];
+        var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
+        
+        BitBoard bishops = _pieces[color.ToIndex(), PieceType.Bishop.ToIndex()];
+        BitBoard oppositeOccupancies = _occupancies[color.Opposite().ToIndex()];
 
-        int opposite = pieceColor.Opposite().ToIndex();
-        int moveIndex = 0;
-
-        while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
+        while (bishops.TryPopFirstSquare(out SquareIndex sourceSquare))
         {
-            BitBoard toBitboard = targetSquare.Board;
-            
-            if ((toBitboard & _occupancies[opposite]) != 0 && TryGetPieceAt(targetSquare, out Piece targetPiece))
+            BitBoard attack = ClearMaskFromOccupancies(
+                BishopAttacks.GetSliderAttack(sourceSquare, _allOccupancies),
+                occupanciesColor: color);
+
+            while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
             {
-                moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
+                BitBoard toBitboard = targetSquare.Board;
+            
+                if ((toBitboard & oppositeOccupancies) != 0 && TryGetPieceAt(targetSquare, out Piece targetPiece))
+                {
+                    moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
+                }
+
+                moveBuilder
+                    .WithSourceSquare(sourceSquare)
+                    .WithSourcePiece(PieceType.Bishop, color)
+                    .WithTargetSquare(targetSquare);
+
+                moves.Add(moveBuilder.Build());
+                moveBuilder.Reset();
             }
-
-            moveBuilder
-                .WithSourceSquare(square)
-                .WithSourcePiece(PieceType.Bishop, pieceColor)
-                .WithTargetSquare(targetSquare);
-
-            moves[moveIndex] = moveBuilder.Build();
-
-            moveBuilder.Reset();
-            ++moveIndex;
         }
 
         return moves;
