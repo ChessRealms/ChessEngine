@@ -47,6 +47,11 @@ public readonly struct SquareIndex(int square)
     {
     }
 
+    public readonly bool IsValid()
+    {
+        return Square >= 0 && Square <= 63;
+    }
+
     public override string ToString()
     {
         return string.Format("{0}{1}", (char)('a' + File), (char)('1' + Rank));

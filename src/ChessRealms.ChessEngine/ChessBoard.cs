@@ -216,7 +216,47 @@ public struct ChessBoard
             }
         }
 
-        // TODO: Check and add enpassant move.
+        if (Enpassant != SquareIndex.None)
+        {
+            SquareIndex left = Enpassant - 1;
+            SquareIndex right = Enpassant + 1;
+            
+            if (TryGetPieceAt(left, out Piece leftPiece) && left.Rank == Enpassant.Rank)
+            {
+                if (leftPiece.Type == PieceType.Pawn && leftPiece.Color == color)
+                {
+                    BinaryMove enpassant = moveBuilder
+                        .WithSourceSquare(left)
+                        .WithSourcePiece(in leftPiece)
+                        .WithTargetSquare(Enpassant)
+                        .WithTargetPiece(PieceType.Pawn, color.Opposite())
+                        .WithCapture()
+                        .WithEnpassant()
+                        .Build();
+                        
+                    moves.Add(enpassant);
+                    moveBuilder.Reset();
+                }
+            }
+            
+            if (TryGetPieceAt(right, out Piece rightPiece) && right.Rank == Enpassant.Rank)
+            {
+                if (rightPiece.Type == PieceType.Pawn && rightPiece.Color == color)
+                {
+                    BinaryMove enpassant = moveBuilder
+                        .WithSourceSquare(right)
+                        .WithSourcePiece(in rightPiece)
+                        .WithTargetSquare(Enpassant)
+                        .WithTargetPiece(PieceType.Pawn, color.Opposite())
+                        .WithCapture()
+                        .WithEnpassant()
+                        .Build();
+                        
+                    moves.Add(enpassant);
+                    moveBuilder.Reset();
+                }
+            }
+        }
 
         return moves;
     }
