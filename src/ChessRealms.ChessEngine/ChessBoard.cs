@@ -3,6 +3,7 @@ using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine;
 
@@ -172,28 +173,34 @@ public struct ChessBoard
                 .WithSourcePiece(PieceType.Pawn, color)
                 .WithTargetSquare(targetSquare);
 
+            #region Pawn Promote Moves
             if ((targetSquare.Board & pawnPromotionRank) != 0)
             {
-                moveBuilder.WithPromote(PromotePiece.Knight)
-                    .Build(out BinaryMove promotion)
-                    .ResetPromote();
-                moves.Add(promotion);
+                int oldCount = moves.Count;
+                CollectionsMarshal.SetCount(moves, oldCount + 4);
+                Span<BinaryMove> movesSpan = CollectionsMarshal.AsSpan(moves);
 
-                moveBuilder.WithPromote(PromotePiece.Bishop)
-                    .Build(out promotion)
+                moveBuilder
+                    .WithPromote(PromotePiece.Knight)
+                    .Build(out movesSpan[oldCount])
                     .ResetPromote();
-                moves.Add(promotion);
 
-                moveBuilder.WithPromote(PromotePiece.Rook)
-                    .Build(out promotion)
+                moveBuilder
+                    .WithPromote(PromotePiece.Bishop)
+                    .Build(out movesSpan[oldCount + 1])
                     .ResetPromote();
-                moves.Add(promotion);
 
-                moveBuilder.WithPromote(PromotePiece.Queen)
-                    .Build(out promotion)
+                moveBuilder
+                    .WithPromote(PromotePiece.Rook)
+                    .Build(out movesSpan[oldCount + 2])
                     .ResetPromote();
-                moves.Add(promotion);
+
+                moveBuilder
+                    .WithPromote(PromotePiece.Queen)
+                    .Build(out movesSpan[oldCount + 3])
+                    .ResetPromote();
             }
+            #endregion
             else
             {
                 moves.Add(moveBuilder.Build());
@@ -230,16 +237,46 @@ public struct ChessBoard
             {
                 if (TryGetPieceAt(targetSquare, out Piece piece))
                 {
-                    BinaryMove move = moveBuilder
+                    moveBuilder
                         .WithSourceSquare(sourceSquare)
                         .WithSourcePiece(PieceType.Pawn, color)
                         .WithTargetSquare(targetSquare)
                         .WithTargetPiece(in piece)
-                        .WithCapture()
-                        .Build();
+                        .WithCapture();
 
-                    moves.Add(move);
-                    moveBuilder.Reset();
+                    #region Pawn Promote Moves
+                    if ((targetSquare.Board & pawnPromotionRank) != 0)
+                    {
+                        int oldCount = moves.Count;
+                        CollectionsMarshal.SetCount(moves, oldCount + 4);
+                        Span<BinaryMove> movesSpan = CollectionsMarshal.AsSpan(moves);
+
+                        moveBuilder
+                            .WithPromote(PromotePiece.Knight)
+                            .Build(out movesSpan[oldCount])
+                            .ResetPromote();
+
+                        moveBuilder
+                            .WithPromote(PromotePiece.Bishop)
+                            .Build(out movesSpan[oldCount + 1])
+                            .ResetPromote();
+
+                        moveBuilder
+                            .WithPromote(PromotePiece.Rook)
+                            .Build(out movesSpan[oldCount + 2])
+                            .ResetPromote();
+
+                        moveBuilder
+                            .WithPromote(PromotePiece.Queen)
+                            .Build(out movesSpan[oldCount + 3])
+                            .ResetPromote();
+                    }
+                    #endregion
+                    else
+                    {
+                        moves.Add(moveBuilder.Build());
+                        moveBuilder.Reset();
+                    }                    
                 }
             }
         }

@@ -31,10 +31,11 @@ string JSON = JsonSerializer.Serialize(
 
 var promoteMoves = moves
     .Where(x => x.Promote != PromotePiece.None)
-    .Select(x => string.Format("{0}{1}->{2}", 
-        x.SourceSquare, 
+    .Select(x => string.Format("{0}{1}{2}->{3}", 
+        x.SourceSquare,
+        x.IsCapture ? 'x' : '-',
         x.TargetSquare,
-        x.Promote.ToString()));
+        x.Promote));
 
 Console.WriteLine(JSON);
 Console.WriteLine();
