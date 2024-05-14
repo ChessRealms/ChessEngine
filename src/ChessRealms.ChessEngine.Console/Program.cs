@@ -17,7 +17,7 @@ JsonSerializerOptions jsonOptions = new(JsonSerializerDefaults.Web)
     },
 };
 
-if (!FenStrings.TryParse(FenStrings.TrickyPosition, out ChessBoard chessBoard))
+if (!FenStrings.TryParse("r3k2r/p1ppqpb1/bn2pn2/3PN3/Pp2P3/2N2Q1p/1PPBBPpP/R3K2R b KQkq a4 0 1", out ChessBoard chessBoard))
 {
     return;
 }
@@ -29,7 +29,16 @@ string JSON = JsonSerializer.Serialize(
     moves,
     options: jsonOptions);
 
+var promoteMoves = moves
+    .Where(x => x.Promote != PromotePiece.None)
+    .Select(x => string.Format("{0}{1}->{2}", 
+        x.SourceSquare, 
+        x.TargetSquare,
+        x.Promote.ToString()));
+
 Console.WriteLine(JSON);
+Console.WriteLine();
+Console.WriteLine(string.Join(' ', promoteMoves));
 Console.WriteLine();
 Console.WriteLine("Total moves: {0}", moves.Count());
 

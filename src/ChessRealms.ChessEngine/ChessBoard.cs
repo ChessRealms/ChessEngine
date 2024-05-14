@@ -143,6 +143,7 @@ public struct ChessBoard
         BitBoard empty = _allOccupancies ^ LerfConstants.ALL_SQUARES;
         BitBoard singlePush;
         BitBoard doublePush;
+        ulong pawnPromotionRank;
         int rankOffset;
 
         if (color == PieceColor.White)
@@ -150,12 +151,14 @@ public struct ChessBoard
             rankOffset = -1;
             singlePush = (pawns << 8) & empty;
             doublePush = (singlePush << 8) & empty & LerfConstants.RANK_4;
+            pawnPromotionRank = LerfConstants.RANK_8;
         }
         else
         {
             rankOffset = 1;
             singlePush = (pawns >> 8) & empty;
             doublePush = (singlePush >> 8) & empty & LerfConstants.RANK_5;
+            pawnPromotionRank = LerfConstants.RANK_1;
         }
 
         while (singlePush.TryPopFirstSquare(out SquareIndex targetSquare))
@@ -164,13 +167,38 @@ public struct ChessBoard
                 targetSquare.File,
                 targetSquare.Rank + (1 * rankOffset));
 
-            BinaryMove move = moveBuilder
+            moveBuilder
                 .WithSourceSquare(sourceSquare)
                 .WithSourcePiece(PieceType.Pawn, color)
-                .WithTargetSquare(targetSquare)
-                .Build();
+                .WithTargetSquare(targetSquare);
 
-            moves.Add(move);
+            if ((targetSquare.Board & pawnPromotionRank) != 0)
+            {
+                moveBuilder.WithPromote(PromotePiece.Knight)
+                    .Build(out BinaryMove promotion)
+                    .ResetPromote();
+                moves.Add(promotion);
+
+                moveBuilder.WithPromote(PromotePiece.Bishop)
+                    .Build(out promotion)
+                    .ResetPromote();
+                moves.Add(promotion);
+
+                moveBuilder.WithPromote(PromotePiece.Rook)
+                    .Build(out promotion)
+                    .ResetPromote();
+                moves.Add(promotion);
+
+                moveBuilder.WithPromote(PromotePiece.Queen)
+                    .Build(out promotion)
+                    .ResetPromote();
+                moves.Add(promotion);
+            }
+            else
+            {
+                moves.Add(moveBuilder.Build());
+            }
+
             moveBuilder.Reset();
         }
 

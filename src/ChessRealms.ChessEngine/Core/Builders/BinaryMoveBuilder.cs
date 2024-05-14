@@ -68,6 +68,12 @@ public class BinaryMoveBuilder()
         return this;
     }
 
+    public BinaryMoveBuilder ResetPromote()
+    {
+        _encodedMove ^= _encodedMove & PROMOTE_TO;
+        return this;
+    }
+
     public BinaryMoveBuilder WithCapture()
     {
         _encodedMove |= 1u << 25;
@@ -100,5 +106,11 @@ public class BinaryMoveBuilder()
     public BinaryMove Build()
     {
         return new BinaryMove(_encodedMove);
+    }
+
+    public BinaryMoveBuilder Build(out BinaryMove move)
+    {
+        move = new BinaryMove(_encodedMove);
+        return this;
     }
 }
