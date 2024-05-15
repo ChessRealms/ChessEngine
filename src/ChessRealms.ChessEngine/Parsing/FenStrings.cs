@@ -79,22 +79,22 @@ public static partial class FenStrings
         #region Castling
         if (castlingSpan.Contains("K", StringComparison.Ordinal))
         {
-            chessBoard.Castling |= Castling.WK;
+            chessBoard.CastlingState |= Castling.WK;
         }
 
         if (castlingSpan.Contains("Q", StringComparison.Ordinal))
         {
-            chessBoard.Castling |= Castling.WQ;
+            chessBoard.CastlingState |= Castling.WQ;
         }
 
         if (castlingSpan.Contains("k", StringComparison.Ordinal))
         {
-            chessBoard.Castling |= Castling.BK;
+            chessBoard.CastlingState |= Castling.BK;
         }
 
         if (castlingSpan.Contains("q", StringComparison.Ordinal))
         {
-            chessBoard.Castling |= Castling.BQ;
+            chessBoard.CastlingState |= Castling.BQ;
         }
         #endregion
 

@@ -26,6 +26,8 @@ public readonly struct BinaryMove(uint encodedValue)
         get => (PieceColor)((EncodedValue & SRC_PIECE_COLOR) >> 15);
     }
 
+    public Piece SourcePiece => new(SourcePieceType, SourcePieceColor);
+
     public PieceType TargetPieceType
     {
         get => (PieceType)((EncodedValue & TRG_PIECE_TYPE) >> 17);
@@ -35,6 +37,8 @@ public readonly struct BinaryMove(uint encodedValue)
     {
         get => (PieceColor)((EncodedValue & TRG_PIECE_COLOR) >> 20);
     }
+
+    public Piece TargetPiece => new(TargetPieceType, TargetPieceColor);
 
     public PromotePiece Promote
     {

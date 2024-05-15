@@ -8,4 +8,9 @@ public static class TypesExtensions
     {
         return color == PieceColor.White ? PieceColor.Black : PieceColor.White;
     }
+
+    public static PieceType ToPieceType(this PromotePiece promote)
+    {
+        return (PieceType)(promote + 1);
+    }
 }
