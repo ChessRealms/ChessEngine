@@ -562,6 +562,20 @@ public struct ChessBoard
     private const EnumSquare BK_ROOK = EnumSquare.h8;
     private const EnumSquare BQ_ROOK = EnumSquare.a8;
 
+    public bool TryMakeLegalMove(BinaryMove move)
+    {
+        IEnumerable<BinaryMove> moves = GetMoves(CurrentColor);
+        
+        if (moves.Any(x => x.EncodedValue == move.EncodedValue))
+        {
+            MakeMove(move);
+            CurrentColor = CurrentColor.Opposite();
+            return true;
+        }
+
+        return false;
+    }
+
     public void MakeMove(BinaryMove move)
     {
         if (move.Castling != Castling.None)

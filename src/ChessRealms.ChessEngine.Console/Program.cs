@@ -3,7 +3,6 @@ using ChessRealms.ChessEngine.Console;
 using ChessRealms.ChessEngine.Core.Builders;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Parsing;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -27,14 +26,25 @@ if (!FenStrings.TryParse("r3k2r/p1ppq1b1/bn2pn2/3PN3/Pp2P3/2N2Q1p/1PPBBPpP/R3K2R
 
 var moveBuilder = new BinaryMoveBuilder();
 var castlingMove = moveBuilder
+    .WithSourceSquare(EnumSquare.e8)
+    .WithSourcePiece(PieceType.King, PieceColor.Black)
+    .WithTargetSquare(EnumSquare.g8)
     .WithCastling(Castling.BK)
     .Build();
 
-chessBoard.MakeMove(castlingMove);
+if (chessBoard.TryMakeLegalMove(castlingMove))
+{
+    Console.WriteLine("BK castling was applied");
+}
+else
+{
+    Console.WriteLine("Cant apply move");
+}
 
+Console.WriteLine();
 Print.Board(chessBoard);
 
-IEnumerable<BinaryMove> moves = chessBoard.GetMoves(PieceColor.Black);
+IEnumerable<BinaryMove> moves = chessBoard.GetMoves(chessBoard.CurrentColor);
 
 string JSON = JsonSerializer.Serialize(
     moves,
