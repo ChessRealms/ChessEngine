@@ -474,13 +474,7 @@ public struct ChessBoard
 
             if (BK_CastlingAvailable)
             {
-                moveBuilder
-                    .WithSourceSquare(EnumSquare.e8)
-                    .WithSourcePiece(PieceType.King, PieceColor.Black)
-                    .WithTargetSquare(EnumSquare.g8)
-                    .WithCastling(Castling.BK);
-
-                moves.Add(moveBuilder.Build());
+                moves.Add(moveBuilder.WithCastling(Castling.BK).Build());
                 moveBuilder.Reset();
             }
 
@@ -493,13 +487,7 @@ public struct ChessBoard
 
             if (BQ_CastlingAvailable)
             {
-                moveBuilder
-                    .WithSourceSquare(EnumSquare.e8)
-                    .WithSourcePiece(PieceType.King, PieceColor.Black)
-                    .WithTargetSquare(EnumSquare.c8)
-                    .WithCastling(Castling.BQ);
-
-                moves.Add(moveBuilder.Build());
+                moves.Add(moveBuilder.WithCastling(Castling.BQ).Build());
                 moveBuilder.Reset();
             }
         }
@@ -514,13 +502,7 @@ public struct ChessBoard
 
             if (WK_CastlingAvailable)
             {
-                moveBuilder
-                    .WithSourceSquare(EnumSquare.e1)
-                    .WithSourcePiece(PieceType.King, PieceColor.White)
-                    .WithTargetSquare(EnumSquare.g1)
-                    .WithCastling(Castling.WK);
-
-                moves.Add(moveBuilder.Build());
+                moves.Add(moveBuilder.WithCastling(Castling.WK).Build());
                 moveBuilder.Reset();
             }
 
@@ -533,13 +515,7 @@ public struct ChessBoard
 
             if (WQ_CastlingAvailable)
             {
-                moveBuilder
-                    .WithSourceSquare(EnumSquare.e1)
-                    .WithSourcePiece(PieceType.King, PieceColor.White)
-                    .WithTargetSquare(EnumSquare.c1)
-                    .WithCastling(Castling.WQ);
-
-                moves.Add(moveBuilder.Build());
+                moves.Add(moveBuilder.WithCastling(Castling.WQ).Build());
                 moveBuilder.Reset();
             }
         }
