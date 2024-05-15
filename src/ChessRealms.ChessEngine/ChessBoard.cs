@@ -137,7 +137,13 @@ public struct ChessBoard
 
         // 'castlingMoves' already look for 'is king checked' so don't include this.
         List<BinaryMove>[] moveBatches = [pawnMoves, knightMoves, bishopMoves, rookMoves, queenMoves, kingMoves];
+        
         ChessBoard tempBoard = new();
+
+        PieceColor oppositeColor = side.Opposite();
+        
+        int sideIndex = side.ToIndex();
+        int kingBoardIndex = PieceType.King.ToIndex();
 
         foreach (var batch in moveBatches)
         {
@@ -145,10 +151,10 @@ public struct ChessBoard
             {
                 CopyTo(ref tempBoard);
                 tempBoard.MakeMove(batch[i]);
-                BitBoard king = tempBoard._pieces[side.ToIndex(), PieceType.King.ToIndex()];
+                BitBoard king = tempBoard._pieces[sideIndex, kingBoardIndex];
             
                 if (king.TryPopFirstSquare(out SquareIndex kingSquare) && 
-                    tempBoard.IsSquareAttacked(kingSquare, side.Opposite()))
+                    tempBoard.IsSquareAttacked(kingSquare, oppositeColor))
                 {
                     batch.RemoveAt(i);
                 }
