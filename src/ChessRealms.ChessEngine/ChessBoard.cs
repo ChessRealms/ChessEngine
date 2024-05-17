@@ -5,35 +5,28 @@ using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Core.Types.Enums;
 using System.Collections.Immutable;
-using System.Runtime.InteropServices;
 
 using static ChessRealms.ChessEngine.Core.Constants.ChessConstants;
 
 namespace ChessRealms.ChessEngine;
 
-public ref struct ChessBoard
+public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
 {
-    private readonly BitBoard[,] _pieces;    
-    private readonly BitBoard[] _occupancies;
+    private readonly Span<BitBoard> _pieces = pieces;
+    private readonly Span<BitBoard> _occupancies = occupancies;
 
-    public SquareIndex Enpassant { get; set; }
+    public SquareIndex Enpassant { get; set; } = SquareIndex.None;
 
-    public PieceColor CurrentColor { get; set; }
+    public PieceColor CurrentColor { get; set; } = PieceColor.White;
 
-    public Castling CastlingState { get; set; }
+    public Castling CastlingState { get; set; } = 0;
 
     public int HalfMoveClock { get; set; }
 
     public int FullMoveNumber { get; set; }
 
-    public ChessBoard()
+    public ChessBoard() : this([], [])
     {
-        _pieces = new BitBoard[2, 6];
-        _occupancies = new BitBoard[3];
-        
-        Enpassant = SquareIndex.None;
-        CurrentColor = PieceColor.White;
-        CastlingState = 0;
     }
 
     #region Piece Management
@@ -49,10 +42,14 @@ public ref struct ChessBoard
         int colorVal = _occupancies[COLOR_BLACK].GetBitAt(square) != 0 
             ? COLOR_BLACK 
             : COLOR_WHITE;
-        
+
+        int bitboard;
+
         for (int pieceVal = PIECE_PAWN; pieceVal < PIECE_NONE; ++pieceVal)
         {
-            if (_pieces[colorVal, pieceVal].GetBitAt(square) != 0)
+            bitboard = BitBoardIndex(colorVal, pieceVal);
+
+            if (_pieces[bitboard].GetBitAt(square) != 0)
             {
                 piece = new Piece(pieceVal, colorVal);
                 return true;
@@ -65,26 +62,20 @@ public ref struct ChessBoard
 
     public readonly void SetPieceAt(SquareIndex square, in Piece piece)
     {
-        _pieces[piece.Color, piece.Type] = _pieces[piece.Color, piece.Type].SetBitAt(square);
-        _occupancies[piece.Color] = _occupancies[piece.Color].SetBitAt(square);
-        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].SetBitAt(square);
-    }
+        int bitboard = BitBoardIndex(in piece);
 
-    public readonly void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
-    {
-        int colorIndex = (int)color;
-        int pieceIndex = (int)piece;
-        
-        _pieces[colorIndex, pieceIndex] = _pieces[colorIndex, pieceIndex].SetBitAt(square);
-        _occupancies[colorIndex] = _occupancies[colorIndex].SetBitAt(square);
-        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].SetBitAt(square);
+        _pieces[bitboard]           = _pieces[bitboard].SetBitAt(square);
+        _occupancies[piece.Color]   = _occupancies[piece.Color].SetBitAt(square);
+        _occupancies[COLOR_NONE]    = _occupancies[COLOR_NONE].SetBitAt(square);
     }
 
     public readonly void RemovePieceAt(SquareIndex square, in Piece piece)
     {
-        _pieces[piece.Color, piece.Type] = _pieces[piece.Color, piece.Type].PopBitAt(square);
-        _occupancies[piece.Color] = _occupancies[piece.Color].PopBitAt(square);
-        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].PopBitAt(square);
+        int bitboard = BitBoardIndex(in piece);
+
+        _pieces[bitboard]           = _pieces[bitboard].PopBitAt(square);
+        _occupancies[piece.Color]   = _occupancies[piece.Color].PopBitAt(square);
+        _occupancies[COLOR_NONE]    = _occupancies[COLOR_NONE].PopBitAt(square);
     }
 
     public readonly void MovePiece(SquareIndex source, SquareIndex target, in Piece piece)
@@ -100,74 +91,90 @@ public ref struct ChessBoard
     /// Determine if square is attacked by specified side.
     /// </summary>
     /// <param name="square"> Square to check. </param>
-    /// <param name="attacker"> Attacker color. </param>
+    /// <param name="attackerColor"> Attacker color. </param>
     /// <returns> <see langword="true"/> if attacked, otherwise <see langword="false"/>. </returns>
-    internal readonly bool IsSquareAttacked(SquareIndex square, int attacker)
+    internal readonly bool IsSquareAttacked(SquareIndex square, int attackerColor)
     {
-        return (PawnAttacks.AttackMasks[COLOR_NONE + ~attacker][square] & _pieces[attacker, PIECE_PAWN]) != 0
-            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, PIECE_KNIGHT]) != 0
-            || (BishopAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_BISHOP]) != 0
-            || (RookAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_ROOK]) != 0
-            || (QueenAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_QUEEN]) != 0
-            || (KingAttacks.AttackMasks[square] & _pieces[attacker, PIECE_KING]) != 0;
+        int colorCoef = attackerColor * 6;
+
+        return (PawnAttacks.AttackMasks[COLOR_NONE + ~attackerColor][square] & _pieces[colorCoef + PIECE_PAWN]) != 0
+            || (KnightAttacks.AttackMasks[square] & _pieces[colorCoef + PIECE_KNIGHT]) != 0
+            || (BishopAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[colorCoef + PIECE_BISHOP]) != 0
+            || (RookAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[colorCoef + PIECE_ROOK]) != 0
+            || (QueenAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[colorCoef + PIECE_QUEEN]) != 0
+            || (KingAttacks.AttackMasks[square] & _pieces[colorCoef + PIECE_KING]) != 0;
     }
 
-    public readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
+    public readonly int GetMoves(Span<BinaryMove> dest, PieceColor side)
     {
         int color = (int)side;
 
-        List<BinaryMove> moves = new(capacity: 218);
+        Span<BinaryMove> moves = stackalloc BinaryMove[218];
 
-        AddPawnMoves(moves, color);
+        int offset = 0;
         
-        AddLeapingMoves(moves,
+        offset += AddPawnMoves(moves, color, offset);
+        
+        offset += AddLeapingMoves(moves,
             KnightAttacks.AttackMasks, 
-            new Piece(PIECE_KNIGHT, color));
+            new Piece(PIECE_KNIGHT, color),
+            offset);
         
-        AddSlidingMoves(moves,
+        offset += AddSlidingMoves(moves,
             BishopAttacks.GetSliderAttack, 
-            new Piece(PIECE_BISHOP, color));
+            new Piece(PIECE_BISHOP, color),
+            offset);
         
-        AddSlidingMoves(moves,
+        offset += AddSlidingMoves(moves,
             RookAttacks.GetSliderAttack, 
-            new Piece(PIECE_ROOK, color));
+            new Piece(PIECE_ROOK, color),
+            offset);
         
-        AddSlidingMoves(moves,
+        offset += AddSlidingMoves(moves,
             QueenAttacks.GetSliderAttack, 
-            new Piece(PIECE_QUEEN, color));
+            new Piece(PIECE_QUEEN, color),
+            offset);
         
-        AddLeapingMoves(moves,
+        offset += AddLeapingMoves(moves,
             KingAttacks.AttackMasks, 
-            new Piece(PIECE_KING, color));
+            new Piece(PIECE_KING, color),
+            offset);
         
-        AddCastlingMoves(moves, color);
+        offset += AddCastlingMoves(moves, color, offset);
 
-        ChessBoard tempBoard = new();
+        Span<BitBoard> pieces = stackalloc BitBoard[12];
+        Span<BitBoard> occupancies = stackalloc BitBoard[3];
+        ChessBoard tempBoard = new(pieces, occupancies);
 
         int oppositeColor = COLOR_NONE + ~color;
-        
-        for (int i = moves.Count - 1; i >= 0; --i)
+        int written = 0;
+
+        for (int i = 0; i < offset; ++i)
         {
             CopyTo(ref tempBoard);
             tempBoard.MakeMove(moves[i]);
             
-            BitBoard king = tempBoard._pieces[color, PIECE_KING];
+            BitBoard king = tempBoard._pieces[BitBoardIndex(color, PIECE_KING)];
 
             if (king.TryPopFirstSquare(out SquareIndex kingSquare, out _) && tempBoard.IsSquareAttacked(kingSquare, oppositeColor))
             {
-                moves.RemoveAt(i);
+                continue;
             }
+
+            dest[written++] = moves[i];
         }
 
-        return moves;
+        return written;
     }
 
-    internal readonly void AddPawnMoves(List<BinaryMove> moves, int color)
+    internal readonly int AddPawnMoves(Span<BinaryMove> moves, int color, int offset)
     {
+        int index = offset;
         var moveBuilder = new BinaryMoveBuilder();
 
         #region Setup variables depends from color.
-        BitBoard pawns = _pieces[color, PIECE_PAWN];
+        int bitboard = BitBoardIndex(color, PIECE_PAWN);
+        BitBoard pawns = _pieces[bitboard];
         BitBoard empty = _occupancies[COLOR_NONE] ^ SquareMapping.ALL_SQUARES;
         BitBoard singlePush;
         BitBoard doublePush;
@@ -206,32 +213,28 @@ public ref struct ChessBoard
             {
                 moveBuilder
                     .WithPromote(PromotePiece.Knight)
-                    .Build(out BinaryMove promote)
+                    .Build(out moves[index++])
                     .ResetPromote();
-                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Bishop)
-                    .Build(out promote)
+                    .Build(out moves[index++])
                     .ResetPromote();
-                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Rook)
-                    .Build(out promote)
+                    .Build(out moves[index++])
                     .ResetPromote();
-                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Queen)
-                    .Build(out promote)
+                    .Build(out moves[index++])
                     .ResetPromote();
-                moves.Add(promote);
             }
             #endregion
             else
             {
-                moves.Add(moveBuilder.Build());
+                moves[index++] = moveBuilder.Build();
             }
 
             moveBuilder.Reset();
@@ -243,15 +246,14 @@ public ref struct ChessBoard
         {
             SquareIndex sourceSquare = targetSquare + (2 * rankOffset);
 
-            BinaryMove move = moveBuilder
+            moveBuilder
                 .WithSourceSquare(sourceSquare)
                 .WithSourcePiece(PIECE_PAWN, color)
                 .WithTargetSquare(targetSquare)
                 .WithTargetPiece(Piece.Empty)
                 .WithDoublePush()
-                .Build();
+                .Build(out moves[index++]);
 
-            moves.Add(move);
             moveBuilder.Reset();
         }
         #endregion
@@ -280,32 +282,28 @@ public ref struct ChessBoard
                     {
                         moveBuilder
                             .WithPromote(PromotePiece.Knight)
-                            .Build(out var promote)
+                            .Build(out moves[index++])
                             .ResetPromote();
-                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Bishop)
-                            .Build(out promote)
+                            .Build(out moves[index++])
                             .ResetPromote();
-                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Rook)
-                            .Build(out promote)
+                            .Build(out moves[index++])
                             .ResetPromote();
-                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Queen)
-                            .Build(out promote)
+                            .Build(out moves[index++])
                             .ResetPromote();
-                        moves.Add(promote);
                     }
                     #endregion
                     else
                     {
-                        moves.Add(moveBuilder.Build());
+                        moves[index++] = moveBuilder.Build();
                     }                    
 
                     moveBuilder.Reset();
@@ -318,11 +316,12 @@ public ref struct ChessBoard
         if (Enpassant != SquareIndex.None)
         {
             int oppositeColor = COLOR_NONE + ~color;
-            BitBoard sources = PawnAttacks.AttackMasks[oppositeColor][Enpassant] & _pieces[color, PIECE_PAWN];
+            
+            BitBoard sources = PawnAttacks.AttackMasks[oppositeColor][Enpassant] & _pieces[BitBoardIndex(color, PIECE_PAWN)];
 
             while (sources.TryPopFirstSquare(out SquareIndex enpassantSrc, out sources))
             {
-                BinaryMove ep = moveBuilder
+                BinaryMove enpassant = moveBuilder
                     .WithSourceSquare(enpassantSrc)
                     .WithSourcePiece(PIECE_PAWN, color)
                     .WithTargetSquare(Enpassant)
@@ -331,63 +330,76 @@ public ref struct ChessBoard
                     .WithCapture()
                     .Build();
 
-                moves.Add(ep);
+                moves[index++] = enpassant;
                 moveBuilder.Reset();
             }
         }
         #endregion
+
+        return index - offset;
     }
 
-    internal readonly void AddLeapingMoves(
-        List<BinaryMove> moves,
+    internal readonly int AddLeapingMoves(
+        Span<BinaryMove> moves,
         ImmutableArray<ulong> attackMasks,
-        in Piece piece)
+        in Piece piece,
+        int offset)
     {
+#if DEBUG
         if (!ValidateLeapingPiece(piece.Type))
         {
             throw new ArgumentException("Invalid leaping piece type.", nameof(piece));
         }
+#endif
 
+        int index = offset;
         var moveBuilder = new BinaryMoveBuilder();
-
-        BitBoard pieces = _pieces[piece.Color, piece.Type];
+        int bitboard = BitBoardIndex(in piece);
+        BitBoard pieces = _pieces[bitboard];
         
         while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare, out pieces))
         {
             BitBoard attackMask = ClearMaskFromOccupancies(attackMasks[sourceSquare], piece.Color);
-            
+
             while (attackMask.TryPopFirstSquare(out SquareIndex targetSquare, out attackMask))
             {
                 if (TryGetPieceAt(targetSquare, out Piece targetPiece))
                 {
                     moveBuilder.WithCapture();
                 }
-                
+
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
                     .WithSourcePiece(in piece)
                     .WithTargetSquare(targetSquare)
                     .WithTargetPiece(in targetPiece);
 
-                moves.Add(moveBuilder.Build());
+                moves[index++] = moveBuilder.Build();
                 moveBuilder.Reset();
             }
         }
+
+        return index - offset;
     }
 
-    internal readonly void AddSlidingMoves(
-        List<BinaryMove> moves, 
+    internal readonly int AddSlidingMoves(
+        Span<BinaryMove> moves, 
         Func<SquareIndex, ulong, BitBoard> getSliderAttackFunc,
-        in Piece piece)
+        in Piece piece,
+        int offset)
     {
+#if DEBUG
         if (!ValidateSlidingPiece(piece.Type))
         {
             throw new ArgumentException("Invalid sliding piece type.", nameof(piece));
         }
+#endif
+
+        int index = offset;
+        int bitboard = BitBoardIndex(in piece);
+        BitBoard pieces = _pieces[bitboard];
 
         var moveBuilder = new BinaryMoveBuilder();
-        
-        BitBoard pieces = _pieces[piece.Color, piece.Type];
 
         while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare, out pieces))
         {
@@ -408,14 +420,17 @@ public ref struct ChessBoard
                     .WithTargetSquare(targetSquare)
                     .WithTargetPiece(in targetPiece);
 
-                moves.Add(moveBuilder.Build());
+                moves[index++] = moveBuilder.Build();
                 moveBuilder.Reset();
             }
         }
+
+        return index - offset;
     }
 
-    internal readonly List<BinaryMove> AddCastlingMoves(List<BinaryMove> moves, int color)
-    { 
+    internal readonly int AddCastlingMoves(Span<BinaryMove> moves, int color, int offset)
+    {
+        int index = offset;
         var moveBuilder = new BinaryMoveBuilder();
 
         if (color == COLOR_BLACK)
@@ -429,7 +444,7 @@ public ref struct ChessBoard
 
             if (BK_CastlingAvailable)
             {
-                moves.Add(moveBuilder.WithCastling(Castling.BK).Build());
+                moves[index++] = moveBuilder.WithCastling(Castling.BK).Build();
                 moveBuilder.Reset();
             }
 
@@ -443,7 +458,7 @@ public ref struct ChessBoard
 
             if (BQ_CastlingAvailable)
             {
-                moves.Add(moveBuilder.WithCastling(Castling.BQ).Build());
+                moves[index++] = moveBuilder.WithCastling(Castling.BQ).Build();
                 moveBuilder.Reset();
             }
         }
@@ -459,7 +474,7 @@ public ref struct ChessBoard
 
             if (WK_CastlingAvailable)
             {
-                moves.Add(moveBuilder.WithCastling(Castling.WK).Build());
+                moves[index++] = moveBuilder.WithCastling(Castling.WK).Build();
                 moveBuilder.Reset();
             }
 
@@ -473,19 +488,19 @@ public ref struct ChessBoard
 
             if (WQ_CastlingAvailable)
             {
-                moves.Add(moveBuilder.WithCastling(Castling.WQ).Build());
+                moves[index++] = moveBuilder.WithCastling(Castling.WQ).Build();
                 moveBuilder.Reset();
             }
         }
 
-        return moves;
+        return index - offset;
     }
     
     private readonly BitBoard ClearMaskFromOccupancies(BitBoard mask, int occupanciesColor)
     {
         return mask & ~_occupancies[occupanciesColor];
     }
-    #endregion
+#endregion
 
     #region Apply Moves
     private const EnumSquare WHITE_KING = EnumSquare.e1;
@@ -498,13 +513,18 @@ public ref struct ChessBoard
 
     public bool TryMakeLegalMove(BinaryMove move)
     {
-        IEnumerable<BinaryMove> moves = GetMoves(CurrentColor);
+        Span<BinaryMove> moves = stackalloc BinaryMove[218];
         
-        if (moves.Any(x => x.EncodedValue == move.EncodedValue))
+        int written = GetMoves(moves, CurrentColor);
+        
+        for (int i = 0; i < written; ++i)
         {
-            MakeMove(move);
-            CurrentColor = CurrentColor.Opposite();
-            return true;
+            if (moves[i].EncodedValue == move.EncodedValue)
+            {
+                MakeMove(move);
+                CurrentColor = CurrentColor.Opposite();
+                return true;
+            }
         }
 
         return false;
@@ -711,8 +731,8 @@ public ref struct ChessBoard
 
     public readonly void CopyTo(ref ChessBoard board)
     {
-        Array.Copy(_pieces, board._pieces, _pieces.Length);
-        Array.Copy(_occupancies, board._occupancies, _occupancies.Length);
+        _pieces.CopyTo(board._pieces);
+        _occupancies.CopyTo(board._occupancies);
         board.CastlingState = CastlingState;
         board.HalfMoveClock = HalfMoveClock;
         board.FullMoveNumber = FullMoveNumber;
@@ -720,6 +740,11 @@ public ref struct ChessBoard
         board.Enpassant = Enpassant;
     }
 
+    internal static int BitBoardIndex(in Piece piece) => (piece.Color * 6) + piece.Type;
+
+    internal static int BitBoardIndex(int color, int piece) => (color * 6) + piece;
+
+#if DEBUG
     private static bool ValidateSlidingPiece(int piece)
     {
         return piece == PIECE_BISHOP || piece == PIECE_ROOK || piece == PIECE_QUEEN;
@@ -729,4 +754,5 @@ public ref struct ChessBoard
     {
         return piece == PIECE_KNIGHT || piece == PIECE_KING;
     }
+#endif
 }
