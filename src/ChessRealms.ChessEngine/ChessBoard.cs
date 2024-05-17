@@ -25,6 +25,18 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
 
     public int FullMoveNumber { get; set; }
 
+    private static readonly int[] CastlingRightsLookup =
+    [
+        13, 15, 15, 15, 12, 15, 15, 14,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15,
+         7, 15, 15, 15,  3, 15, 15, 11
+    ];
+
     public ChessBoard() : this([], [])
     {
     }
@@ -555,7 +567,9 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
         else
         {
             MakeNormalMove(move);
-            BreakCastlingIfPossible(move);
+
+            CastlingState &= (Castling) CastlingRightsLookup[move.SourceSquare];
+            CastlingState &= (Castling) CastlingRightsLookup[move.TargetSquare];
         }
         #endregion
 
@@ -656,75 +670,6 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
             RemovePieceAt(targetSquare, in sourcePiece);
             SetPieceAt(targetSquare, in promotedPiece);
         }
-    }
-
-    internal void BreakCastlingIfPossible(BinaryMove move)
-    {
-        SquareIndex sourceSquare = move.SourceSquare;
-        SquareIndex targetSquare = move.TargetSquare;
-
-        Piece sourcePiece = move.SourcePiece;
-        Piece targetPiece = move.TargetPiece;
-
-        Castling castlingToBreak = Castling.None;
-
-        #region KING was moved.
-        if (sourcePiece.Type == PIECE_KING)
-        {
-            if (sourcePiece.Color == COLOR_WHITE)
-            {
-                castlingToBreak |= Castling.WK;
-                castlingToBreak |= Castling.WQ;
-            }
-            else
-            {
-                castlingToBreak |= Castling.BK;
-                castlingToBreak |= Castling.BQ;
-            }
-        }
-        #endregion
-
-        #region ROOK was moved from init position.
-        else if (sourcePiece.Type == PIECE_ROOK)
-        {
-            if (sourcePiece.Color == COLOR_WHITE)
-            {
-                if (sourceSquare == WK_ROOK) 
-                    castlingToBreak |= Castling.WK;
-                else if (sourceSquare == WQ_ROOK) 
-                    castlingToBreak |= Castling.WQ;
-            }
-            else
-            {
-                
-                if (sourceSquare == BK_ROOK) castlingToBreak |= Castling.BK;
-                else if (sourceSquare == BQ_ROOK) castlingToBreak |= Castling.BQ;
-            }
-        }
-        #endregion
-
-        #region ROOK was captured.
-        // Additional check in case when rook wasnt moved but was captured at init position.
-        else if (targetPiece.Type == PIECE_ROOK)
-        {
-            if (targetPiece.Color == COLOR_WHITE)
-            {
-                if (targetSquare == WK_ROOK) 
-                    castlingToBreak |= Castling.WK;
-                else if (targetSquare == WQ_ROOK) 
-                    castlingToBreak |= Castling.WQ;
-            }
-            else
-            {
-                if (targetSquare == BK_ROOK) 
-                    castlingToBreak |= Castling.BK;
-                else if (targetSquare == BQ_ROOK) 
-                    castlingToBreak |= Castling.BQ;
-            }
-        }
-        #endregion
-
-        CastlingState ^= CastlingState & castlingToBreak;
     }
 
     #endregion
