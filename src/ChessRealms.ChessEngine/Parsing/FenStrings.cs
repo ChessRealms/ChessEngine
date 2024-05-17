@@ -119,7 +119,7 @@ public static partial class FenStrings
     [GeneratedRegex(
         "^(?<PiecePlacement>((?<RankItem>[pnbrqkPNBRQK1-8]{1,8})\\/?){8})\\s+" +
         "(?<SideToMove>b|w)\\s+" +
-        "(?<Castling>-|K?Q?k?q)\\s+" +
+        "(?<Castling>-|K?Q?k?q?)\\s+" +
         "(?<EnPassant>-|[a-h][3-6])\\s+" +
         "(?<HalfMoveClock>\\d+)\\s+" +
         "(?<FullMoveNumber>\\d+)\\s*$", RegexOptions.Compiled | RegexOptions.ExplicitCapture)]

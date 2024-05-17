@@ -70,28 +70,4 @@ public readonly struct BitBoard(ulong value)
 
     public static implicit operator ulong(BitBoard board) => board.Value;
     #endregion
-
-#if DEBUG
-    public override readonly string ToString()
-    {
-        var sb = new StringBuilder();
-
-        for (int rank = 7; rank >= 0; --rank)
-        {
-            sb.Append(string.Format(" {0}", rank + 1));
-
-            for (int file = 0; file < 8; ++file)
-            {
-                var bit = (Value & SquareIndex.FromFileRank(file, rank).Board) != 0 ? 1 : 0;
-                sb.Append(string.Format(" {0}", bit));
-            }
-
-            sb.AppendLine();
-        }
-
-        sb.AppendLine("   a b c d e f g h");
-
-        return sb.ToString();
-    }
-#endif
 }

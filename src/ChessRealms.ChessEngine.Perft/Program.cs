@@ -6,6 +6,10 @@ using ChessRealms.ChessEngine.Parsing;
 using System.Diagnostics;
 using System.Text;
 
+Span<BitBoard> pieces = stackalloc BitBoard[12];
+Span<BitBoard> occupancies = stackalloc BitBoard[3];
+ChessBoard board = new(pieces, occupancies);
+
 if (args.Length != 2)
 {
     Console.Error.WriteLine("Invalid arguments amount.");
@@ -21,20 +25,22 @@ if (!int.TryParse(args[0], out var depth) || depth < 1)
     return;
 }
 
-
 Stopwatch stopwatch = Stopwatch.StartNew();
-
-Span<BitBoard> pieces = stackalloc BitBoard[12];
-Span<BitBoard> occupancies = stackalloc BitBoard[3];
-
-ChessBoard board = new(pieces, occupancies);
 
 if (!FenStrings.TryParse(args[1], ref board))
 {
+    Console.Error.WriteLine("Invalid 'fen'.");
+    Console.Error.WriteLine("FEN: {0}", args[1]);
+    Environment.Exit(1);
     return;
 }
 
-var nodes = Perft.Test(board, 8);
+
+Console.WriteLine("Depth: {0}", args[0]);
+Console.WriteLine("Fen:   {0}", args[1]);
+Console.WriteLine();
+
+var nodes = Perft.Test(board, depth);
 
 stopwatch.Stop();
 
@@ -42,7 +48,9 @@ Console.WriteLine();
 Console.WriteLine();
 Console.WriteLine("{0}", nodes);
 Console.WriteLine();
+Console.WriteLine("Seconds: {0}", stopwatch.Elapsed.TotalSeconds);
 Console.WriteLine("Elapsed: {0}", stopwatch.Elapsed);
+Console.WriteLine("ElapsedMilliseconds: {0}", stopwatch.ElapsedMilliseconds);
 
 static class Perft
 {
