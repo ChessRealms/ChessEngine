@@ -1,19 +1,20 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Builders;
+using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 using System.Collections.Immutable;
-using System.Drawing;
 using System.Runtime.InteropServices;
+
+using static ChessRealms.ChessEngine.Core.Constants.ChessConstants;
 
 namespace ChessRealms.ChessEngine;
 
-public struct ChessBoard
+public ref struct ChessBoard
 {
     private readonly BitBoard[,] _pieces;    
     private readonly BitBoard[] _occupancies;
-
-    private BitBoard _allOccupancies;
 
     public SquareIndex Enpassant { get; set; }
 
@@ -28,214 +29,204 @@ public struct ChessBoard
     public ChessBoard()
     {
         _pieces = new BitBoard[2, 6];
-        _occupancies = new BitBoard[2];
-
+        _occupancies = new BitBoard[3];
+        
         Enpassant = SquareIndex.None;
         CurrentColor = PieceColor.White;
         CastlingState = 0;
     }
 
+    #region Piece Management
+
     public readonly bool TryGetPieceAt(SquareIndex square, out Piece piece)
     {
-        if (_allOccupancies.GetBitAt(square) == 0)
+        if (!_occupancies[COLOR_NONE].TryGetBitAt(square, out _))
         {
             piece = Piece.Empty;
             return false;
         }
 
-        BitBoard whiteOcc = _occupancies[PieceColor.White.ToIndex()];
-
-        int colorIndex = (whiteOcc.GetBitAt(square) != 0 
-            ? PieceColor.White 
-            : PieceColor.Black).ToIndex();
+        int colorVal = _occupancies[COLOR_BLACK].GetBitAt(square) != 0 
+            ? COLOR_BLACK 
+            : COLOR_WHITE;
         
-        int pieceIndex = -1;
-
-        for (int i = 0; i < 6; ++i)
+        for (int pieceVal = PIECE_PAWN; pieceVal < PIECE_NONE; ++pieceVal)
         {
-            if (_pieces[colorIndex, i].GetBitAt(square) != 0)
+            if (_pieces[colorVal, pieceVal].GetBitAt(square) != 0)
             {
-                pieceIndex = i;
-                break;
+                piece = new Piece(pieceVal, colorVal);
+                return true;
             }
         }
 
-        if (pieceIndex == -1)
-        {
-            piece = Piece.Empty;
-            return false;
-        }
-
-        piece = new Piece(pieceIndex.ToPiece(), colorIndex.ToColor());
-        return true;
+        piece = Piece.Empty;
+        return false;
     }
 
-    public void SetPieceAt(SquareIndex square, in Piece piece)
+    public readonly void SetPieceAt(SquareIndex square, in Piece piece)
     {
-        int colorIndex = piece.Color.ToIndex();
-        int pieceIndex = piece.Type.ToIndex();
+        _pieces[piece.Color, piece.Type] = _pieces[piece.Color, piece.Type].SetBitAt(square);
+        _occupancies[piece.Color] = _occupancies[piece.Color].SetBitAt(square);
+        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].SetBitAt(square);
+    }
+
+    public readonly void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
+    {
+        int colorIndex = (int)color;
+        int pieceIndex = (int)piece;
         
-        _pieces[colorIndex, pieceIndex].SetBitAt(square);
-        _occupancies[colorIndex].SetBitAt(square);
-        _allOccupancies.SetBitAt(square);
+        _pieces[colorIndex, pieceIndex] = _pieces[colorIndex, pieceIndex].SetBitAt(square);
+        _occupancies[colorIndex] = _occupancies[colorIndex].SetBitAt(square);
+        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].SetBitAt(square);
     }
 
-    public void SetPieceAt(SquareIndex square, PieceColor color, PieceType piece)
+    public readonly void RemovePieceAt(SquareIndex square, in Piece piece)
     {
-        int colorIndex = color.ToIndex();
-        int pieceIndex = piece.ToIndex();
-        
-        _pieces[colorIndex, pieceIndex].SetBitAt(square);
-        _occupancies[colorIndex].SetBitAt(square);
-        _allOccupancies.SetBitAt(square);
+        _pieces[piece.Color, piece.Type] = _pieces[piece.Color, piece.Type].PopBitAt(square);
+        _occupancies[piece.Color] = _occupancies[piece.Color].PopBitAt(square);
+        _occupancies[COLOR_NONE] = _occupancies[COLOR_NONE].PopBitAt(square);
     }
 
-    public void RemovePieceAt(SquareIndex square, in Piece piece)
-    {
-        int colorIndex = piece.Color.ToIndex();
-        int pieceIndex = piece.Type.ToIndex();
-
-        _pieces[colorIndex, pieceIndex].PopBitAt(square);
-        _occupancies[colorIndex].PopBitAt(square);
-        _allOccupancies.PopBitAt(square);
-    }
-
-    public void MovePiece(SquareIndex source, SquareIndex target, in Piece piece)
+    public readonly void MovePiece(SquareIndex source, SquareIndex target, in Piece piece)
     {
         RemovePieceAt(source, in piece);
         SetPieceAt(target, in piece);
     }
+
+    #endregion
 
     #region Get Moves
     /// <summary>
     /// Determine if square is attacked by specified side.
     /// </summary>
     /// <param name="square"> Square to check. </param>
-    /// <param name="attackerColor"> Attacker color. </param>
+    /// <param name="attacker"> Attacker color. </param>
     /// <returns> <see langword="true"/> if attacked, otherwise <see langword="false"/>. </returns>
-    public readonly bool IsSquareAttacked(SquareIndex square, PieceColor attackerColor)
+    internal readonly bool IsSquareAttacked(SquareIndex square, int attacker)
     {
-        int attacker = attackerColor.ToIndex();
-
-        return (PawnAttacks.AttackMasks[attackerColor.Opposite()][square] & _pieces[attacker, PieceType.Pawn.ToIndex()]) != 0
-            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, PieceType.Knight.ToIndex()]) != 0
-            || (BishopAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, PieceType.Bishop.ToIndex()]) != 0
-            || (RookAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, PieceType.Rook.ToIndex()]) != 0
-            || (QueenAttacks.GetSliderAttack(square, _allOccupancies) & _pieces[attacker, PieceType.Queen.ToIndex()]) != 0
-            || (KingAttacks.AttackMasks[square] & _pieces[attacker, PieceType.King.ToIndex()]) != 0;
+        return (PawnAttacks.AttackMasks[COLOR_NONE + ~attacker][square] & _pieces[attacker, PIECE_PAWN]) != 0
+            || (KnightAttacks.AttackMasks[square] & _pieces[attacker, PIECE_KNIGHT]) != 0
+            || (BishopAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_BISHOP]) != 0
+            || (RookAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_ROOK]) != 0
+            || (QueenAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[attacker, PIECE_QUEEN]) != 0
+            || (KingAttacks.AttackMasks[square] & _pieces[attacker, PIECE_KING]) != 0;
     }
 
     public readonly IEnumerable<BinaryMove> GetMoves(PieceColor side)
     {
-        List<BinaryMove> pawnMoves = GetPawnMoves(side);
-        List<BinaryMove> knightMoves = GetLeapingMoves(KnightAttacks.AttackMasks, new Piece(PieceType.Knight, side));
-        List<BinaryMove> bishopMoves = GetSlidingMoves(BishopAttacks.GetSliderAttack, new Piece(PieceType.Bishop, side));
-        List<BinaryMove> rookMoves = GetSlidingMoves(RookAttacks.GetSliderAttack, new Piece(PieceType.Rook, side));
-        List<BinaryMove> queenMoves = GetSlidingMoves(QueenAttacks.GetSliderAttack, new Piece(PieceType.Queen, side));
-        List<BinaryMove> kingMoves = GetLeapingMoves(KingAttacks.AttackMasks, new Piece(PieceType.King, side));
-        List<BinaryMove> castlingMoves = GetCastlingMoves(side);
+        int color = (int)side;
 
-        // 'castlingMoves' already look for 'is king checked' so don't include this.
-        List<BinaryMove>[] moveBatches = [pawnMoves, knightMoves, bishopMoves, rookMoves, queenMoves, kingMoves];
+        List<BinaryMove> moves = new(capacity: 218);
+
+        AddPawnMoves(moves, color);
         
+        AddLeapingMoves(moves,
+            KnightAttacks.AttackMasks, 
+            new Piece(PIECE_KNIGHT, color));
+        
+        AddSlidingMoves(moves,
+            BishopAttacks.GetSliderAttack, 
+            new Piece(PIECE_BISHOP, color));
+        
+        AddSlidingMoves(moves,
+            RookAttacks.GetSliderAttack, 
+            new Piece(PIECE_ROOK, color));
+        
+        AddSlidingMoves(moves,
+            QueenAttacks.GetSliderAttack, 
+            new Piece(PIECE_QUEEN, color));
+        
+        AddLeapingMoves(moves,
+            KingAttacks.AttackMasks, 
+            new Piece(PIECE_KING, color));
+        
+        AddCastlingMoves(moves, color);
+
         ChessBoard tempBoard = new();
 
-        PieceColor oppositeColor = side.Opposite();
+        int oppositeColor = COLOR_NONE + ~color;
         
-        int sideIndex = side.ToIndex();
-        int kingBoardIndex = PieceType.King.ToIndex();
-
-        foreach (var batch in moveBatches)
+        for (int i = moves.Count - 1; i >= 0; --i)
         {
-            for (int i = batch.Count - 1; i >= 0; --i)
-            {
-                CopyTo(ref tempBoard);
-                tempBoard.MakeMove(batch[i]);
-                BitBoard king = tempBoard._pieces[sideIndex, kingBoardIndex];
+            CopyTo(ref tempBoard);
+            tempBoard.MakeMove(moves[i]);
             
-                if (king.TryPopFirstSquare(out SquareIndex kingSquare) && 
-                    tempBoard.IsSquareAttacked(kingSquare, oppositeColor))
-                {
-                    batch.RemoveAt(i);
-                }
+            BitBoard king = tempBoard._pieces[color, PIECE_KING];
+
+            if (king.TryPopFirstSquare(out SquareIndex kingSquare, out _) && tempBoard.IsSquareAttacked(kingSquare, oppositeColor))
+            {
+                moves.RemoveAt(i);
             }
         }
-
-        var moves = pawnMoves
-            .Concat(knightMoves)
-            .Concat(bishopMoves)
-            .Concat(rookMoves)
-            .Concat(queenMoves)
-            .Concat(kingMoves)
-            .Concat(castlingMoves);
 
         return moves;
     }
 
-    internal readonly List<BinaryMove> GetPawnMoves(PieceColor color)
+    internal readonly void AddPawnMoves(List<BinaryMove> moves, int color)
     {
-        var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
 
-        BitBoard pawns = _pieces[color.ToIndex(), PieceType.Pawn.ToIndex()];
-        BitBoard empty = _allOccupancies ^ LerfConstants.ALL_SQUARES;
+        #region Setup variables depends from color.
+        BitBoard pawns = _pieces[color, PIECE_PAWN];
+        BitBoard empty = _occupancies[COLOR_NONE] ^ SquareMapping.ALL_SQUARES;
         BitBoard singlePush;
         BitBoard doublePush;
         ulong pawnPromotionRank;
         int rankOffset;
 
-        if (color == PieceColor.White)
+        if (color == COLOR_WHITE)
         {
-            rankOffset = -1;
+            rankOffset = -8;
             singlePush = (pawns << 8) & empty;
-            doublePush = (singlePush << 8) & empty & LerfConstants.RANK_4;
-            pawnPromotionRank = LerfConstants.RANK_8;
+            doublePush = (singlePush << 8) & empty & (SquareMapping.RANK_4);
+            pawnPromotionRank = SquareMapping.RANK_8;
         }
         else
         {
-            rankOffset = 1;
+            rankOffset = 8;
             singlePush = (pawns >> 8) & empty;
-            doublePush = (singlePush >> 8) & empty & LerfConstants.RANK_5;
-            pawnPromotionRank = LerfConstants.RANK_1;
+            doublePush = (singlePush >> 8) & empty & (SquareMapping.RANK_5);
+            pawnPromotionRank = SquareMapping.RANK_1;
         }
+        #endregion
 
-        while (singlePush.TryPopFirstSquare(out SquareIndex targetSquare))
+        #region Loop Single Pushes
+        while (singlePush.TryPopFirstSquare(out SquareIndex targetSquare, out singlePush))
         {
-            SquareIndex sourceSquare = SquareIndex.FromFileRank(
-                targetSquare.File,
-                targetSquare.Rank + (1 * rankOffset));
-
+            SquareIndex sourceSquare = targetSquare + rankOffset;
+            
             moveBuilder
                 .WithSourceSquare(sourceSquare)
-                .WithSourcePiece(PieceType.Pawn, color)
-                .WithTargetSquare(targetSquare);
+                .WithSourcePiece(PIECE_PAWN, color)
+                .WithTargetSquare(targetSquare)
+                .WithTargetPiece(Piece.Empty);
 
             #region Pawn Promote Moves
             if ((targetSquare.Board & pawnPromotionRank) != 0)
             {
-                int oldCount = moves.Count;
-                CollectionsMarshal.SetCount(moves, oldCount + 4);
-                Span<BinaryMove> movesSpan = CollectionsMarshal.AsSpan(moves);
-
                 moveBuilder
                     .WithPromote(PromotePiece.Knight)
-                    .Build(out movesSpan[oldCount])
+                    .Build(out BinaryMove promote)
                     .ResetPromote();
+                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Bishop)
-                    .Build(out movesSpan[oldCount + 1])
+                    .Build(out promote)
                     .ResetPromote();
+                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Rook)
-                    .Build(out movesSpan[oldCount + 2])
+                    .Build(out promote)
                     .ResetPromote();
+                moves.Add(promote);
 
                 moveBuilder
                     .WithPromote(PromotePiece.Queen)
-                    .Build(out movesSpan[oldCount + 3])
+                    .Build(out promote)
                     .ResetPromote();
+                moves.Add(promote);
             }
             #endregion
             else
@@ -245,38 +236,41 @@ public struct ChessBoard
 
             moveBuilder.Reset();
         }
+        #endregion
 
-        while (doublePush.TryPopFirstSquare(out SquareIndex targetSquare))
+        #region Loop Double Pushes
+        while (doublePush.TryPopFirstSquare(out SquareIndex targetSquare, out doublePush))
         {
-            SquareIndex sourceSquare = SquareIndex.FromFileRank(
-                targetSquare.File,
-                targetSquare.Rank + (2 * rankOffset));
+            SquareIndex sourceSquare = targetSquare + (2 * rankOffset);
 
             BinaryMove move = moveBuilder
                 .WithSourceSquare(sourceSquare)
-                .WithSourcePiece(PieceType.Pawn, color)
+                .WithSourcePiece(PIECE_PAWN, color)
                 .WithTargetSquare(targetSquare)
+                .WithTargetPiece(Piece.Empty)
                 .WithDoublePush()
                 .Build();
 
             moves.Add(move);
             moveBuilder.Reset();
         }
+        #endregion
 
-        BitBoard oppositeOccupancy = _occupancies[color.Opposite().ToIndex()];
+        #region Loop Captures
+        BitBoard oppositeOccupancy = _occupancies[COLOR_NONE + ~color];
 
-        while (pawns.TryPopFirstSquare(out SquareIndex sourceSquare))
+        while (pawns.TryPopFirstSquare(out SquareIndex sourceSquare, out pawns))
         {
             BitBoard mask = PawnAttacks.AttackMasks[color][sourceSquare];
             BitBoard captures = mask & oppositeOccupancy;
 
-            while (captures.TryPopFirstSquare(out SquareIndex targetSquare))
+            while (captures.TryPopFirstSquare(out SquareIndex targetSquare, out captures))
             {
                 if (TryGetPieceAt(targetSquare, out Piece piece))
                 {
                     moveBuilder
                         .WithSourceSquare(sourceSquare)
-                        .WithSourcePiece(PieceType.Pawn, color)
+                        .WithSourcePiece(PIECE_PAWN, color)
                         .WithTargetSquare(targetSquare)
                         .WithTargetPiece(in piece)
                         .WithCapture();
@@ -284,139 +278,105 @@ public struct ChessBoard
                     #region Pawn Promote Moves
                     if ((targetSquare.Board & pawnPromotionRank) != 0)
                     {
-                        int oldCount = moves.Count;
-                        CollectionsMarshal.SetCount(moves, oldCount + 4);
-                        Span<BinaryMove> movesSpan = CollectionsMarshal.AsSpan(moves);
-
                         moveBuilder
                             .WithPromote(PromotePiece.Knight)
-                            .Build(out movesSpan[oldCount])
+                            .Build(out var promote)
                             .ResetPromote();
+                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Bishop)
-                            .Build(out movesSpan[oldCount + 1])
+                            .Build(out promote)
                             .ResetPromote();
+                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Rook)
-                            .Build(out movesSpan[oldCount + 2])
+                            .Build(out promote)
                             .ResetPromote();
+                        moves.Add(promote);
 
                         moveBuilder
                             .WithPromote(PromotePiece.Queen)
-                            .Build(out movesSpan[oldCount + 3])
+                            .Build(out promote)
                             .ResetPromote();
+                        moves.Add(promote);
                     }
                     #endregion
                     else
                     {
                         moves.Add(moveBuilder.Build());
-                        moveBuilder.Reset();
                     }                    
+
+                    moveBuilder.Reset();
                 }
             }
         }
+        #endregion
 
+        #region Handle Enpassant
         if (Enpassant != SquareIndex.None)
         {
-            SquareIndex left = Enpassant - 1;
-            SquareIndex right = Enpassant + 1;
-            
-            if (TryGetPieceAt(left, out Piece leftPiece) && left.Rank == Enpassant.Rank)
+            int oppositeColor = COLOR_NONE + ~color;
+            BitBoard sources = PawnAttacks.AttackMasks[oppositeColor][Enpassant] & _pieces[color, PIECE_PAWN];
+
+            while (sources.TryPopFirstSquare(out SquareIndex enpassantSrc, out sources))
             {
-                if (leftPiece.Type == PieceType.Pawn && leftPiece.Color == color)
-                {
-                    BinaryMove enpassant = moveBuilder
-                        .WithSourceSquare(left)
-                        .WithSourcePiece(in leftPiece)
-                        // target square is upper/below (depends from rankOffset)
-                        .WithTargetSquare(Enpassant + (8 * rankOffset))
-                        .WithTargetPiece(new Piece(PieceType.Pawn, color.Opposite()))
-                        .WithCapture()
-                        .WithEnpassant()
-                        .Build();
-                        
-                    moves.Add(enpassant);
-                    moveBuilder.Reset();
-                }
-            }
-            
-            if (TryGetPieceAt(right, out Piece rightPiece) && right.Rank == Enpassant.Rank)
-            {
-                if (rightPiece.Type == PieceType.Pawn && rightPiece.Color == color)
-                {
-                    BinaryMove enpassant = moveBuilder
-                        .WithSourceSquare(right)
-                        .WithSourcePiece(in rightPiece)
-                        .WithTargetSquare(Enpassant)
-                        .WithTargetPiece(PieceType.Pawn, color.Opposite())
-                        .WithCapture()
-                        .WithEnpassant()
-                        .Build();
-                        
-                    moves.Add(enpassant);
-                    moveBuilder.Reset();
-                }
+                BinaryMove ep = moveBuilder
+                    .WithSourceSquare(enpassantSrc)
+                    .WithSourcePiece(PIECE_PAWN, color)
+                    .WithTargetSquare(Enpassant)
+                    .WithTargetPiece(PIECE_PAWN, oppositeColor)
+                    .WithEnpassant()
+                    .WithCapture()
+                    .Build();
+
+                moves.Add(ep);
+                moveBuilder.Reset();
             }
         }
-
-        return moves;
+        #endregion
     }
 
-    /// <summary>
-    /// Get leaping moves by specified piece and attack masks.
-    /// Allowed piece types are <see cref="PieceType.Knight"/> and <see cref="PieceType.King"/>.
-    /// </summary>
-    /// <param name="attackMasks"> Immutable array with pre-allocated leaping attack masks. </param>
-    /// <param name="piece"> Piece to generate moves. </param>
-    /// <returns> Generated moves. </returns>
-    /// <exception cref="ArgumentException"></exception>
-    internal readonly List<BinaryMove> GetLeapingMoves(ImmutableArray<ulong> attackMasks, in Piece piece)
+    internal readonly void AddLeapingMoves(
+        List<BinaryMove> moves,
+        ImmutableArray<ulong> attackMasks,
+        in Piece piece)
     {
         if (!ValidateLeapingPiece(piece.Type))
         {
             throw new ArgumentException("Invalid leaping piece type.", nameof(piece));
         }
 
-        var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
 
-        BitBoard pieces = _pieces[piece.Color.ToIndex(), piece.Type.ToIndex()];
+        BitBoard pieces = _pieces[piece.Color, piece.Type];
         
-        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare))
+        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare, out pieces))
         {
             BitBoard attackMask = ClearMaskFromOccupancies(attackMasks[sourceSquare], piece.Color);
             
-            while (attackMask.TryPopFirstSquare(out SquareIndex targetSquare))
+            while (attackMask.TryPopFirstSquare(out SquareIndex targetSquare, out attackMask))
             {
+                if (TryGetPieceAt(targetSquare, out Piece targetPiece))
+                {
+                    moveBuilder.WithCapture();
+                }
+                
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
                     .WithSourcePiece(in piece)
-                    .WithTargetSquare(targetSquare);
-
-                if (TryGetPieceAt(targetSquare, out Piece targetPiece))
-                {
-                    moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
-                }
+                    .WithTargetSquare(targetSquare)
+                    .WithTargetPiece(in targetPiece);
 
                 moves.Add(moveBuilder.Build());
                 moveBuilder.Reset();
             }
         }
-
-        return moves;
     }
 
-    /// <summary>
-    /// Get sliding moves by specified piece and related sliderAttackFunc.
-    /// Allowed piece types are <see cref="PieceType.Bishop"/>, <see cref="PieceType.Rook"/> and <see cref="PieceType.Queen"/>.
-    /// </summary>
-    /// <param name="getSliderAttackFunc"> Slider attack method that will be used to get attack/move masks. </param>
-    /// <param name="piece"> Piece to generate movess. </param>
-    /// <returns> Generated moves. </returns>
-    /// <exception cref="ArgumentException"></exception>
-    internal readonly List<BinaryMove> GetSlidingMoves(
+    internal readonly void AddSlidingMoves(
+        List<BinaryMove> moves, 
         Func<SquareIndex, ulong, BitBoard> getSliderAttackFunc,
         in Piece piece)
     {
@@ -425,52 +385,47 @@ public struct ChessBoard
             throw new ArgumentException("Invalid sliding piece type.", nameof(piece));
         }
 
-        var moves = new List<BinaryMove>();
         var moveBuilder = new BinaryMoveBuilder();
         
-        BitBoard pieces = _pieces[piece.Color.ToIndex(), piece.Type.ToIndex()];
-        BitBoard oppositeOccupancies = _occupancies[piece.Color.Opposite().ToIndex()];
+        BitBoard pieces = _pieces[piece.Color, piece.Type];
 
-        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare))
+        while (pieces.TryPopFirstSquare(out SquareIndex sourceSquare, out pieces))
         {
             BitBoard attack = ClearMaskFromOccupancies(
-                getSliderAttackFunc.Invoke(sourceSquare, _allOccupancies),
+                getSliderAttackFunc.Invoke(sourceSquare, _occupancies[COLOR_NONE]),
                 occupanciesColor: piece.Color);
 
-            while (attack.TryPopFirstSquare(out SquareIndex targetSquare))
+            while (attack.TryPopFirstSquare(out SquareIndex targetSquare, out attack))
             {
-                BitBoard toBitboard = targetSquare.Board;
-            
-                if ((toBitboard & oppositeOccupancies) != 0 && TryGetPieceAt(targetSquare, out Piece targetPiece))
+                if (TryGetPieceAt(targetSquare, out Piece targetPiece))
                 {
-                    moveBuilder.WithCapture().WithTargetPiece(in targetPiece);
+                    moveBuilder.WithCapture();
                 }
 
                 moveBuilder
                     .WithSourceSquare(sourceSquare)
                     .WithSourcePiece(in piece)
-                    .WithTargetSquare(targetSquare);
+                    .WithTargetSquare(targetSquare)
+                    .WithTargetPiece(in targetPiece);
 
                 moves.Add(moveBuilder.Build());
                 moveBuilder.Reset();
             }
         }
-
-        return moves;
     }
 
-    internal readonly List<BinaryMove> GetCastlingMoves(PieceColor color)
-    {
-        var moves = new List<BinaryMove>(capacity: 2);
+    internal readonly List<BinaryMove> AddCastlingMoves(List<BinaryMove> moves, int color)
+    { 
         var moveBuilder = new BinaryMoveBuilder();
 
-        if (color == PieceColor.Black)
+        if (color == COLOR_BLACK)
         {
             bool BK_CastlingAvailable = CastlingState.HasFlag(Castling.BK) &&
-                _allOccupancies.GetBitAt(EnumSquare.f8) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.g8) == 0 &&
-                !IsSquareAttacked(EnumSquare.e8, PieceColor.White) &&
-                !IsSquareAttacked(EnumSquare.g8, PieceColor.White);
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.f8) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.g8) == 0 &&
+                !IsSquareAttacked(EnumSquare.e8, COLOR_WHITE) &&
+                !IsSquareAttacked(EnumSquare.f8, COLOR_WHITE) &&
+                !IsSquareAttacked(EnumSquare.g8, COLOR_WHITE);
 
             if (BK_CastlingAvailable)
             {
@@ -479,11 +434,12 @@ public struct ChessBoard
             }
 
             bool BQ_CastlingAvailable = CastlingState.HasFlag(Castling.BQ) &&
-                _allOccupancies.GetBitAt(EnumSquare.b8) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.c8) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.d8) == 0 &&
-                !IsSquareAttacked(EnumSquare.e8, PieceColor.White) &&
-                !IsSquareAttacked(EnumSquare.c8, PieceColor.White);
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.b8) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.c8) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.d8) == 0 &&
+                !IsSquareAttacked(EnumSquare.e8, COLOR_WHITE) &&
+                !IsSquareAttacked(EnumSquare.d8, COLOR_WHITE) &&
+                !IsSquareAttacked(EnumSquare.c8, COLOR_WHITE);
 
             if (BQ_CastlingAvailable)
             {
@@ -495,10 +451,11 @@ public struct ChessBoard
         else
         {
             bool WK_CastlingAvailable = CastlingState.HasFlag(Castling.WK) &&
-                _allOccupancies.GetBitAt(EnumSquare.f1) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.g1) == 0 &&
-                !IsSquareAttacked(EnumSquare.e1, PieceColor.Black) &&
-                !IsSquareAttacked(EnumSquare.g1, PieceColor.Black);
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.f1) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.g1) == 0 &&
+                !IsSquareAttacked(EnumSquare.e1, COLOR_BLACK) &&
+                !IsSquareAttacked(EnumSquare.f1, COLOR_BLACK) &&
+                !IsSquareAttacked(EnumSquare.g1, COLOR_BLACK);
 
             if (WK_CastlingAvailable)
             {
@@ -507,11 +464,12 @@ public struct ChessBoard
             }
 
             bool WQ_CastlingAvailable = CastlingState.HasFlag(Castling.WQ) &&
-                _allOccupancies.GetBitAt(EnumSquare.b1) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.c1) == 0 &&
-                _allOccupancies.GetBitAt(EnumSquare.d1) == 0 &&
-                !IsSquareAttacked(EnumSquare.e1, PieceColor.Black) &&
-                !IsSquareAttacked(EnumSquare.c1, PieceColor.Black);
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.b1) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.c1) == 0 &&
+                _occupancies[COLOR_NONE].GetBitAt(EnumSquare.d1) == 0 &&
+                !IsSquareAttacked(EnumSquare.e1, COLOR_BLACK) &&
+                !IsSquareAttacked(EnumSquare.d1, COLOR_BLACK) &&
+                !IsSquareAttacked(EnumSquare.c1, COLOR_BLACK);
 
             if (WQ_CastlingAvailable)
             {
@@ -523,9 +481,9 @@ public struct ChessBoard
         return moves;
     }
     
-    private readonly BitBoard ClearMaskFromOccupancies(BitBoard mask, PieceColor occupanciesColor)
+    private readonly BitBoard ClearMaskFromOccupancies(BitBoard mask, int occupanciesColor)
     {
-        return mask ^ (0UL ^ (mask & _occupancies[occupanciesColor.ToIndex()]));
+        return mask & ~_occupancies[occupanciesColor];
     }
     #endregion
 
@@ -561,6 +519,7 @@ public struct ChessBoard
         
         else if (move.IsDoublePush)
         {
+            Enpassant = SquareIndex.None;
             MakeDoublePush(move);
             return;
         }
@@ -576,10 +535,10 @@ public struct ChessBoard
         else
         {
             MakeNormalMove(move);
+            BreakCastlingIfPossible(move);
         }
         #endregion
 
-        BreakCastlingIfPossible(move);
         Enpassant = SquareIndex.None;
     }
 
@@ -588,23 +547,23 @@ public struct ChessBoard
         switch (castling)
         {
             case Castling.WK:
-                MovePiece(WHITE_KING, EnumSquare.g1, new Piece(PieceType.King, PieceColor.White));
-                MovePiece(WK_ROOK, EnumSquare.f1, new Piece(PieceType.Rook, PieceColor.White));
+                MovePiece(WHITE_KING, EnumSquare.g1, new Piece(PIECE_KING, COLOR_WHITE));
+                MovePiece(WK_ROOK, EnumSquare.f1, new Piece(PIECE_ROOK, COLOR_WHITE));
                 CastlingState ^= CastlingState & (Castling.WK | Castling.WQ);
                 break;
             case Castling.WQ: 
-                MovePiece(WHITE_KING, EnumSquare.c1, new Piece(PieceType.King, PieceColor.White));
-                MovePiece(WQ_ROOK, EnumSquare.d1, new Piece(PieceType.Rook, PieceColor.White));
+                MovePiece(WHITE_KING, EnumSquare.c1, new Piece(PIECE_KING, COLOR_WHITE));
+                MovePiece(WQ_ROOK, EnumSquare.d1, new Piece(PIECE_ROOK, COLOR_WHITE));
                 CastlingState ^= CastlingState & (Castling.WK | Castling.WQ);
                 break;
             case Castling.BK:
-                MovePiece(BLACK_KING, EnumSquare.g8, new Piece(PieceType.King, PieceColor.Black));
-                MovePiece(BK_ROOK, EnumSquare.f8, new Piece(PieceType.Rook, PieceColor.Black));
+                MovePiece(BLACK_KING, EnumSquare.g8, new Piece(PIECE_KING, COLOR_BLACK));
+                MovePiece(BK_ROOK, EnumSquare.f8, new Piece(PIECE_ROOK, COLOR_BLACK));
                 CastlingState ^= CastlingState & (Castling.BK | Castling.BQ);
                 break;
             case Castling.BQ:
-                MovePiece(BLACK_KING, EnumSquare.c8, new Piece(PieceType.King, PieceColor.Black));
-                MovePiece(BQ_ROOK, EnumSquare.d8, new Piece(PieceType.Rook, PieceColor.Black));
+                MovePiece(BLACK_KING, EnumSquare.c8, new Piece(PIECE_KING, COLOR_BLACK));
+                MovePiece(BQ_ROOK, EnumSquare.d8, new Piece(PIECE_ROOK, COLOR_BLACK));
                 CastlingState ^= CastlingState & (Castling.BK | Castling.BQ);
                 break;
             default: break;
@@ -618,39 +577,46 @@ public struct ChessBoard
         MovePiece(move.SourceSquare, targetSquare, move.SourcePiece);
 
         #region Set Enpassant
-        PieceColor oppositeColor = move.SourcePieceColor.Opposite();
-        SquareIndex left = targetSquare - 1;
-        SquareIndex right = targetSquare + 1;
+        int oppositeColor = COLOR_NONE + ~move.SourcePieceColor;
+        var offset = oppositeColor == COLOR_WHITE ? 8 : -8;
+        SquareIndex left = targetSquare + 1;
+        SquareIndex right = targetSquare - 1;
 
         if (left.Rank == targetSquare.Rank && TryGetPieceAt(left, out Piece pieceNearby))
         {
-            if (pieceNearby.Type == PieceType.Pawn && pieceNearby.Color == oppositeColor)
+            if (pieceNearby.Type == PIECE_PAWN && pieceNearby.Color == oppositeColor)
             {
-                Enpassant = targetSquare;
+                Enpassant = targetSquare + offset;
             }
         }
 
         if (right.Rank == targetSquare.Rank && TryGetPieceAt(right, out pieceNearby))
         {
-            if (pieceNearby.Type == PieceType.Pawn && pieceNearby.Color == oppositeColor)
+            if (pieceNearby.Type == PIECE_PAWN && pieceNearby.Color == oppositeColor)
             {
-                Enpassant = targetSquare;
+                Enpassant = targetSquare + offset;
             }
         }
         #endregion
     }
 
-    internal void MakeEnpassant(BinaryMove move)
+    internal readonly void MakeEnpassant(BinaryMove move)
     {
         SquareIndex sourceSquare = move.SourceSquare;
         SquareIndex targetSquare = move.TargetSquare;
+        
         MovePiece(sourceSquare, targetSquare, move.SourcePiece);
-        RemovePieceAt(Enpassant, move.TargetPiece);
+
+        SquareIndex ep = move.TargetPiece.Color == COLOR_BLACK 
+            ? Enpassant - 8 
+            : Enpassant + 8;
+
+        RemovePieceAt(ep, move.TargetPiece);
     }
 
     internal void MakeNormalMove(BinaryMove move)
     {
-        if (move.IsCapture)
+        if (move.IsCapture || (move.TargetPiece.Type != PIECE_NONE))
         {
             RemovePieceAt(move.TargetSquare, move.TargetPiece);
         }
@@ -664,10 +630,10 @@ public struct ChessBoard
         if (move.Promote != PromotePiece.None)
         {
             Piece promotedPiece = new(
-                type: move.Promote.ToPieceType(),
+                type: (int)move.Promote,
                 color: sourcePiece.Color);
 
-            RemovePieceAt(sourceSquare, in sourcePiece);
+            RemovePieceAt(targetSquare, in sourcePiece);
             SetPieceAt(targetSquare, in promotedPiece);
         }
     }
@@ -683,9 +649,9 @@ public struct ChessBoard
         Castling castlingToBreak = Castling.None;
 
         #region KING was moved.
-        if (sourcePiece.Type == PieceType.King)
+        if (sourcePiece.Type == PIECE_KING)
         {
-            if (sourcePiece.Color == PieceColor.White)
+            if (sourcePiece.Color == COLOR_WHITE)
             {
                 castlingToBreak |= Castling.WK;
                 castlingToBreak |= Castling.WQ;
@@ -697,10 +663,11 @@ public struct ChessBoard
             }
         }
         #endregion
+
         #region ROOK was moved from init position.
-        else if (sourcePiece.Type == PieceType.Rook)
+        else if (sourcePiece.Type == PIECE_ROOK)
         {
-            if (sourcePiece.Color == PieceColor.White)
+            if (sourcePiece.Color == COLOR_WHITE)
             {
                 if (sourceSquare == WK_ROOK) 
                     castlingToBreak |= Castling.WK;
@@ -715,11 +682,12 @@ public struct ChessBoard
             }
         }
         #endregion
+
         #region ROOK was captured.
         // Additional check in case when rook wasnt moved but was captured at init position.
-        else if (targetPiece.Type == PieceType.Rook)
+        else if (targetPiece.Type == PIECE_ROOK)
         {
-            if (targetPiece.Color == PieceColor.White)
+            if (targetPiece.Color == COLOR_WHITE)
             {
                 if (targetSquare == WK_ROOK) 
                     castlingToBreak |= Castling.WK;
@@ -745,7 +713,6 @@ public struct ChessBoard
     {
         Array.Copy(_pieces, board._pieces, _pieces.Length);
         Array.Copy(_occupancies, board._occupancies, _occupancies.Length);
-        board._allOccupancies = _allOccupancies;
         board.CastlingState = CastlingState;
         board.HalfMoveClock = HalfMoveClock;
         board.FullMoveNumber = FullMoveNumber;
@@ -753,13 +720,13 @@ public struct ChessBoard
         board.Enpassant = Enpassant;
     }
 
-    private static bool ValidateSlidingPiece(PieceType pieceType)
+    private static bool ValidateSlidingPiece(int piece)
     {
-        return pieceType == PieceType.Bishop || pieceType == PieceType.Rook || pieceType == PieceType.Queen;
+        return piece == PIECE_BISHOP || piece == PIECE_ROOK || piece == PIECE_QUEEN;
     }
 
-    private static bool ValidateLeapingPiece(PieceType pieceType)
+    private static bool ValidateLeapingPiece(int piece)
     {
-        return pieceType == PieceType.Knight || pieceType == PieceType.King;
+        return piece == PIECE_KNIGHT || piece == PIECE_KING;
     }
 }

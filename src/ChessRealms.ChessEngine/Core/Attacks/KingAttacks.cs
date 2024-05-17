@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
 using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
@@ -27,13 +28,13 @@ internal static class KingAttacks
         attacks |= board << 8;
         attacks |= board >> 8;
 
-        attacks |= board << 9 & LerfConstants.NOT_A_FILE;
-        attacks |= board << 1 & LerfConstants.NOT_A_FILE;
-        attacks |= board >> 7 & LerfConstants.NOT_A_FILE;
+        attacks |= board << 9 & SquareMapping.NOT_A_FILE;
+        attacks |= board << 1 & SquareMapping.NOT_A_FILE;
+        attacks |= board >> 7 & SquareMapping.NOT_A_FILE;
 
-        attacks |= board >> 9 & LerfConstants.NOT_H_FILE;
-        attacks |= board >> 1 & LerfConstants.NOT_H_FILE;
-        attacks |= board << 7 & LerfConstants.NOT_H_FILE;
+        attacks |= board >> 9 & SquareMapping.NOT_H_FILE;
+        attacks |= board >> 1 & SquareMapping.NOT_H_FILE;
+        attacks |= board << 7 & SquareMapping.NOT_H_FILE;
 
         return attacks;
     }

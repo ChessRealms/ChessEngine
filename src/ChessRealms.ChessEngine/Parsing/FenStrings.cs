@@ -1,14 +1,13 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 using System.Text.RegularExpressions;
 
 namespace ChessRealms.ChessEngine.Parsing;
 
 public static partial class FenStrings
 {
-#if DEBUG
     public const string StartPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a4 0 1";
-#endif
 
     public static bool TryParse(string fen, out ChessBoard chessBoard)
     {

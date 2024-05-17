@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
 using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
@@ -24,15 +25,15 @@ internal static class KnightAttacks
         ulong board = square.Board;
         ulong attacks = 0UL;
 
-        attacks |= board >> 17 & LerfConstants.NOT_H_FILE;
-        attacks |= board >> 15 & LerfConstants.NOT_A_FILE;
-        attacks |= board >> 10 & LerfConstants.NOT_HG_FILE;
-        attacks |= board >> 6 & LerfConstants.NOT_AB_FILE;
+        attacks |= board >> 17 & SquareMapping.NOT_H_FILE;
+        attacks |= board >> 15 & SquareMapping.NOT_A_FILE;
+        attacks |= board >> 10 & SquareMapping.NOT_HG_FILE;
+        attacks |= board >> 6 & SquareMapping.NOT_AB_FILE;
 
-        attacks |= board << 17 & LerfConstants.NOT_A_FILE;
-        attacks |= board << 15 & LerfConstants.NOT_H_FILE;
-        attacks |= board << 10 & LerfConstants.NOT_AB_FILE;
-        attacks |= board << 6 & LerfConstants.NOT_HG_FILE;
+        attacks |= board << 17 & SquareMapping.NOT_A_FILE;
+        attacks |= board << 15 & SquareMapping.NOT_H_FILE;
+        attacks |= board << 10 & SquareMapping.NOT_AB_FILE;
+        attacks |= board << 6 & SquareMapping.NOT_HG_FILE;
 
         return attacks;
     }

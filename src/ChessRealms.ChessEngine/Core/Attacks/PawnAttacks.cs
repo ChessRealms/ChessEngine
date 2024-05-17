@@ -1,11 +1,12 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
 using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
 internal static class PawnAttacks
 {
-    internal static readonly ImmutableDictionary<PieceColor, ImmutableArray<ulong>> AttackMasks;
+    internal static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
 
     static PawnAttacks()
     {
@@ -14,33 +15,29 @@ internal static class PawnAttacks
 
         for (int square = 0; square < 64; ++square)
         {
-            white[square] = MaskPawnAttack(PieceColor.White, square);
-            black[square] = MaskPawnAttack(PieceColor.Black, square);
+            white[square] = MaskPawnAttack(ChessConstants.COLOR_WHITE, square);
+            black[square] = MaskPawnAttack(ChessConstants.COLOR_BLACK, square);
         }
 
-        Dictionary<PieceColor, ImmutableArray<ulong>> masks = new()
-        {
-            { PieceColor.White, white.ToImmutableArray() },
-            { PieceColor.Black, black.ToImmutableArray() },
-        };
+        ImmutableArray<ulong>[] masks = [[.. black], [.. white]];
 
-        AttackMasks = masks.ToImmutableDictionary();
+        AttackMasks = [.. masks];
     }
 
-    private static ulong MaskPawnAttack(PieceColor color, SquareIndex square)
+    private static ulong MaskPawnAttack(int color, SquareIndex square)
     {
         ulong board = square.Board;
         ulong attacks = 0UL;
 
-        if (color == PieceColor.White)
+        if (color == ChessConstants.COLOR_WHITE)
         {
-            attacks |= board << 7 & LerfConstants.NOT_H_FILE;
-            attacks |= board << 9 & LerfConstants.NOT_A_FILE;
+            attacks |= board << 7 & SquareMapping.NOT_H_FILE;
+            attacks |= board << 9 & SquareMapping.NOT_A_FILE;
         }
         else
         {
-            attacks |= board >> 7 & LerfConstants.NOT_A_FILE;
-            attacks |= board >> 9 & LerfConstants.NOT_H_FILE;
+            attacks |= board >> 7 & SquareMapping.NOT_A_FILE;
+            attacks |= board >> 9 & SquareMapping.NOT_H_FILE;
         }
 
         return attacks;

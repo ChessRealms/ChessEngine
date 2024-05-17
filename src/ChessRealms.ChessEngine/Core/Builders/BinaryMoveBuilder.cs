@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 
 namespace ChessRealms.ChessEngine.Core.Builders;
 
@@ -19,7 +20,7 @@ public class BinaryMoveBuilder()
     public const uint IS_DOUBLE_PUSH             = 0x4000000;    // 1 bit (1 << 26)
     public const uint IS_ENPASSANT               = 0x8000000;    // 1 bit (1 << 27)
     public const uint CASTLING                   = 0xf0000000;   // 4 bit (15 << 28)
-    
+
     private uint _encodedMove = 0u;
 
     public BinaryMoveBuilder WithSourceSquare(SquareIndex square)
@@ -34,7 +35,7 @@ public class BinaryMoveBuilder()
         return this;
     }
 
-    public BinaryMoveBuilder WithSourcePiece(PieceType piece, PieceColor color)
+    public BinaryMoveBuilder WithSourcePiece(int piece, int color)
     {
         _encodedMove |= unchecked((uint)piece) << 12;
         _encodedMove |= unchecked((uint)color) << 15;
@@ -48,7 +49,7 @@ public class BinaryMoveBuilder()
         return this;
     }
 
-    public BinaryMoveBuilder WithTargetPiece(PieceType piece, PieceColor color)
+    public BinaryMoveBuilder WithTargetPiece(int piece, int color)
     {
         _encodedMove |= unchecked((uint)piece) << 17;
         _encodedMove |= unchecked((uint)color) << 20;
@@ -98,9 +99,10 @@ public class BinaryMoveBuilder()
         return this;
     }
 
-    public void Reset()
+    public BinaryMoveBuilder Reset()
     {
-        _encodedMove &= 0u;
+        _encodedMove = 0u;
+        return this;
     }
 
     public BinaryMove Build()

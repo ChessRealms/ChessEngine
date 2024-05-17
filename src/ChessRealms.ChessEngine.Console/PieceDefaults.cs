@@ -1,4 +1,6 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 
 namespace ChessRealms.ChessEngine.Console;
 
@@ -16,18 +18,18 @@ public static class PieceCharset
 
     public static Piece GetPieceFromAscii(char symbol)
     {
-        PieceType type = symbol switch 
+        int type = symbol switch 
         {
-            'p' => PieceType.Pawn,
-            'n' => PieceType.Knight,
-            'b' => PieceType.Bishop,
-            'r' => PieceType.Rook,
-            'q' => PieceType.Queen,
-            'k' => PieceType.King,
-            _ => PieceType.None
+            'p' => ChessConstants.PIECE_PAWN,
+            'n' => ChessConstants.PIECE_KNIGHT,
+            'b' => ChessConstants.PIECE_BISHOP,
+            'r' => ChessConstants.PIECE_ROOK,
+            'q' => ChessConstants.PIECE_QUEEN,
+            'k' => ChessConstants.PIECE_KING,
+            _ => ChessConstants.PIECE_NONE
         };
 
-        PieceColor color = char.IsUpper(symbol) ? PieceColor.White : PieceColor.Black;
+        int color = char.IsUpper(symbol) ? ChessConstants.COLOR_WHITE : ChessConstants.COLOR_BLACK;
         
         return new Piece(type, color);
     }

@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
