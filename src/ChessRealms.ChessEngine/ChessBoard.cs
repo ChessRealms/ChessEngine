@@ -97,7 +97,7 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
     {
         int colorCoef = attackerColor * 6;
 
-        return (PawnAttacks.AttackMasks[COLOR_NONE + ~attackerColor][square] & _pieces[colorCoef + PIECE_PAWN]) != 0
+        return (PawnAttacks.AttackMasks[attackerColor.Opposite()][square] & _pieces[colorCoef + PIECE_PAWN]) != 0
             || (KnightAttacks.AttackMasks[square] & _pieces[colorCoef + PIECE_KNIGHT]) != 0
             || (BishopAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[colorCoef + PIECE_BISHOP]) != 0
             || (RookAttacks.GetSliderAttack(square, _occupancies[COLOR_NONE]) & _pieces[colorCoef + PIECE_ROOK]) != 0
@@ -146,7 +146,7 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
         Span<BitBoard> occupancies = stackalloc BitBoard[3];
         ChessBoard tempBoard = new(pieces, occupancies);
 
-        int oppositeColor = COLOR_NONE + ~color;
+        int oppositeColor = color.Opposite();
         int written = 0;
 
         for (int i = 0; i < offset; ++i)
@@ -259,7 +259,7 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
         #endregion
 
         #region Loop Captures
-        BitBoard oppositeOccupancy = _occupancies[COLOR_NONE + ~color];
+        BitBoard oppositeOccupancy = _occupancies[color.Opposite()];
 
         while (pawns.TryPopFirstSquare(out SquareIndex sourceSquare, out pawns))
         {
@@ -315,7 +315,7 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
         #region Handle Enpassant
         if (Enpassant != SquareIndex.None)
         {
-            int oppositeColor = COLOR_NONE + ~color;
+            int oppositeColor = color.Opposite();
             
             BitBoard sources = PawnAttacks.AttackMasks[oppositeColor][Enpassant] & _pieces[BitBoardIndex(color, PIECE_PAWN)];
 
@@ -597,7 +597,7 @@ public ref struct ChessBoard(Span<BitBoard> pieces, Span<BitBoard> occupancies)
         MovePiece(move.SourceSquare, targetSquare, move.SourcePiece);
 
         #region Set Enpassant
-        int oppositeColor = COLOR_NONE + ~move.SourcePieceColor;
+        int oppositeColor = move.SourcePieceColor.Opposite();
         var offset = oppositeColor == COLOR_WHITE ? 8 : -8;
         SquareIndex left = targetSquare + 1;
         SquareIndex right = targetSquare - 1;
