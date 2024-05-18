@@ -1,22 +1,22 @@
 ﻿using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 using System.Text.RegularExpressions;
+
+using static ChessRealms.ChessEngine.Core.Constants.ChessConstants;
 
 namespace ChessRealms.ChessEngine.Parsing;
 
 public static partial class FenStrings
 {
-#if DEBUG
     public const string StartPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a4 0 1";
-#endif
 
-    public static bool TryParse(string fen, out ChessBoard chessBoard)
+    public static bool TryParse(string fen, ref ChessBoard chessBoard)
     {
         Match match = FenRegex().Match(fen);
 
         if (!match.Success)
         {
-            chessBoard = new();
             return false;
         }
 
@@ -28,8 +28,6 @@ public static partial class FenStrings
         ReadOnlySpan<char> enPassantSpan        = groups["EnPassant"].ValueSpan;
         ReadOnlySpan<char> halfMoveClockSpan    = groups["HalfMoveClock"].ValueSpan;
         ReadOnlySpan<char> fullMoveNumberSpan   = groups["FullMoveNumber"].ValueSpan;
-
-        chessBoard = new ChessBoard();
 
         #region Read pieces
         // Fen string represented as piece in next positions a8-h8/a7-h8/.../a1-h1.
@@ -53,18 +51,18 @@ public static partial class FenStrings
             }
             else
             {
-                PieceColor color = char.IsUpper(piecePlacementSpan[i]) ? PieceColor.White : PieceColor.Black;
-                PieceType piece = char.ToLower(piecePlacementSpan[i]) switch
+                int color = char.IsUpper(piecePlacementSpan[i]) ? COLOR_WHITE : COLOR_BLACK;
+                int piece = char.ToLower(piecePlacementSpan[i]) switch
                 {
-                    'p' => PieceType.Pawn,
-                    'n' => PieceType.Knight,
-                    'b' => PieceType.Bishop,
-                    'r' => PieceType.Rook,
-                    'q' => PieceType.Queen,
-                    _ => PieceType.King
+                    'p' => PIECE_PAWN,
+                    'n' => PIECE_KNIGHT,
+                    'b' => PIECE_BISHOP,
+                    'r' => PIECE_ROOK,
+                    'q' => PIECE_QUEEN,
+                    _ => PIECE_KING
                 };
 
-                chessBoard.SetPieceAt(squareIndex, color, piece);
+                chessBoard.SetPieceAt(squareIndex, new Piece(piece, color));
                 ++squareIndex;
             }
         }
@@ -121,7 +119,7 @@ public static partial class FenStrings
     [GeneratedRegex(
         "^(?<PiecePlacement>((?<RankItem>[pnbrqkPNBRQK1-8]{1,8})\\/?){8})\\s+" +
         "(?<SideToMove>b|w)\\s+" +
-        "(?<Castling>-|K?Q?k?q)\\s+" +
+        "(?<Castling>-|K?Q?k?q?)\\s+" +
         "(?<EnPassant>-|[a-h][3-6])\\s+" +
         "(?<HalfMoveClock>\\d+)\\s+" +
         "(?<FullMoveNumber>\\d+)\\s*$", RegexOptions.Compiled | RegexOptions.ExplicitCapture)]

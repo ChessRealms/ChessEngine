@@ -1,9 +1,12 @@
-﻿namespace ChessRealms.ChessEngine.Core.Types;
+﻿using static ChessRealms.ChessEngine.Core.Constants.ChessConstants;
 
-public readonly struct Piece(PieceType type, PieceColor color)
+namespace ChessRealms.ChessEngine.Core.Types;
+
+public readonly struct Piece(int type, int color)
 {
-    public readonly PieceType Type = type;
-    public readonly PieceColor Color = color;
+    public readonly int Type = type;
 
-    public static readonly Piece Empty = new(PieceType.None, PieceColor.None);
+    public readonly int Color = color;
+
+    public static readonly Piece Empty = new(PIECE_NONE, COLOR_NONE);
 }

@@ -1,4 +1,7 @@
-﻿namespace ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Exceptions;
+using ChessRealms.ChessEngine.Core.Types.Enums;
+
+namespace ChessRealms.ChessEngine.Core.Types;
 
 /// <summary>
 /// Value that represents position at chess-board. Basically it is <see cref="int"/> readonly value.
@@ -11,39 +14,31 @@ public readonly struct SquareIndex(int square)
 
     /// <summary>
     /// Raw representation of <see cref="SquareIndex"/>. 
-    /// It is just <see cref="int"/> value from 0 to 63 (64 square indicies in total).
+    /// It is just an <see cref="int"/> value from 0 to 63 (64 square indicies in total).
     /// </summary>
-    public readonly int Square = square;
+    public readonly int Value = square;
 
     /// <summary>
     /// Zero-based index of file.
     /// </summary>
-    public readonly int File => Square % 8;
+    public readonly int File => Value % 8;
 
     /// <summary>
     /// Zero-based index of rank.
     /// </summary>
-    public readonly int Rank => Square / 8;
+    public readonly int Rank => Value / 8;
 
     /// <summary>
     /// <see cref="BitBoard"/> instance with single bit that corresponds to square at board.
     /// </summary>
-    public readonly BitBoard Board => 1UL << Square;
+    public readonly BitBoard Board => 1UL << Value;
 
     /// <summary>
     /// Empty <see cref="SquareIndex"/> value.
     /// </summary>
     public static readonly SquareIndex None = -1;
 
-    public SquareIndex() : this(0)
-    {
-    }
-
-    public SquareIndex(uint square) : this(unchecked((int)square)) 
-    {
-    }
-
-    public SquareIndex(EnumSquare square) : this((int)square) 
+    public SquareIndex() : this(0) 
     {
     }
 
@@ -88,17 +83,17 @@ public readonly struct SquareIndex(int square)
     /// <param name="file"> Zero-based 'file' value that is in range from <c>0</c> to <see cref="MAX_FILE"/>. </param>
     /// <param name="rank"> Zero-based 'rank' value that is in range from <c>0</c> to <see cref="MAX_RANK"/>. </param>
     /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="FileRankOutOfRangeException"></exception>
     public static SquareIndex FromFileRank(int file, int rank)
     {
         if (!ValidateFileRankIndex(file))
         {
-            throw new ArgumentOutOfRangeException(nameof(file), file, $"Invalid 'file' value. File must be in range from 0 to 7.");
+            throw new FileRankOutOfRangeException(nameof(file), file, FileRankOutOfRangeException.InvalidFileMessage);
         }
 
         if (!ValidateFileRankIndex(rank))
         {
-            throw new ArgumentOutOfRangeException(nameof(rank), rank, $"Invalid 'rank' value. Rank must be in range from 0 to 7");
+            throw new FileRankOutOfRangeException(nameof(rank), rank, FileRankOutOfRangeException.InvalidRankMessage);
         }
 
         return new SquareIndex(rank * 8 + file);
@@ -109,12 +104,12 @@ public readonly struct SquareIndex(int square)
     /// </summary>
     /// <param name="file"> File value. </param>
     /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="FileRankOutOfRangeException"></exception>
     public static int FromFile(char file)
     {
         if (!ValidateFile(file))
         {
-            throw new ArgumentOutOfRangeException(nameof(file), file, "Invalid file value. File must be in range from 'a' to 'h'.");
+            throw new FileRankOutOfRangeException(nameof(file), file, FileRankOutOfRangeException.InvalidFileMessage);
         }
 
         return file - 'a';
@@ -125,17 +120,18 @@ public readonly struct SquareIndex(int square)
     /// </summary>
     /// <param name="rank"> Rank value. </param>
     /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="FileRankOutOfRangeException"></exception>
     public static int FromRank(char rank)
     {
         if (!ValidateRank(rank))
         {
-            throw new ArgumentOutOfRangeException(nameof(rank), rank, "Invalid rank value. Rank must be in range from '1' to '8'.");
+            throw new FileRankOutOfRangeException(nameof(rank), rank, FileRankOutOfRangeException.InvalidRankMessage);
         }
 
         return rank - '1';
     }
 
+    #region Validations
     private static bool ValidateFileRankIndex(int fileOrRank)
     {
         return fileOrRank >= 0 && fileOrRank <= MAX_FILE;
@@ -150,16 +146,23 @@ public readonly struct SquareIndex(int square)
     {
         return rank >= '1' && rank <= '8';
     }
+    #endregion
 
+    #region Implicit Int32
     public static implicit operator SquareIndex(int square) => new(square);
 
-    public static implicit operator int(SquareIndex squareIndex) => squareIndex.Square;
+    public static implicit operator int(SquareIndex squareIndex) => squareIndex.Value;
+    #endregion
 
-    public static implicit operator SquareIndex(EnumSquare square) => new(square);
+    #region Implicit UInt32
+    public static implicit operator uint(SquareIndex squareIndex) => unchecked((uint)squareIndex.Value);
 
-    public static implicit operator EnumSquare(SquareIndex squareIndex) => unchecked((EnumSquare)squareIndex.Square);
+    public static implicit operator SquareIndex(uint squareIndex) => new(unchecked((int)squareIndex));
+    #endregion
 
-    public static implicit operator uint(SquareIndex squareIndex) => unchecked((uint)squareIndex.Square);
+    #region Implicit EnumSquare
+    public static implicit operator SquareIndex(EnumSquare square) => new((int)square);
 
-    public static implicit operator SquareIndex(uint squareIndex) => new(squareIndex);
+    public static implicit operator EnumSquare(SquareIndex squareIndex) => (EnumSquare)squareIndex.Value;
+    #endregion
 }

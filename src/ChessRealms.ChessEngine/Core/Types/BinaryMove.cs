@@ -1,4 +1,6 @@
-﻿using static ChessRealms.ChessEngine.Core.Builders.BinaryMoveBuilder;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types.Enums;
+using static ChessRealms.ChessEngine.Core.Builders.BinaryMoveBuilder;
 
 namespace ChessRealms.ChessEngine.Core.Types;
 
@@ -16,26 +18,26 @@ public readonly struct BinaryMove(uint encodedValue)
         get => (EncodedValue & TRG_SQUARE) >> 6;
     }
 
-    public PieceType SourcePieceType
+    public int SourcePieceType
     {
-        get => (PieceType)((EncodedValue & SRC_PIECE_TYPE) >> 12);
+        get => (int)((EncodedValue & SRC_PIECE_TYPE) >> 12);
     }
 
-    public PieceColor SourcePieceColor
+    public int SourcePieceColor
     {
-        get => (PieceColor)((EncodedValue & SRC_PIECE_COLOR) >> 15);
+        get => (int)((EncodedValue & SRC_PIECE_COLOR) >> 15);
     }
 
     public Piece SourcePiece => new(SourcePieceType, SourcePieceColor);
 
-    public PieceType TargetPieceType
+    public int TargetPieceType
     {
-        get => (PieceType)((EncodedValue & TRG_PIECE_TYPE) >> 17);
+        get => (int)((EncodedValue & TRG_PIECE_TYPE) >> 17);
     }
 
-    public PieceColor TargetPieceColor
+    public int TargetPieceColor
     {
-        get => (PieceColor)((EncodedValue & TRG_PIECE_COLOR) >> 20);
+        get => (int)((EncodedValue & TRG_PIECE_COLOR) >> 20);
     }
 
     public Piece TargetPiece => new(TargetPieceType, TargetPieceColor);
@@ -80,4 +82,19 @@ public readonly struct BinaryMove(uint encodedValue)
     public static implicit operator int(BinaryMove move) => unchecked((int)move.EncodedValue);
 
     public static implicit operator BinaryMove(int value) => new(value);
+
+    public override string ToString()
+    {
+        char piece = SourcePieceType switch
+        {
+            ChessConstants.PIECE_PAWN => 'p',
+            ChessConstants.PIECE_KNIGHT => 'n',
+            ChessConstants.PIECE_BISHOP => 'b',
+            ChessConstants.PIECE_ROOK => 'r',
+            ChessConstants.PIECE_QUEEN => 'q',
+            ChessConstants.PIECE_KING => 'k',
+            _ => '\0'
+        };
+        return string.Format("{0}{1}", SourcePieceColor == ChessConstants.COLOR_WHITE ? char.ToUpper(piece) : piece, TargetSquare);
+    }
 }

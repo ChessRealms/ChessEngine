@@ -1,13 +1,11 @@
-﻿namespace ChessRealms.ChessEngine.Core.Types;
+﻿namespace ChessRealms.ChessEngine.Core.Constants;
 
 /// <summary>
 /// Little-Endian File-Rank Mapping Constants. 
 /// See <see href="https://www.chessprogramming.org/Square_Mapping_Considerations"/> for details.
 /// </summary>
-internal static class LerfConstants
+internal static class SquareMapping
 {
-    public const int TOTAL_SQUARES = 64;
-
     public const ulong A_FILE = 0x0101010101010101;
 
     public const ulong NOT_A_FILE = 0xfefefefefefefefe; // A_FILE ^ ulong.MaxValue;
@@ -22,11 +20,11 @@ internal static class LerfConstants
 
     public const ulong RANK_1 = 0x00000000000000FF;
 
+    public const ulong RANK_4 = 0x00000000FF000000;
+
+    public const ulong RANK_5 = 0x000000FF00000000;
+
     public const ulong RANK_8 = 0xFF00000000000000;
-
-    public const ulong RANK_4 = RANK_1 << 24;
-
-    public const ulong RANK_5 = RANK_8 >> 24;
 
     public const ulong A1_H8_DIAGONAL = 0x8040201008040201;
 

@@ -18,13 +18,13 @@ public static class Occupancy
 
         for (int i = 0; i < bitsCount; ++i)
         {
-            SquareIndex s = attackMask.TrailingZeroCount();
+            SquareIndex s = attackMask.Ls1b();
 
-            attackMask.PopBitAt(s);
+            attackMask = attackMask.PopBitAt(s);
 
             if ((occupancyIndex & 1 << i) != 0)
             {
-                occupancy.SetBitAt(s);
+                occupancy = occupancy.SetBitAt(s);
             }
         }
 

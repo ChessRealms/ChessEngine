@@ -1,58 +1,73 @@
 ﻿using System.Numerics;
+using System.Text;
 
 namespace ChessRealms.ChessEngine.Core.Types;
 
-public struct BitBoard(ulong value)
+public readonly struct BitBoard(ulong value)
 {
-    public ulong Value { get; private set; } = value;
+    public readonly ulong Value = value;
 
-    public BitBoard() : this(0UL) { }
-
-    public readonly BitBoard GetBitAt(SquareIndex index)
+    public readonly BitBoard GetBitAt(SquareIndex squareIndex)
     {
-        return Value & index.Board;
+        return Value & (1ul << squareIndex.Value);
     }
 
-    public void PopBitAt(SquareIndex index)
+    public readonly bool TryGetBitAt(SquareIndex squareIndex, out BitBoard bitBoard)
     {
-        if (GetBitAt(index) != 0)
+        bitBoard = Value & (1ul << squareIndex.Value);
+        return bitBoard != 0;
+    }
+
+    public readonly BitBoard PopBitAt(SquareIndex squareIndex)
+    {
+        return Value ^ (1ul << squareIndex.Value);
+    }
+
+    public readonly bool TryPopBitAt(SquareIndex squareIndex, out BitBoard bitBoard)
+    {
+        bitBoard = Value ^ (1ul << squareIndex.Value);
+        return bitBoard != 0;
+    }
+
+    public readonly BitBoard PopFirstSquare(out SquareIndex squareIndex)
+    {
+        if (Value == 0)
         {
-            Value ^= index.Board;
+            squareIndex = SquareIndex.None;
+            return this;
         }
+
+        squareIndex = Ls1b();
+        return PopBitAt(squareIndex);
     }
 
-    public bool TryPopFirstSquare(out SquareIndex squareIndex)
+    public readonly bool TryPopFirstSquare(out SquareIndex squareIndex, out BitBoard bitBoard)
     {
-        if (Value != 0)
+        if (Value == 0)
         {
-            squareIndex = TrailingZeroCount();
-            PopBitAt(squareIndex);
-            return true;
+            squareIndex = SquareIndex.None;
+            bitBoard = 0ul;
+            return false;
         }
 
-        squareIndex = SquareIndex.None;
-        return false;
+        squareIndex = Ls1b();
+        bitBoard = PopBitAt(squareIndex);
+        return true;
     }
 
-    public void SetBitAt(SquareIndex index)
+    public readonly BitBoard SetBitAt(SquareIndex index)
     {
-        Value |= index.Board;
+        return Value | index.Board;
     }
 
-    public void SetBitsAt(IEnumerable<SquareIndex> indicies)
-    {
-        foreach (SquareIndex index in indicies)
-        {
-            Value |= index.Board;
-        }
-    }
-
-    public readonly SquareIndex TrailingZeroCount()
+    internal readonly int Ls1b()
     {
         return BitOperations.TrailingZeroCount(Value);
     }
 
+    #region Implicit UInt64
     public static implicit operator BitBoard(ulong value) => new(value);
 
     public static implicit operator ulong(BitBoard board) => board.Value;
+    #endregion
 }

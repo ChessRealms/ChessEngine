@@ -1,5 +1,7 @@
-﻿using ChessRealms.ChessEngine.Core.Extensions;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Core.Types.Enums;
 using static System.Console;
 
 namespace ChessRealms.ChessEngine.Console;
@@ -22,7 +24,7 @@ public static class Print
                 }
                 else
                 {
-                    int index = piece.Type.ToIndex() + (piece.Color == PieceColor.Black ? 6 : 0);
+                    int index = piece.Type + (piece.Color == ChessConstants.COLOR_BLACK ? 6 : 0);
 
                     Write(" {0}", PieceCharset.ASCII[index]);
                 }
