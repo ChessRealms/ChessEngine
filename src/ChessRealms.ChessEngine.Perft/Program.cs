@@ -6,10 +6,6 @@ using ChessRealms.ChessEngine.Parsing;
 using System.Diagnostics;
 using System.Text;
 
-Span<BitBoard> pieces = stackalloc BitBoard[12];
-Span<BitBoard> occupancies = stackalloc BitBoard[3];
-ChessBoard board = new(pieces, occupancies);
-
 if (args.Length != 2)
 {
     Console.Error.WriteLine("Invalid arguments amount.");
@@ -25,7 +21,7 @@ if (!int.TryParse(args[0], out var depth) || depth < 1)
     return;
 }
 
-Stopwatch stopwatch = Stopwatch.StartNew();
+ChessBoard board = new();
 
 if (!FenStrings.TryParse(args[1], ref board))
 {
@@ -39,6 +35,8 @@ if (!FenStrings.TryParse(args[1], ref board))
 Console.WriteLine("Depth: {0}", args[0]);
 Console.WriteLine("Fen:   {0}", args[1]);
 Console.WriteLine();
+
+Stopwatch stopwatch = Stopwatch.StartNew();
 
 var nodes = Perft.Test(board, depth);
 
@@ -76,6 +74,8 @@ static class Perft
 
     public static PerftResult Test(ChessBoard chessBoard, int depth, bool upper = true)
     {
+        ChessBoard tmp = new();
+
         Span<BinaryMove> moves = stackalloc BinaryMove[218];
         int written = chessBoard.GetMoves(moves, chessBoard.CurrentColor);
 
@@ -85,7 +85,17 @@ static class Perft
 
             for (int i = 0; i < written; ++i)
             {
+                chessBoard.CopyTo(ref tmp);
+
+                tmp.MakeMove(moves[i]);
+
+                if (tmp.IsChecked())
+                {
+                    continue;
+                }
+
                 perftResult.Nodes += 1;
+
                 if (moves[i].IsCapture) perftResult.Captures += 1;
                 if (moves[i].IsEnpassant) perftResult.Ep += 1;
                 if (moves[i].Castling != Castling.None) perftResult.Castles += 1;
@@ -96,16 +106,20 @@ static class Perft
         }
 
         PerftResult finalRes = new();
-        
-        Span<BitBoard> pieces = stackalloc BitBoard[12];
-        Span<BitBoard> occupancies = stackalloc BitBoard[3];
-        ChessBoard tmp = new(pieces, occupancies);
 
         for (int i = 0; i < written; ++i)
         {
             chessBoard.CopyTo(ref tmp);
+            
             tmp.MakeMove(moves[i]);
+            
+            if (tmp.IsChecked())
+            {
+                continue;
+            }
+
             tmp.CurrentColor = chessBoard.CurrentColor.Opposite();
+            
             var tmpRes = Test(tmp, depth - 1, false);
 
             finalRes.Nodes += tmpRes.Nodes;

@@ -6,8 +6,6 @@
 /// </summary>
 internal static class SquareMapping
 {
-    public const int TOTAL_SQUARES = 64;
-
     public const ulong A_FILE = 0x0101010101010101;
 
     public const ulong NOT_A_FILE = 0xfefefefefefefefe; // A_FILE ^ ulong.MaxValue;

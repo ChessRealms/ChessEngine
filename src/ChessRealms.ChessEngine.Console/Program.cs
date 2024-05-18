@@ -5,15 +5,13 @@ using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Parsing;
 
+ChessBoard board = new();
 
+FenStrings.TryParse(FenStrings.StartPosition, ref board);
 
-BinaryMoveBuilder builder = new();
+ChessBoard cpy = new();
 
-BinaryMove _move = builder.Build();
+board.CopyTo(ref cpy);
 
-//builder.WithSourcePiece(ChessConstants.PIECE_ROOK, ChessConstants.COLOR_WHITE);
-builder.WithSourcePiece(ChessConstants.PIECE_ROOK, ChessConstants.COLOR_WHITE);
-
-BinaryMove move = builder.Build();
-
-Console.WriteLine(move);
+Print.Board(board);
+Print.Board(cpy);
