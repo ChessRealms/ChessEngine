@@ -129,35 +129,6 @@ public unsafe struct ChessBoard()
             && IsSquareAttacked(kingSquare, color.Opposite());
     }
 
-    public readonly int GetLegalMoves(Span<BinaryMove> dest, PieceColor side)
-    {
-        Span<BinaryMove> moves = stackalloc BinaryMove[218];
-        int movesLen = GetMoves(moves, side);
-
-        Span<BitBoard> pieces = stackalloc BitBoard[12];
-        Span<BitBoard> occupancies = stackalloc BitBoard[3];
-        ChessBoard tempBoard = new();
-
-        int color = (int)side;
-        int oppositeColor = color.Opposite();
-        int written = 0;
-
-        for (int i = 0; i < movesLen; ++i)
-        {
-            CopyTo(ref tempBoard);
-            tempBoard.MakeMove(moves[i]);
-            
-            if (tempBoard.IsChecked())
-            {
-                continue;
-            }
-
-            dest[written++] = moves[i];
-        }
-
-        return written;
-    }
-
     public readonly int GetMoves(Span<BinaryMove> dest, PieceColor side)
     {
         int color = (int)side;
@@ -538,25 +509,6 @@ public unsafe struct ChessBoard()
     private const EnumSquare WQ_ROOK = EnumSquare.a1;
     private const EnumSquare BK_ROOK = EnumSquare.h8;
     private const EnumSquare BQ_ROOK = EnumSquare.a8;
-
-    public bool TryMakeLegalMove(BinaryMove move)
-    {
-        Span<BinaryMove> moves = stackalloc BinaryMove[218];
-        
-        int written = GetLegalMoves(moves, CurrentColor);
-        
-        for (int i = 0; i < written; ++i)
-        {
-            if (moves[i].EncodedValue == move.EncodedValue)
-            {
-                MakeMove(move);
-                CurrentColor = CurrentColor.Opposite();
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     public void MakeMove(BinaryMove move)
     {
