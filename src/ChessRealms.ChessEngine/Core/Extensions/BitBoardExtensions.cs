@@ -39,7 +39,7 @@ internal static class BitBoardExtensions
         return board.PopBitAt(squareIndex);
     }
 
-    public static bool TryPopFirstSquare(this ulong board, out SquareIndex squareIndex, out BitBoard bitBoard)
+    public static bool TryPopFirstSquare(this ulong board, out SquareIndex squareIndex, out ulong bitBoard)
     {
         if (board == 0)
         {

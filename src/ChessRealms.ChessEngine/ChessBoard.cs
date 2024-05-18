@@ -173,10 +173,10 @@ public unsafe struct ChessBoard()
 
         #region Setup variables depends from color.
         int bitboard = BitBoardIndex(color, PIECE_PAWN);
-        BitBoard pawns = _pieces[bitboard];
-        BitBoard empty = _occupancies[COLOR_NONE] ^ SquareMapping.ALL_SQUARES;
-        BitBoard singlePush;
-        BitBoard doublePush;
+        ulong pawns = _pieces[bitboard];
+        ulong empty = _occupancies[COLOR_NONE] ^ SquareMapping.ALL_SQUARES;
+        ulong singlePush;
+        ulong doublePush;
         ulong pawnPromotionRank;
         int rankOffset;
 

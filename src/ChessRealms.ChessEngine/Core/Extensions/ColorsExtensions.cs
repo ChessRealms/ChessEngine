@@ -3,7 +3,7 @@ using ChessRealms.ChessEngine.Core.Types.Enums;
 
 namespace ChessRealms.ChessEngine.Core.Extensions;
 
-public static class TypesExtensions
+public static class ColorsExtensions
 {
     public static PieceColor Opposite(this PieceColor color)
     {
