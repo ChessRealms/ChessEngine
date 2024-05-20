@@ -6,7 +6,7 @@ using ChessRealms.ChessEngine2.Parsing;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn.WriteMovesToSpan;
 
-public class QuietPawnMoveTests
+public class QuietMoveTests
 {
     private const string ParseFenError = "Cant parse fen string.";
 

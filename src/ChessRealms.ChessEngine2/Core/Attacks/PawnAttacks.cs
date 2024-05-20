@@ -19,7 +19,7 @@ internal static class PawnAttacks
             black[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        ImmutableArray<ulong>[] masks = [[.. black], [.. white]];
+        ImmutableArray<ulong>[] masks = [[.. white], [.. black]];
 
         AttackMasks = [.. masks];
     }
