@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.MagicBruteforce
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Perft", "ChessRealms.ChessEngine.Perft\ChessRealms.ChessEngine.Perft.csproj", "{B52278FD-37F0-4955-8E90-FD365CBBC769}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2", "ChessRealms.ChessEngine2\ChessRealms.ChessEngine2.csproj", "{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2.Tests", "ChessRealms.ChessEngine2.Tests\ChessRealms.ChessEngine2.Tests.csproj", "{A77B252C-0513-4F24-A908-8F68CC3F6728}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A77B252C-0513-4F24-A908-8F68CC3F6728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A77B252C-0513-4F24-A908-8F68CC3F6728}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A77B252C-0513-4F24-A908-8F68CC3F6728}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A77B252C-0513-4F24-A908-8F68CC3F6728}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
