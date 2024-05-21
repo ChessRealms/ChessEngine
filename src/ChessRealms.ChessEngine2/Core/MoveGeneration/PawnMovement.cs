@@ -24,13 +24,12 @@ internal static class PawnMovement
         return bitboard >> HorizontalRotateStep;
     }
 
-    public static unsafe int WriteMovesUnsafe(Position* position, int color, int* moves, int size, int offset)
+    public static unsafe int WriteMovesUnsafe(Position* position, int color, int* dest, int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);
-        Debug.Assert(offset < size);
         
-        int* cursor = moves + offset;
+        int* cursor = dest + offset;
         int BBIndex = Position.BBIndex(Pieces.Pawn, color);
 
         ulong empty = position->blockers[Colors.None] ^ SquareMapping.ALL_SQUARES;
@@ -167,11 +166,11 @@ internal static class PawnMovement
         return (int)(cursor - cursor);
     }
 
-    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> moves, int offset = 0)
+    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);
-        Debug.Assert(offset < moves.Length);
+        Debug.Assert(offset < dest.Length);
 
         int cursor = offset;
         int BBIndex = Position.BBIndex(Pieces.Pawn, color);
@@ -211,25 +210,25 @@ internal static class PawnMovement
 
             if ((SquareOps.ToBitboard(trgSquare) & promotionRank) != 0)
             {
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare,
                     promotion: Promotions.Knight);
 
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare,
                     promotion: Promotions.Bishop);
 
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare,
                     promotion: Promotions.Rook);
 
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare,
                     promotion: Promotions.Queen);
             }
             else
             {
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare);
             }
 
@@ -241,7 +240,7 @@ internal static class PawnMovement
             int trgSquare = BitboardOps.Lsb(doublePush);
             int srcSquare = trgSquare + (2 * stepBack);
 
-            moves[cursor++] = BinaryMoveOps.EncodeMove(
+            dest[cursor++] = BinaryMoveOps.EncodeMove(
                 srcSquare, Pieces.Pawn, color, trgSquare, 
                 doublePush: 1);
 
@@ -258,7 +257,7 @@ internal static class PawnMovement
             {
                 srcSquare = BitboardOps.Lsb(srcSquares);
 
-                moves[cursor++] = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, enpassant,
                     enpassant: 1, capture: 1);
 
@@ -279,25 +278,25 @@ internal static class PawnMovement
 
                 if ((SquareOps.ToBitboard(targetSquare) & promotionRank) != 0)
                 {
-                    moves[cursor++] = BinaryMoveOps.EncodeMove(
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare,
                         capture: 1, promotion: Promotions.Knight);
 
-                    moves[cursor++] = BinaryMoveOps.EncodeMove(
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare,
                         capture: 1, promotion: Promotions.Bishop);
 
-                    moves[cursor++] = BinaryMoveOps.EncodeMove(
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare,
                         capture: 1, promotion: Promotions.Rook);
 
-                    moves[cursor++] = BinaryMoveOps.EncodeMove(
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare,
                         capture: 1, promotion: Promotions.Queen);
                 }
                 else
                 {
-                    moves[cursor++] = BinaryMoveOps.EncodeMove(
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare, capture: 1);
                 }
 

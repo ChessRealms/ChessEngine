@@ -4,20 +4,34 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal static class KnightAttacks
+internal static unsafe class KnightAttacks
 {
+    private static readonly ulong[] _attackMasks;
+    public static readonly ulong* AttackMasksUnsafe;
     public static readonly ImmutableArray<ulong> AttackMasks;
 
     static KnightAttacks()
     {
-        ulong[] masks = new ulong[64];
+        _attackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            masks[square] = MaskKnightAttack(square);
+            _attackMasks[square] = MaskKnightAttack(square);
         }
 
-        AttackMasks = [.. masks];
+        fixed (ulong* ptr = _attackMasks)
+            AttackMasksUnsafe = ptr;
+
+        AttackMasks = [.. _attackMasks];
+    }
+
+    /// <summary>
+    /// Triggers static ctor().
+    /// </summary>
+    public static void InvokeInit()
+    {
+        // Touch variable to trigger static ctor.
+        _ = AttackMasks[0];
     }
 
     public static ulong MaskKnightAttack(int square)

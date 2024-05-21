@@ -13,4 +13,4 @@ var config = DefaultConfig.Instance
          .WithLaunchCount(1)
          .WithToolchain(InProcessEmitToolchain.DontLogOutput));
 
-BenchmarkRunner.Run<PawnMoveGenerationBench>(config);
+BenchmarkRunner.Run<MoveGenerationBenchmarks>(config);

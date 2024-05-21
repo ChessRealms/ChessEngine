@@ -59,7 +59,7 @@ internal unsafe static class PawnAttacks
         DebugAsserts.ValidColor(color);
         DebugAsserts.ValidSquare(square);
 
-        return AttackMasksUnsafe[(color * 64) + square];
+        return *(AttackMasksUnsafe + (color * 64) + square);
     }
 
     private static ulong MaskPawnAttack(int color, int square)
