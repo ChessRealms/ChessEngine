@@ -1,4 +1,4 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -12,14 +12,14 @@ public static class SquareOps
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Rank(int square)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugAsserts.ValidSquare(square);
         return square / 8;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int File(int square)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugAsserts.ValidSquare(square);
         return square % 8;
     }
 
@@ -40,13 +40,13 @@ public static class SquareOps
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong ToBitboard(int square)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugAsserts.ValidSquare(square);
         return 1ul << square;
     }
 
     public static string ToAbbriviature(int square)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugAsserts.ValidSquare(square);
         int file = File(square);
         int rank = Rank(square);
         return string.Format("{0}{1}", (char)('a' + file), (char)('1' + rank));

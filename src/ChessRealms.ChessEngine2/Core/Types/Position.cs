@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -13,7 +14,7 @@ public unsafe struct Position
     internal int color;
     internal int castlings;
     internal int enpassant;
-    
+
     internal int fullMoveCount;
     internal int halfMoveClock;
 
@@ -26,10 +27,10 @@ public unsafe struct Position
 
     public Piece GetPieceAt(int square, int color)
     {
-        Debug.Assert(Squares.IsValid(square));
-        Debug.Assert(Colors.IsValid(color));
+        DebugAsserts.ValidSquare(square);
+        DebugAsserts.ValidColor(color);
 
-        int bbIndex     = BBIndex(Pieces.Pawn, color);
+        int bbIndex = BBIndex(Pieces.Pawn, color);
         int bbLastIndex = BBIndex(Pieces.King, color);
 
         Debug.Assert(IsValidBBIndex(bbIndex));
@@ -51,10 +52,10 @@ public unsafe struct Position
 
     public void SetPieceAt(int square, int piece, int color)
     {
-        Debug.Assert(Squares.IsValid(square));
-        Debug.Assert(Pieces.IsValid(piece));
-        Debug.Assert(Colors.IsValid(color));
-        
+        DebugAsserts.ValidSquare(square);
+        DebugAsserts.ValidPiece(piece);
+        DebugAsserts.ValidColor(color);
+
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
 
@@ -72,9 +73,9 @@ public unsafe struct Position
 
     public void PopPieceAt(int square, int piece, int color)
     {
-        Debug.Assert(Squares.IsValid(square));
-        Debug.Assert(Pieces.IsValid(piece));
-        Debug.Assert(Colors.IsValid(color));
+        DebugAsserts.ValidSquare(square);
+        DebugAsserts.ValidPiece(piece);
+        DebugAsserts.ValidColor(color);
 
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
@@ -94,8 +95,8 @@ public unsafe struct Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int BBIndex(int piece, int color)
     {
-        Debug.Assert(Pieces.IsValid(piece));
-        Debug.Assert(Colors.IsValid(color));
+        DebugAsserts.ValidPiece(piece);
+        DebugAsserts.ValidColor(color);
 
         return color * 6 + piece;
     }
@@ -104,7 +105,7 @@ public unsafe struct Position
     internal static int PieceFromBBIndex(int bbIndex, int color)
     {
         Debug.Assert(IsValidBBIndex(bbIndex));
-        Debug.Assert(Colors.IsValid(color));
+        DebugAsserts.ValidColor(color);
 
         return bbIndex - color * 6;
     }
