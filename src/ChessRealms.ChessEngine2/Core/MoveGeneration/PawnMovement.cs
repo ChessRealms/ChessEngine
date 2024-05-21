@@ -160,7 +160,7 @@ internal static class PawnMovement
         while (BitboardOps.IsNotEmpty(pawns))
         {
             int srcSquare = BitboardOps.Lsb(pawns);
-            ulong attack = PawnAttacks.AttackMasks[enemyColor][srcSquare];
+            ulong attack = PawnAttacks.AttackMasks[color][srcSquare];
             ulong captures = attack & enemyPieces;
 
             while (BitboardOps.IsNotEmpty(captures))

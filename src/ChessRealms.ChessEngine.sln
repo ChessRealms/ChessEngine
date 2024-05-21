@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2.Tests", "ChessRealms.ChessEngine2.Tests\ChessRealms.ChessEngine2.Tests.csproj", "{A77B252C-0513-4F24-A908-8F68CC3F6728}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChessEngine2", "ChessEngine2", "{0785FE11-03DA-45AC-8704-A67DE5C4777C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EDFF5B83-6F63-48D6-9C08-2D4E3CCAE324} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
+		{A77B252C-0513-4F24-A908-8F68CC3F6728} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E65FD084-D2F8-4F38-93AC-24C1EB66CE8A}

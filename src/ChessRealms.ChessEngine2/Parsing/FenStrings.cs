@@ -127,8 +127,8 @@ public static partial class FenStrings
     {
         if (fileRankSpan.Length > 1)
         {
-            int file = 'h' - fileRankSpan[0];
-            int rank = '8' - fileRankSpan[1];
+            int file = fileRankSpan[0] - 'a';
+            int rank = fileRankSpan[1] - '1';
 
             if (SquareOps.ValidateFileRank(file) && SquareOps.ValidateFileRank(rank))
             {

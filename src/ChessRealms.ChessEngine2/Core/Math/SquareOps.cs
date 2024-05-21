@@ -43,4 +43,12 @@ public static class SquareOps
         Debug.Assert(Squares.IsValid(square));
         return 1ul << square;
     }
+
+    public static string ToAbbriviature(int square)
+    {
+        Debug.Assert(Squares.IsValid(square));
+        int file = File(square);
+        int rank = Rank(square);
+        return string.Format("{0}{1}", (char)('a' + file), (char)('1' + rank));
+    }
 }
