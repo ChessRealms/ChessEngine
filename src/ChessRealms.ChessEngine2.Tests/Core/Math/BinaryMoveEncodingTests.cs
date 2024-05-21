@@ -3,7 +3,7 @@ using ChessRealms.ChessEngine2.Core.Math;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.Math;
 
-public class BinaryMoveEncodingTests
+internal class BinaryMoveEncodingTests
 {
     [Test]
     public void EncodeDecodeMoveTest()

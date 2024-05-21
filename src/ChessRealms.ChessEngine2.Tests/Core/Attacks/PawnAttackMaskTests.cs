@@ -4,7 +4,7 @@ using ChessRealms.ChessEngine2.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class PawnAttackMaskTests
+internal class PawnAttackMaskTests
 {
     [Test]
     public void From_A4_AsWhitePawn()

@@ -4,9 +4,9 @@ using ChessRealms.ChessEngine2.Core.MoveGeneration;
 using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Parsing;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn.WriteMovesToSpan;
+namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn;
 
-public class EnpassantMoveTests
+internal class EnpassantMoveTests
 {
     [Test]
     public void Test_1_AsWhite()

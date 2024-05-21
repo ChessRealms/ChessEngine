@@ -167,7 +167,7 @@ internal static class PawnMovement
         return (int)(cursor - cursor);
     }
 
-    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> moves, int offset)
+    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> moves, int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);

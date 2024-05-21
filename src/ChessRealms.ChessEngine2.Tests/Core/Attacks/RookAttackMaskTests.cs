@@ -4,7 +4,7 @@ using ChessRealms.ChessEngine2.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class RookAttackMaskTests
+internal class RookAttackMaskTests
 {
     [Test]
     public void From_D4()
