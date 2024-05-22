@@ -24,6 +24,7 @@ internal static class KnightMovement
         while (BitboardOps.IsNotEmpty(knightBB))
         {
             int srcSquare = BitboardOps.Lsb(knightBB);
+            int trgSquare;
 
             ulong movesBB = ~myBlockers & *(KnightAttacks.AttackMasksUnsafe + srcSquare);
             ulong captures = enemyBlockers & movesBB;
@@ -31,7 +32,7 @@ internal static class KnightMovement
 
             while (BitboardOps.IsNotEmpty(captures))
             {
-                int trgSquare = BitboardOps.Lsb(captures);
+                trgSquare = BitboardOps.Lsb(captures);
                 *cursor++ = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Knight, color, trgSquare, 
                     capture: 1);
@@ -40,7 +41,7 @@ internal static class KnightMovement
 
             while (BitboardOps.IsNotEmpty(normalMoves))
             {
-                int trgSquare = BitboardOps.Lsb(normalMoves);
+                trgSquare = BitboardOps.Lsb(normalMoves);
                 *cursor++ = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Knight, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);
@@ -67,6 +68,7 @@ internal static class KnightMovement
         while (BitboardOps.IsNotEmpty(knightBB))
         {
             int srcSquare = BitboardOps.Lsb(knightBB);
+            int trgSquare;
 
             ulong movesBB = ~myBlockers & KnightAttacks.AttackMasks[srcSquare];
             ulong captures = enemyBlockers & movesBB;
@@ -74,7 +76,7 @@ internal static class KnightMovement
 
             while (BitboardOps.IsNotEmpty(captures))
             {
-                int trgSquare = BitboardOps.Lsb(captures);
+                trgSquare = BitboardOps.Lsb(captures);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Knight, color, trgSquare, 
                     capture: 1);
@@ -83,7 +85,7 @@ internal static class KnightMovement
 
             while (BitboardOps.IsNotEmpty(normalMoves))
             {
-                int trgSquare = BitboardOps.Lsb(normalMoves);
+                trgSquare = BitboardOps.Lsb(normalMoves);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Knight, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);

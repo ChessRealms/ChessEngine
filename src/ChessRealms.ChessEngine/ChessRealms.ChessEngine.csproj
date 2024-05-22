@@ -11,6 +11,7 @@
     <InternalsVisibleTo Include="ChessRealms.ChessEngine.Tests" />
     <InternalsVisibleTo Include="ChessRealms.MagicBruteforce" />
     <InternalsVisibleTo Include="ChessRealms.ChessEngine.Console" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Benchmark" />
   </ItemGroup>
 
 </Project>
