@@ -1,26 +1,24 @@
 ﻿using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Debugs;
 using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal static class RookAttacks
+internal static unsafe class RookAttacks
 {
     /// <summary>
-    /// Pre-calculated rook slider attacks. Shape of array is <c>[64][4096]</c>.
+    /// Pre-calculated rook slider attacks. Shape of array is <c>[64 * 4096]</c>.
     /// </summary>
-    public static readonly ImmutableArray<ImmutableArray<ulong>> SliderAttacks;
+    public static readonly ImmutableArray<ulong> SliderAttacks;
 
     /// <summary>
     /// Pre-calculated rook attack masks (no outer squares) for each square index from 0 to 63.
     /// </summary>
     public static readonly ImmutableArray<ulong> AttackMasks;
 
-    /// <summary>
-    /// Pre-calculated bit counts for each rook attack mask.
-    /// </summary>
-    public static readonly ImmutableArray<int> RelevantBits =
+    private static readonly ImmutableArray<int> RelevantBits = 
     [
          12, 11, 11, 11, 11, 11, 11, 12,
          11, 10, 10, 10, 10, 10, 10, 11,
@@ -31,11 +29,8 @@ internal static class RookAttacks
          11, 10, 10, 10, 10, 10, 10, 11,
          12, 11, 11, 11, 11, 11, 11, 12
     ];
-        
-    /// <summary>
-    /// Pre-calculated rook magic numbers for each square index from 0 to 63.
-    /// </summary>
-    public static readonly ImmutableArray<ulong> MagicNumbers =
+
+    private static readonly ImmutableArray<ulong> MagicNumbers = 
     [
         0x0C80108004400020,
         0x0240002000100042,
@@ -105,13 +100,12 @@ internal static class RookAttacks
 
     static RookAttacks()
     {
-        ulong[] attackMasks = new ulong[64];
-        ulong[][] sliderAttacks = new ulong[64][];
+        var attackMasks = new ulong[64];
+        var sliderAttacks = new ulong[64 * 4096];
 
         for (int square = 0; square < 64; ++square)
         {
             attackMasks[square] = MaskRookAttack(square);
-            sliderAttacks[square] = new ulong[4096];
 
             int occupancyIndicies = 1 << RelevantBits[square];
 
@@ -119,14 +113,21 @@ internal static class RookAttacks
             {
                 ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], attackMasks[square]);
                 
-                ulong magicIndex = (occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]);
+                int magicIndex = (int)((occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]));
 
-                sliderAttacks[square][magicIndex] = MaskRookSliderAttackOnTheFly(square, occupancy);
+                ulong mask = MaskRookSliderAttackOnTheFly(square, occupancy);
+
+                sliderAttacks[(square * 4096) + magicIndex] = mask;
             }
         }
 
         AttackMasks = [.. attackMasks];
-        SliderAttacks = sliderAttacks.Select(x => x.ToImmutableArray()).ToImmutableArray();
+        SliderAttacks = [.. sliderAttacks];
+    }
+
+    public static void InvokeInit()
+    {
+        _ = SliderAttacks[0];
     }
 
     /// <summary>
@@ -137,12 +138,11 @@ internal static class RookAttacks
     /// <returns> Attack mask. </returns>
     public static ulong GetSliderAttack(int square, ulong occupancy)
     {
-        Debug.Assert(Squares.IsValid(square));
-
+        DebugAsserts.ValidSquare(square);
         occupancy &= AttackMasks[square];
         occupancy *= MagicNumbers[square];
         occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[square][(int)occupancy];
+        return SliderAttacks[(square * 4096) + unchecked((int)occupancy)];
     }
 
     /// <summary>

@@ -24,4 +24,16 @@ internal static class DebugAsserts
     {
         Debug.Assert(Pieces.IsValid(piece), "Invalid Piece.", "Actual piece value: '{0}'.", piece);
     }
+
+    [Conditional(DEBUG)]
+    public static void LeapingPiece(int piece)
+    {
+        Debug.Assert(piece == Pieces.King || piece == Pieces.Knight);
+    }
+
+    [Conditional(DEBUG)]
+    public static void SlidingPiece(int piece)
+    {
+        Debug.Assert(piece == Pieces.Bishop || piece == Pieces.Rook || piece == Pieces.Queen);
+    }
 }

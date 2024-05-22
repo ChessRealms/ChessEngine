@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine2.Core.MoveGeneration;
 
-internal static class PawnMovement
+internal unsafe static class PawnMovement
 {
     public const int HorizontalRotateStep = 8;
 
@@ -24,7 +24,7 @@ internal static class PawnMovement
         return bitboard >> HorizontalRotateStep;
     }
 
-    public static unsafe int WriteMovesUnsafe(Position* position, int color, int* dest, int offset = 0)
+    public static int WriteMovesToPtrUnsafe(Position* position, int color, int* dest, int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);
@@ -166,7 +166,7 @@ internal static class PawnMovement
         return (int)(cursor - cursor);
     }
 
-    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
+    public static int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);

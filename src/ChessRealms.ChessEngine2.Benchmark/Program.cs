@@ -13,4 +13,9 @@ var config = DefaultConfig.Instance
          .WithLaunchCount(1)
          .WithToolchain(InProcessEmitToolchain.DontLogOutput));
 
-BenchmarkRunner.Run<MoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<PawnMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<KnightMoveGenerationBenckmarks>(config);
+BenchmarkRunner.Run<BishopMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<RookMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<QueenMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<KingMoveGenerationBenchmarks>(config);

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Knight;
 
-internal class KnightMovesTests
+internal unsafe class KnightMovesTestsUnsafe
 {
     //     ASCII Board (as white)
     //
@@ -26,7 +26,7 @@ internal class KnightMovesTests
     private const string fen = "6P1/3p3P/5n2/3p3P/P3p1P1/2N5/P3p3/1P1p4 b - - 0 1";
     private Position position;
 
-    public KnightMovesTests()
+    public KnightMovesTestsUnsafe()
     {
         bool parsed = FenStrings.TryParse(fen, out position);
         Debug.Assert(parsed);
@@ -38,17 +38,31 @@ internal class KnightMovesTests
         int color = Colors.White;
         int expectedWritten = 5;
         
-        Span<int> moves = stackalloc int[expectedWritten];
-        int written = LeapingMovement.WriteMovesToSpan(
-            ref position, 
-            color, 
-            Pieces.Knight,
-            KnightAttacks.AttackMasks,
-            moves);
+        int* moves = stackalloc int[expectedWritten];
+        int written;
+        fixed (Position* posPtr = &position)
+        {
+            written = LeapingMovement.WriteMovesToPtrUnsafe(
+                posPtr, 
+                color, 
+                Pieces.Knight,
+                KnightAttacks.AttackMasksUnsafe,
+                moves);
+        }
+        
         
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        var moveSet = moves.ToArray().ToHashSet();
+        HashSet<int> moveSet = [];
+
+        int* cursor = moves;
+        int* maxMoves = moves + written;
+        
+        while (cursor < maxMoves)
+        {
+            moveSet.Add(*cursor++);
+        }
+        
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(
@@ -72,17 +86,32 @@ internal class KnightMovesTests
         int color = Colors.Black;
         int expectedWritten = 5;
 
-        Span<int> moves = stackalloc int[expectedWritten];
-        int written = LeapingMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            Pieces.Knight,
-            KnightAttacks.AttackMasks,
-            moves);
+        int* moves = stackalloc int[expectedWritten];
+        int written;
+        
+        fixed (Position* posPtr = &position)
+        {
+            written = LeapingMovement.WriteMovesToPtrUnsafe(
+                posPtr,
+                Colors.Black,
+                Pieces.Knight,
+                KnightAttacks.AttackMasksUnsafe,
+                moves);
+        }
+        
         
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        var moveSet = moves.ToArray().ToHashSet();      
+        HashSet<int> moveSet = [];
+
+        int* cursor = moves;
+        int* maxMoves = moves + written;
+
+        while (cursor < maxMoves)
+        {
+            moveSet.Add(*cursor++);
+        }
+
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(

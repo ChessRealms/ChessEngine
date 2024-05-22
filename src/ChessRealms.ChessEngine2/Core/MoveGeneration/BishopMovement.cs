@@ -7,9 +7,13 @@ using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Core.MoveGeneration;
 
-internal static class KnightMovement
+internal unsafe static class BishopMovement
 {
-    public static unsafe int WriteMovesUnsafe(Position* position, int color, int* dest, int offset = 0)
+    public static int WriteMovesToPtrUnsafe(
+        Position* position, 
+        int color,
+        int* dest, 
+        int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);
@@ -19,14 +23,17 @@ internal static class KnightMovement
         int enemyColor = Colors.Mirror(color);
         ulong myBlockers = position->blockers[color];
         ulong enemyBlockers = position->blockers[enemyColor];
-        ulong knightBB = position->pieceBBs[Position.BBIndex(Pieces.Knight, color)];
+        ulong allBlockers = myBlockers | enemyBlockers;
+        ulong pieceBB = position->pieceBBs[Position.BBIndex(Pieces.Bishop, color)];
 
-        while (BitboardOps.IsNotEmpty(knightBB))
+        int srcSquare;
+        int trgSquare;
+
+        while (BitboardOps.IsNotEmpty(pieceBB))
         {
-            int srcSquare = BitboardOps.Lsb(knightBB);
-            int trgSquare;
+            srcSquare = BitboardOps.Lsb(pieceBB);
 
-            ulong movesBB = ~myBlockers & *(KnightAttacks.AttackMasksUnsafe + srcSquare);
+            ulong movesBB = ~myBlockers & BishopAttacks.GetSliderAttack(srcSquare, allBlockers);
             ulong captures = enemyBlockers & movesBB;
             ulong normalMoves = captures ^ movesBB;
 
@@ -34,7 +41,7 @@ internal static class KnightMovement
             {
                 trgSquare = BitboardOps.Lsb(captures);
                 *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Knight, color, trgSquare, 
+                    srcSquare, Pieces.Bishop, color, trgSquare, 
                     capture: 1);
                 captures = BitboardOps.PopBitAt(captures, trgSquare);
             }
@@ -43,17 +50,21 @@ internal static class KnightMovement
             {
                 trgSquare = BitboardOps.Lsb(normalMoves);
                 *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Knight, color, trgSquare);
+                    srcSquare, Pieces.Bishop, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);
             }
 
-            knightBB = BitboardOps.PopBitAt(knightBB, srcSquare);
+            pieceBB = BitboardOps.PopBitAt(pieceBB, srcSquare);
         }
 
         return (int)(cursor - dest);
     }
 
-    public static unsafe int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
+    public static int WriteMovesToSpan(
+        ref Position position, 
+        int color,
+        Span<int> dest, 
+        int offset = 0)
     {
         DebugAsserts.ValidColor(color);
         Debug.Assert(offset >= 0);
@@ -63,14 +74,17 @@ internal static class KnightMovement
         int enemyColor = Colors.Mirror(color);
         ulong myBlockers = position.blockers[color];
         ulong enemyBlockers = position.blockers[enemyColor];
-        ulong knightBB = position.pieceBBs[Position.BBIndex(Pieces.Knight, color)];
+        ulong allBlockers = myBlockers | enemyBlockers;
+        ulong pieceBB = position.pieceBBs[Position.BBIndex(Pieces.Bishop, color)];
 
-        while (BitboardOps.IsNotEmpty(knightBB))
+        int srcSquare;
+        int trgSquare;
+
+        while (BitboardOps.IsNotEmpty(pieceBB))
         {
-            int srcSquare = BitboardOps.Lsb(knightBB);
-            int trgSquare;
+            srcSquare = BitboardOps.Lsb(pieceBB); 
 
-            ulong movesBB = ~myBlockers & KnightAttacks.AttackMasks[srcSquare];
+            ulong movesBB = ~myBlockers & BishopAttacks.GetSliderAttack(srcSquare, allBlockers);
             ulong captures = enemyBlockers & movesBB;
             ulong normalMoves = captures ^ movesBB;
 
@@ -78,7 +92,7 @@ internal static class KnightMovement
             {
                 trgSquare = BitboardOps.Lsb(captures);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Knight, color, trgSquare, 
+                    srcSquare, Pieces.Bishop, color, trgSquare, 
                     capture: 1);
                 captures = BitboardOps.PopBitAt(captures, trgSquare);
             }
@@ -87,11 +101,11 @@ internal static class KnightMovement
             {
                 trgSquare = BitboardOps.Lsb(normalMoves);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Knight, color, trgSquare);
+                    srcSquare, Pieces.Bishop, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);
             }
 
-            knightBB = BitboardOps.PopBitAt(knightBB, srcSquare);
+            pieceBB = BitboardOps.PopBitAt(pieceBB, srcSquare);
         }
 
         return cursor - offset;

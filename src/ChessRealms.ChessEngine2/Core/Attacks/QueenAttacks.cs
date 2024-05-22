@@ -10,8 +10,7 @@ internal static class QueenAttacks
     /// <returns> Attack mask. </returns>
     public static ulong GetSliderAttack(int square, ulong occupancy)
     {
-        ulong attacks = RookAttacks.GetSliderAttack(square, occupancy);
-        attacks |= BishopAttacks.GetSliderAttack(square, occupancy);
-        return attacks;
+        return RookAttacks.GetSliderAttack(square, occupancy) 
+            | BishopAttacks.GetSliderAttack(square, occupancy);
     }
 }

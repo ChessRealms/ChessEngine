@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChessEngine2", "ChessEngine2", "{0785FE11-03DA-45AC-8704-A67DE5C4777C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessRealms.ChessEngine2.Benchmark", "ChessRealms.ChessEngine2.Benchmark\ChessRealms.ChessEngine2.Benchmark.csproj", "{0E736095-86A5-4884-8B1E-ABAC05EADC12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine2.Benchmark", "ChessRealms.ChessEngine2.Benchmark\ChessRealms.ChessEngine2.Benchmark.csproj", "{0E736095-86A5-4884-8B1E-ABAC05EADC12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

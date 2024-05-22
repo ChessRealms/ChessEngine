@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine2.Core.Math;
+using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
@@ -12,6 +13,7 @@ internal static class Occupancy
     /// <param name="bitsCount"> Bits count of <paramref name="attackMask"/>. </param>
     /// <param name="attackMask"> Attack mask. </param>
     /// <returns> Occupancy BitBoard. </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CreateAtIndex(int occupancyIndex, int bitsCount, ulong attackMask)
     {
         ulong occupancy = 0;
