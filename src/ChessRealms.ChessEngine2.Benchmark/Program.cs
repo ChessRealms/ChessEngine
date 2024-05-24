@@ -13,12 +13,14 @@ var config = DefaultConfig.Instance
          .WithLaunchCount(1)
          .WithToolchain(InProcessEmitToolchain.DontLogOutput));
 
-//BenchmarkRunner.Run<PawnMoveGenerationBenchmarks>(config);
-//BenchmarkRunner.Run<KnightMoveGenerationBenckmarks>(config);
-//BenchmarkRunner.Run<BishopMoveGenerationBenchmarks>(config);
-//BenchmarkRunner.Run<RookMoveGenerationBenchmarks>(config);
-//BenchmarkRunner.Run<QueenMoveGenerationBenchmarks>(config);
-//BenchmarkRunner.Run<KingMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<PawnMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<KnightMoveGenerationBenckmarks>(config);
+BenchmarkRunner.Run<BishopMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<RookMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<QueenMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<KingMoveGenerationBenchmarks>(config);
 
-//BenchmarkRunner.Run<CastlingMoveGenerationBenchmarks>(config);
+BenchmarkRunner.Run<CastlingMoveGenerationBenchmarks>(config);
 BenchmarkRunner.Run<IsSquareAttackedBenchmarks>(config);
+
+BenchmarkRunner.Run<AllMoveGenerationBenchmarks>(config);

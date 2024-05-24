@@ -49,6 +49,9 @@ Console.WriteLine();
 Console.WriteLine("Seconds: {0}", stopwatch.Elapsed.TotalSeconds);
 Console.WriteLine("Elapsed: {0}", stopwatch.Elapsed);
 Console.WriteLine("ElapsedMilliseconds: {0}", stopwatch.ElapsedMilliseconds);
+Console.WriteLine();
+Console.WriteLine("Nodes/s: {0}", nodes.Nodes / stopwatch.Elapsed.TotalSeconds);
+Console.WriteLine();
 
 static class Perft
 {
