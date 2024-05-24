@@ -3,19 +3,19 @@ using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.MoveGeneration;
 using ChessRealms.ChessEngine2.Core.Types;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
 
 public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
 {
-
-
     public QueenMoveGenerationBenchmarks() : base()
     {
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteSlidingMovesToSpanArray()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -27,6 +27,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteSlidingMovesToSpanList()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -38,6 +39,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteSlidingMovesToUnsafePtr()
     {
         fixed (Position* posPtr = &position)
@@ -53,6 +55,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteQueenMovesToSpanArray()
     {
         QueenMovement.WriteMovesToSpan(
@@ -62,6 +65,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteQueenMovesToSpanList()
     {
         QueenMovement.WriteMovesToSpan(
@@ -71,16 +75,13 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteQueenMovesToUnsafePtr()
     {
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            QueenMovement.WriteMovesToPtrUnsafe(
-                posPtr,
-                Colors.Black,
-                movesPtr);
-        }
+        QueenMovement.WriteMovesToPtrUnsafe(
+            positionPtr,
+            Colors.Black,
+            movesArrPtr);
     }
 
 #if LEGACY_FUNC
@@ -89,6 +90,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
         color: Colors.Black);
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteSlidingMovesToSpanArray_LEGACY()
     {
         position_Legacy.AddSlidingMoves(
@@ -99,6 +101,7 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Queen_WriteSlidingMovesToSpanList_LEGACY()
     {
         position_Legacy.AddSlidingMoves(

@@ -1,16 +1,22 @@
 ﻿using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Parsing;
+#if LEGACY_FUNC
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine;
+#endif
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
 
-public abstract class MoveGenerationBenckmarksBase
+public abstract unsafe class MoveGenerationBenckmarksBase
 {
     #region For current ChessEngine2
     protected readonly int[] movesArr;
+    protected readonly int* movesArrPtr;
     protected readonly List<int> moveList;
 
     protected Position position;
+    protected Position* positionPtr;
     #endregion
 
 #if LEGACY_FUNC
@@ -25,15 +31,17 @@ public abstract class MoveGenerationBenckmarksBase
         string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 1 1",
         int moveBuffersSize = 218) 
     {
-        PawnAttacks.InvokeInit();
-        KnightAttacks.InvokeInit();
-        BishopAttacks.InvokeInit();
-        RookAttacks.InvokeInit();
-        KingAttacks.InvokeInit();
+        AttackLookups.InvokeInit();
 
         movesArr = new int[moveBuffersSize];
         moveList = Enumerable.Range(0, moveBuffersSize).ToList();
         bool parsed1 = FenStrings.TryParse(fen, out position);
+
+        fixed (Position* posPtr = &position)
+            positionPtr = posPtr;
+
+        fixed (int* movesPtr = movesArr)
+            movesArrPtr = movesPtr;
 
 #if LEGACY_FUNC
         movesArr_Legacy = new BinaryMove[moveBuffersSize];

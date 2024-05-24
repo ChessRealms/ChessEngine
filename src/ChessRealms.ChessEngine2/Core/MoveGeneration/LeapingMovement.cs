@@ -13,7 +13,7 @@ internal unsafe static class LeapingMovement
         Position* position, 
         int color, 
         int piece,
-        ulong* masksLookup, 
+        ImmutableArray<ulong> masksLookup,
         int* dest, 
         int offset = 0)
     {
@@ -35,7 +35,7 @@ internal unsafe static class LeapingMovement
         {
             srcSquare = BitboardOps.Lsb(pieceBB);
 
-            ulong movesBB = ~myBlockers & *(masksLookup + srcSquare);
+            ulong movesBB = ~myBlockers & masksLookup[srcSquare];
             ulong captures = enemyBlockers & movesBB;
             ulong normalMoves = captures ^ movesBB;
 

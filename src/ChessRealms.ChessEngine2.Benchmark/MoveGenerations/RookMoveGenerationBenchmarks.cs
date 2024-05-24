@@ -3,6 +3,7 @@ using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.MoveGeneration;
 using ChessRealms.ChessEngine2.Core.Types;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
@@ -14,6 +15,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteSlidingMovesToSpanArray()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -25,6 +27,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteSlidingMovesToSpanList()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -36,6 +39,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteSlidingMovesToUnsafePtr()
     {
         fixed (Position* posPtr = &position)
@@ -51,6 +55,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteRookMovesToSpanArray()
     {
         RookMovement.WriteMovesToSpan(
@@ -60,6 +65,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteRookMovesToSpanList()
     {
         RookMovement.WriteMovesToSpan(
@@ -69,16 +75,13 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteRookMovesToUnsafePtr()
     {
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            RookMovement.WriteMovesToPtrUnsafe(
-                posPtr,
-                Colors.Black,
-                movesPtr);
-        }
+        RookMovement.WriteMovesToPtrUnsafe(
+            positionPtr,
+            Colors.Black,
+            movesArrPtr);
     }
 
 #if LEGACY_FUNC
@@ -87,6 +90,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
         color: Colors.Black);
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteSlidingMovesToSpanArray_LEGACY()
     {
         position_Legacy.AddSlidingMoves(
@@ -97,6 +101,7 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Rook_WriteSlidingMovesToSpanList_LEGACY()
     {
         position_Legacy.AddSlidingMoves(

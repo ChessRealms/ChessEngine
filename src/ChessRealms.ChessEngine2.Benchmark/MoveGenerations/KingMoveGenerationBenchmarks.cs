@@ -2,7 +2,7 @@
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.MoveGeneration;
-using ChessRealms.ChessEngine2.Core.Types;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
@@ -14,6 +14,7 @@ public unsafe class KingMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void King_WriteLeapingMovesToSpanArray()
     {
         LeapingMovement.WriteMovesToSpan(
@@ -25,6 +26,7 @@ public unsafe class KingMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void King_WriteLeapingMovesToSpanLing()
     {
         LeapingMovement.WriteMovesToSpan(
@@ -36,18 +38,15 @@ public unsafe class KingMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void King_WriteLeapingMovesToUnsafePtr()
     {
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            LeapingMovement.WriteMovesToPtrUnsafe(
-                posPtr, 
-                Colors.Black,
-                Pieces.King,
-                KingAttacks.AttackMasksUnsafe, 
-                movesPtr);
-        }
+        LeapingMovement.WriteMovesToPtrUnsafe(
+            positionPtr, 
+            Colors.Black,
+            Pieces.King,
+            KingAttacks.AttackMasks, 
+            movesArrPtr);
     }
 
 #if LEGACY_FUNC
@@ -56,6 +55,7 @@ public unsafe class KingMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
         color: Colors.Black);
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void King_WriteMovesToSpanArray_LEGACY()
     {
         position_Legacy.AddLeapingMoves(
@@ -66,6 +66,7 @@ public unsafe class KingMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void King_WriteMovesToSpanList_LEGACY()
     {
         position_Legacy.AddLeapingMoves(

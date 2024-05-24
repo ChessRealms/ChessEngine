@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal static unsafe class RookAttacks
+internal static class RookAttacks
 {
     /// <summary>
     /// Pre-calculated rook slider attacks. Shape of array is <c>[64 * 4096]</c>.

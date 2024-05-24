@@ -6,17 +6,12 @@ using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal unsafe static class PawnAttacks
+internal static class PawnAttacks
 {
-    private static readonly ulong[] attackMasksUnsafe;
-    public static readonly ulong* AttackMasksUnsafe;
-
-    public static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
     static PawnAttacks()
     {
-        attackMasksUnsafe = new ulong[64 * 2];
-        
         ulong[] white = new ulong[64];
         ulong[] black = new ulong[64];
 
@@ -24,15 +19,18 @@ internal unsafe static class PawnAttacks
         {
             white[square] = MaskPawnAttack(Colors.White, square);
             black[square] = MaskPawnAttack(Colors.Black, square);
-
-            attackMasksUnsafe[square * Colors.White + square] = MaskPawnAttack(Colors.White, square);
-            attackMasksUnsafe[square * Colors.Black + square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        fixed (ulong* ptr = attackMasksUnsafe)
-            AttackMasksUnsafe = ptr;
+        AttackMasks = [.. black, .. white];
+    }
 
-        AttackMasks = [[.. black], [.. white]];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong GetAttackMask(int color, int square)
+    {
+        DebugAsserts.ValidColor(color);
+        DebugAsserts.ValidSquare(square);
+
+        return AttackMasks[(color * 64) + square];
     }
 
     /// <summary>
@@ -42,24 +40,6 @@ internal unsafe static class PawnAttacks
     {
         // Touch variable to trigger its init (calls static ctor).
         _ = AttackMasks[0];
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong GetMask(int color, int square)
-    {
-        DebugAsserts.ValidColor(color);
-        DebugAsserts.ValidSquare(square);
-
-        return AttackMasks[color][square];
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong GetMaskUnsafe(int color, int square)
-    {
-        DebugAsserts.ValidColor(color);
-        DebugAsserts.ValidSquare(square);
-
-        return *(AttackMasksUnsafe + (color * 64) + square);
     }
 
     private static ulong MaskPawnAttack(int color, int square)

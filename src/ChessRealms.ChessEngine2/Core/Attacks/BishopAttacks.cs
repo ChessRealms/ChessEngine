@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal unsafe static class BishopAttacks
+internal static class BishopAttacks
 {
     /// <summary>
     /// Pre-calculated bishop slider attacks. Shape of array is <c>[64 * 512].</c>

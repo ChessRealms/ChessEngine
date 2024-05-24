@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
@@ -114,5 +115,52 @@ public unsafe struct Position
     private static bool IsValidBBIndex(int bbIndex)
     {
         return bbIndex >= 0 && bbIndex < 12;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttacked(int square, int enemyColor)
+    {
+        return IsAttackedByPawn(square, enemyColor)
+            || IsAttackedByKnight(square, enemyColor)
+            || IsAttackedByBishop(square, enemyColor)
+            || IsAttackedByRook(square, enemyColor)
+            || IsAttackedByKing(square, enemyColor);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsAttackedByPawn(int square, int enemyColor)
+    {
+        return (PawnAttacks.GetAttackMask(Colors.Mirror(enemyColor), square)
+            & pieceBBs[BBIndex(Pieces.Pawn, enemyColor)]) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsAttackedByKnight(int square, int enemyColor)
+    {
+        return (KnightAttacks.AttackMasks[square]
+            & pieceBBs[BBIndex(Pieces.Knight, enemyColor)]) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsAttackedByBishop(int square, int enemyColor)
+    {
+        return (BishopAttacks.GetSliderAttack(square, blockers[Colors.None])
+            & (pieceBBs[BBIndex(Pieces.Bishop, enemyColor)] 
+            | pieceBBs[BBIndex(Pieces.Queen, enemyColor)])) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsAttackedByRook(int square, int enemyColor)
+    {
+        return (BishopAttacks.GetSliderAttack(square, blockers[Colors.None])
+            & (pieceBBs[BBIndex(Pieces.Rook, enemyColor)] 
+            | pieceBBs[BBIndex(Pieces.Queen, enemyColor)])) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsAttackedByKing(int square, int enemyColor)
+    {
+        return (KingAttacks.AttackMasks[square]
+            & pieceBBs[BBIndex(Pieces.King, enemyColor)]) != 0;
     }
 }

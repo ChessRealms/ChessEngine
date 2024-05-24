@@ -4,25 +4,20 @@ using System.Collections.Immutable;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-internal static unsafe class KnightAttacks
+internal static class KnightAttacks
 {
-    private static readonly ulong[] _attackMasks;
-    public static readonly ulong* AttackMasksUnsafe;
     public static readonly ImmutableArray<ulong> AttackMasks;
 
     static KnightAttacks()
     {
-        _attackMasks = new ulong[64];
+        var attackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            _attackMasks[square] = MaskKnightAttack(square);
+            attackMasks[square] = MaskKnightAttack(square);
         }
 
-        fixed (ulong* ptr = _attackMasks)
-            AttackMasksUnsafe = ptr;
-
-        AttackMasks = [.. _attackMasks];
+        AttackMasks = [.. attackMasks];
     }
 
     /// <summary>

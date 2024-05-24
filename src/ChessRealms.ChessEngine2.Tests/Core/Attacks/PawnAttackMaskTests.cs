@@ -12,7 +12,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.a4;
         int[] attacks = [Squares.b5];
 
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.White][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.White, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));
@@ -24,7 +24,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.a4;
         int[] attacks = [Squares.b3];
 
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.Black][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.Black, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));
@@ -36,7 +36,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.h4;
         int[] attacks = [Squares.g5];
 
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.White][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.White, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));
@@ -48,7 +48,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.h4;
         int[] attacks = [Squares.g3];
 
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.Black][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.Black, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));
@@ -60,7 +60,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.e5;
         int[] attacks = [Squares.d6, Squares.f6];
         
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.White][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.White, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));
@@ -72,7 +72,7 @@ internal class PawnAttackMaskTests
         int attackFrom = Squares.e5;
         int[] attacks = [Squares.d4, Squares.f4];
         
-        ulong attackMask = PawnAttacks.AttackMasks[Colors.Black][attackFrom];
+        ulong attackMask = PawnAttacks.GetAttackMask(Colors.Black, attackFrom);
         ulong expected = attacks.ToBitboard();
 
         Assert.That(attackMask, Is.EqualTo(expected));

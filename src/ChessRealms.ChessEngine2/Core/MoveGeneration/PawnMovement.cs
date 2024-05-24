@@ -106,7 +106,7 @@ internal unsafe static class PawnMovement
 
         if (Squares.IsValid(enpassant))
         {
-            ulong attack = PawnAttacks.GetMaskUnsafe(enemyColor, enpassant);
+            ulong attack = PawnAttacks.GetAttackMask(enemyColor, enpassant);
             ulong srcSquares = attack & pawns;
 
             int srcSquare;
@@ -126,7 +126,7 @@ internal unsafe static class PawnMovement
         while (BitboardOps.IsNotEmpty(pawns))
         {
             int srcSquare = BitboardOps.Lsb(pawns);
-            ulong attack = PawnAttacks.GetMaskUnsafe(color, srcSquare);
+            ulong attack = PawnAttacks.GetAttackMask(color, srcSquare);
             ulong captures = attack & enemyPieces;
 
             while (BitboardOps.IsNotEmpty(captures))
@@ -249,7 +249,7 @@ internal unsafe static class PawnMovement
 
         if (Squares.IsValid(enpassant))
         {
-            ulong attack = PawnAttacks.GetMask(enemyColor, enpassant);
+            ulong attack = PawnAttacks.GetAttackMask(enemyColor, enpassant);
             ulong srcSquares = attack & pawns;
 
             int srcSquare;
@@ -269,7 +269,7 @@ internal unsafe static class PawnMovement
         while (BitboardOps.IsNotEmpty(pawns))
         {
             int srcSquare = BitboardOps.Lsb(pawns);
-            ulong attack = PawnAttacks.GetMask(color, srcSquare);
+            ulong attack = PawnAttacks.GetAttackMask(color, srcSquare);
             ulong captures = attack & enemyPieces;
 
             while (BitboardOps.IsNotEmpty(captures))

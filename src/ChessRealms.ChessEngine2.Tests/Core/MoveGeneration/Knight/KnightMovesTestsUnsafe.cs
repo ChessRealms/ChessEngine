@@ -46,7 +46,7 @@ internal unsafe class KnightMovesTestsUnsafe
                 posPtr, 
                 color, 
                 Pieces.Knight,
-                KnightAttacks.AttackMasksUnsafe,
+                KnightAttacks.AttackMasks,
                 moves);
         }
         
@@ -95,7 +95,7 @@ internal unsafe class KnightMovesTestsUnsafe
                 posPtr,
                 Colors.Black,
                 Pieces.Knight,
-                KnightAttacks.AttackMasksUnsafe,
+                KnightAttacks.AttackMasks,
                 moves);
         }
         

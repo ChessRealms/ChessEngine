@@ -2,7 +2,7 @@
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.MoveGeneration;
-using ChessRealms.ChessEngine2.Core.Types;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
@@ -14,6 +14,7 @@ public unsafe class KnightMoveGenerationBenckmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Knight_WriteLeapingMovesToSpanArray()
     {
         LeapingMovement.WriteMovesToSpan(
@@ -25,6 +26,7 @@ public unsafe class KnightMoveGenerationBenckmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Knight_WriteLeapingMovesToSpanList()
     {         
         LeapingMovement.WriteMovesToSpan(
@@ -36,18 +38,15 @@ public unsafe class KnightMoveGenerationBenckmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Knight_WriteLeapingMovesToUnsafePtr()
     { 
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            LeapingMovement.WriteMovesToPtrUnsafe(
-                posPtr, 
-                Colors.Black,
-                Pieces.Knight,
-                KnightAttacks.AttackMasksUnsafe, 
-                movesPtr);
-        }
+        LeapingMovement.WriteMovesToPtrUnsafe(
+            positionPtr, 
+            Colors.Black,
+            Pieces.Knight,
+            KnightAttacks.AttackMasks, 
+            movesArrPtr);
     }
 
 #if LEGACY_FUNC
@@ -66,7 +65,6 @@ public unsafe class KnightMoveGenerationBenckmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
-    [Conditional(GlobalDefines.LEGACY_FUNC)]
     public void Knight_WriteLeapingMovesToSpanList_LEGACY()
     {
         position_Legacy.AddLeapingMoves(

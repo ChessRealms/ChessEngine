@@ -2,7 +2,7 @@
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.MoveGeneration;
-using ChessRealms.ChessEngine2.Core.Types;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Benchmark.MoveGenerations;
@@ -14,6 +14,7 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteSlidingMovesToSpanArray()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -25,6 +26,7 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteSlidingMovesToSpanList()
     {
         SlidingMovement.WriteMovesToSpan(
@@ -36,21 +38,19 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteSlidingMovesToUnsafePtr()
     {
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            SlidingMovement.WriteMovesToPtrUnsafe(
-                posPtr,
-                Colors.Black,
-                Pieces.Bishop,
-                BishopAttacks.GetSliderAttack,
-                movesPtr);
-        }
+        SlidingMovement.WriteMovesToPtrUnsafe(
+            positionPtr,
+            Colors.Black,
+            Pieces.Bishop,
+            BishopAttacks.GetSliderAttack,
+            movesArrPtr);
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteBishopMovesToSpanArray()
     {
         BishopMovement.WriteMovesToSpan(
@@ -60,6 +60,7 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteBishopMovesToSpanList()
     {
         BishopMovement.WriteMovesToSpan(
@@ -69,16 +70,13 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteBishopMovesToUnsafePtr()
     {
-        fixed (Position* posPtr = &position)
-        fixed (int* movesPtr = movesArr)
-        {
-            BishopMovement.WriteMovesToPtrUnsafe(
-                posPtr,
-                Colors.Black,
-                movesPtr);
-        }
+        BishopMovement.WriteMovesToPtrUnsafe(
+            positionPtr,
+            Colors.Black,
+            movesArrPtr);
     }
 
 #if LEGACY_FUNC
@@ -87,6 +85,7 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
         color: Colors.Black);
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteSlidingMovesToSpanArray_LEGACY()
     {
         position_Legacy.AddSlidingMoves(
@@ -97,6 +96,7 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
     }
 
     [Benchmark]
+    [MethodImpl(MethodImplOptions.NoOptimization)]
     public void Bishop_WriteSlidingMovesToSpanList_LEGACY()
     {
         position_Legacy.AddSlidingMoves(
