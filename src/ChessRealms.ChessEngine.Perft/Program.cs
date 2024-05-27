@@ -62,7 +62,6 @@ static class Perft
         public int Ep;
         public int Castles;
         public int Promotions;
-        public int Checks;
 
         public override readonly string ToString()
         {
@@ -72,7 +71,6 @@ static class Perft
             sb.AppendLine(string.Format("Ep: {0:n0}", Ep));
             sb.AppendLine(string.Format("Castles: {0:n0}", Castles));
             sb.AppendLine(string.Format("Promotions: {0:n0}", Promotions));
-            sb.AppendLine(string.Format("Checks: {0:n0}", Checks));
             return sb.ToString();
         }
     }
@@ -111,12 +109,6 @@ static class Perft
                 if (moves[i].Castling != Castling.None) perftResult.Castles += 1;
                 
                 if (moves[i].Promote != PromotePiece.None) perftResult.Promotions += 1;
-
-                tmp.CurrentColor = ColorsExtensions.Opposite(tmp.CurrentColor);
-                if (tmp.IsChecked()) 
-                {
-                    perftResult.Checks += 1;
-                }
             }
 
             return perftResult;
@@ -144,7 +136,6 @@ static class Perft
             finalRes.Ep += tmpRes.Ep;
             finalRes.Castles += tmpRes.Castles;
             finalRes.Promotions += tmpRes.Promotions;
-            finalRes.Checks += tmpRes.Checks;
 
             if (upper)
             {

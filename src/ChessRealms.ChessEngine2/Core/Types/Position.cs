@@ -134,9 +134,30 @@ public unsafe struct Position
 
     public bool IsKingChecked(int color)
     {
-        int i = BBIndex(Pieces.King, color);
-        int square = BitboardOps.Lsb(pieceBBs[i]);
-        return IsSquareAttacked(square, Colors.Mirror(color));
+        if (color == Colors.Black)
+        {
+            int ks = BitboardOps.Lsb(pieceBBs[BitboardIndicies.BKing]);
+
+            return IsAttackedByWhitePawn(ks)
+                || IsAttackedByWhiteKnight(ks)
+                || IsAttackedByWhiteBishop(ks)
+                || IsAttackedByWhiteRook(ks)
+                || IsAttackedByWhiteKing(ks);
+        }
+        else
+        {
+            int ks = BitboardOps.Lsb(pieceBBs[BitboardIndicies.WKing]);
+
+            return IsAttackedByBlackPawn(ks)
+                || IsAttackedByBlackKnight(ks)
+                || IsAttackedByBlackBishop(ks)
+                || IsAttackedByBlackRook(ks)
+                || IsAttackedByBlackKing(ks);
+        }
+
+        //int i = BBIndex(Pieces.King, color);
+        //int square = BitboardOps.Lsb(pieceBBs[i]);
+        //return IsSquareAttacked(square, Colors.Mirror(color));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,6 +180,25 @@ public unsafe struct Position
         return (mask & enemy) != 0;
     }
 
+    #region Is Attacked By Pawn
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByWhitePawn(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.WPawn];
+        ulong mask = PawnAttacks.AttackMasks[Colors.Black][square];
+        return (enemy & mask) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByBlackPawn(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.BPawn];
+        ulong mask = PawnAttacks.AttackMasks[Colors.White][square];
+        return (enemy & mask) != 0;
+    }
+    #endregion
+
+    #region Is Attacked By Knight
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByKnight(int square, int enemyColor)
     {
@@ -169,6 +209,26 @@ public unsafe struct Position
         return (mask & enemy) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByWhiteKnight(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.WKnight];
+        ulong mask = KnightAttacks.AttackMasks[square];
+
+        return (enemy & mask) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByBlackKnight(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.BKnight];
+        ulong mask = KnightAttacks.AttackMasks[square];
+
+        return (enemy & mask) != 0;
+    }
+    #endregion
+
+    #region Is Attacked By Bishop
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByBishop(int square, int enemyColor)
     {
@@ -181,6 +241,26 @@ public unsafe struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByWhiteBishop(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.WBishop] | pieceBBs[BitboardIndicies.WQueen];
+        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByBlackBishop(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.BBishop] | pieceBBs[BitboardIndicies.BQueen];
+        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
+    }
+    #endregion
+
+    #region Is Attacked By Rook
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByRook(int square, int enemyColor)
     {
         int bb1 = BBIndex(Pieces.Rook, enemyColor);
@@ -191,6 +271,26 @@ public unsafe struct Position
         return (mask & enemy) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByWhiteRook(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.WRook] | pieceBBs[BitboardIndicies.WQueen];
+        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByBlackRook(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.BRook] | pieceBBs[BitboardIndicies.BQueen];
+        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
+    }
+    #endregion
+
+    #region Is Attacked By King
     internal bool IsAttackedByKing(int square, int enemyColor)
     {
         int i = BBIndex(Pieces.King, enemyColor);
@@ -200,25 +300,30 @@ public unsafe struct Position
         return (mask & enemy) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByWhiteKing(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.WKing];
+        ulong mask = KingAttacks.AttackMasks[square];
+
+        return (enemy & mask) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsAttackedByBlackKing(int square)
+    {
+        ulong enemy = pieceBBs[BitboardIndicies.BKing];
+        ulong mask = KingAttacks.AttackMasks[square];
+
+        return (enemy & mask) != 0;
+    }
+    #endregion
+
     public unsafe void CopyTo(Position* dst)
     {
         fixed (Position* src = &this)
         {
             Buffer.MemoryCopy(src, dst, sizeof(Position), sizeof(Position));
         }
-        //fixed (ulong* srcPieces = pieceBBs)
-        //fixed (ulong* dstPieces = dst.pieceBBs)
-        //fixed (ulong* srcBlockers = blockers)
-        //fixed (ulong* dstBlockers = dst.blockers)
-        //{
-        //    Buffer.MemoryCopy(srcPieces, dstPieces, sizeof(ulong) * 12, sizeof(ulong) * 12);
-        //    Buffer.MemoryCopy(srcBlockers, dstBlockers, sizeof(ulong) * 3, sizeof(ulong) * 3);
-
-        //    dst.castlings = castlings;
-        //    dst.color = color;
-        //    dst.enpassant = enpassant;
-        //    dst.halfMoveClock = halfMoveClock;
-        //    dst.fullMoveCount = fullMoveCount;
-        //}
     }
 }

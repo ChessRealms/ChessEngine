@@ -98,6 +98,27 @@ public static class Directions
     public const int SouthWest = South + West;
 }
 
+public static class BitboardIndicies
+{
+    public const int BPawn = 0;
+    public const int BKnight = 1;
+    public const int BBishop = 2;
+    public const int BRook = 3;
+    public const int BQueen = 4;
+    public const int BKing = 5;
+
+    public const int WPawn = 6;
+    public const int WKnight = 7;
+    public const int WBishop = 8;
+    public const int WRook = 9;
+    public const int WQueen = 10;
+    public const int WKing = 11;
+
+    public const int BBlockers = 0;
+    public const int WBlockers = 1;
+    public const int AllBlockers = 2;
+}
+
 public static class Squares
 {
     public const int Empty = -1;

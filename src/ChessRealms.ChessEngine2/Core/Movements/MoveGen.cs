@@ -29,7 +29,7 @@ internal static unsafe class MoveGen
             QueenAttacks.GetSliderAttack, moves, cursor);
         
         cursor += LeapingMovement.WriteMovesToSpan(
-            ref position, color, Pieces.King, 
+            ref position, color, Pieces.King,
             KingAttacks.AttackMasks, moves, cursor);
 
         cursor += CastlingMovement.WriteMovesToSpan(ref position, color, moves, cursor);

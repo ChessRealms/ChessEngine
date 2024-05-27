@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
@@ -6,12 +7,14 @@ using ChessRealms.ChessEngine2.Parsing;
 using System.Diagnostics;
 using System.Text;
 
-string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 1 1";
-int depth = 5;
+string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+int depth = 6;
 
 Console.WriteLine("Fen: {0}", fen);
 Console.WriteLine("Depth: {0}", depth);
 Console.WriteLine();
+
+AttackLookups.InvokeInit();
 
 _ = FenStrings.TryParse(fen, out Position pos);
 
@@ -41,8 +44,6 @@ static class Perft
         public int Ep;
         public int Castles;
         public int Promotions;
-        public int Checks;
-        public int Checkmates;
 
         public override readonly string ToString()
         {
@@ -52,8 +53,6 @@ static class Perft
             sb.AppendLine(string.Format("Ep: {0:n0}", Ep));
             sb.AppendLine(string.Format("Castles: {0:n0}", Castles));
             sb.AppendLine(string.Format("Promotions: {0:n0}", Promotions));
-            sb.AppendLine(string.Format("Checks: {0:n0}", Checks));
-            sb.AppendLine(string.Format("Checkmates: {0:n0}", Checkmates));
             return sb.ToString();
         }
     }
@@ -123,7 +122,6 @@ static class Perft
             finalRes.Ep += tmpRes.Ep;
             finalRes.Castles += tmpRes.Castles;
             finalRes.Promotions += tmpRes.Promotions;
-            finalRes.Checks += tmpRes.Checks;
 
             if (upper)
             {

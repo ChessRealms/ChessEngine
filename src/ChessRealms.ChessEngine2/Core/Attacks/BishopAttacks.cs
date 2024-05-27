@@ -9,7 +9,7 @@ internal static class BishopAttacks
     /// <summary>
     /// Pre-calculated bishop slider attacks. Shape of array is <c>[64 * 512].</c>
     /// </summary>
-    public static readonly ImmutableArray<ImmutableArray<ulong>> SliderAttacks;
+    public static readonly ImmutableArray<ulong> SliderAttacks;
 
     /// <summary>
     /// Pre-calculated bishop attack masks (no outer squares) for each square index from 0 to 63.
@@ -99,11 +99,10 @@ internal static class BishopAttacks
     static BishopAttacks()
     {
         var attackMasks = new ulong[64];
-        var sliderAttacks = new ulong[64][];
+        var sliderAttacks = new ulong[64 * 512];
 
         for (int square = 0; square < 64; ++square)
         {
-            sliderAttacks[square] = new ulong[512];
             attackMasks[square] = MaskBishopAttack(square);
             
             int occupancyIndicies = 1 << RelevantBits[square];
@@ -116,12 +115,12 @@ internal static class BishopAttacks
 
                 ulong mask = MaskBishopSliderAttackOnTheFly(square, occupancy);
 
-                sliderAttacks[square][magicIndex] = mask;
+                sliderAttacks[(square * 512) + magicIndex] = mask;
             }
         }
 
         AttackMasks = [.. attackMasks];
-        SliderAttacks = sliderAttacks.Select(x => x.ToImmutableArray()).ToImmutableArray();
+        SliderAttacks = [.. sliderAttacks];
     }
 
     public static void InvokeInit()
@@ -142,7 +141,7 @@ internal static class BishopAttacks
         occupancy &= AttackMasks[square];
         occupancy *= MagicNumbers[square];
         occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[square][unchecked((int)occupancy)];
+        return SliderAttacks[(square * 512) + unchecked((int)occupancy)];
     }
 
     /// <summary>

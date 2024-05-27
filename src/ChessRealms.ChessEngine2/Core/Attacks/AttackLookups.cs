@@ -1,6 +1,6 @@
 ﻿namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-public static class AttackLookups
+internal static class AttackLookups
 {
     public static void InvokeInit()
     {
