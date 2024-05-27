@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -49,39 +49,9 @@ public unsafe class RookMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
                 posPtr,
                 Colors.Black,
                 Pieces.Rook,
-                RookAttacks.GetSliderAttack,
+                &RookAttacks.GetSliderAttack,
                 movesPtr);
         }
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Rook_WriteRookMovesToSpanArray()
-    {
-        RookMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            movesArr);
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Rook_WriteRookMovesToSpanList()
-    {
-        RookMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            CollectionsMarshal.AsSpan(moveList));
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Rook_WriteRookMovesToUnsafePtr()
-    {
-        RookMovement.WriteMovesToPtrUnsafe(
-            positionPtr,
-            Colors.Black,
-            movesArrPtr);
     }
 
 #if LEGACY_FUNC

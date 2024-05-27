@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -45,39 +45,10 @@ public unsafe class BishopMoveGenerationBenchmarks : MoveGenerationBenckmarksBas
             positionPtr,
             Colors.Black,
             Pieces.Bishop,
-            BishopAttacks.GetSliderAttack,
+            &BishopAttacks.GetSliderAttack,
             movesArrPtr);
     }
 
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Bishop_WriteBishopMovesToSpanArray()
-    {
-        BishopMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            movesArr);
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Bishop_WriteBishopMovesToSpanList()
-    {
-        BishopMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            CollectionsMarshal.AsSpan(moveList));
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Bishop_WriteBishopMovesToUnsafePtr()
-    {
-        BishopMovement.WriteMovesToPtrUnsafe(
-            positionPtr,
-            Colors.Black,
-            movesArrPtr);
-    }
 
 #if LEGACY_FUNC
     private static readonly ChessEngine.Core.Types.Piece bBishop = new(

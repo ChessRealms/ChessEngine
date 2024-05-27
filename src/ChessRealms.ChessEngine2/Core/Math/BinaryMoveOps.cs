@@ -38,7 +38,7 @@ internal static class BinaryMoveOps
     public const int Enpassant = 0x8000000;
 
     // 4 bit (15 << 28)
-    public const int Castling = unchecked((int)0xf0000000);
+    public const int Castling = -268435456;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int EncodeMove(

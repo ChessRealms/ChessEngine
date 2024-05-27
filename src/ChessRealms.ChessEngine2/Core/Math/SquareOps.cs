@@ -12,14 +12,16 @@ public static class SquareOps
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Rank(int square)
     {
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidSquare(square);
+
         return square / 8;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int File(int square)
     {
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidSquare(square);
+
         return square % 8;
     }
 
@@ -28,6 +30,7 @@ public static class SquareOps
     {
         Debug.Assert(ValidateFileRank(file), "Invalid File Value", $"File value was {file}.");
         Debug.Assert(ValidateFileRank(rank), "Invalid Rank Value", $"Rank value was {rank}.");
+
         return rank * 8 + file;
     }
 
@@ -40,15 +43,18 @@ public static class SquareOps
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong ToBitboard(int square)
     {
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidSquare(square);
+        
         return 1ul << square;
     }
 
-    public static string ToAbbriviature(int square)
+    public static string ToAbbreviature(int square)
     {
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidSquare(square);
+
         int file = File(square);
         int rank = Rank(square);
+        
         return string.Format("{0}{1}", (char)('a' + file), (char)('1' + rank));
     }
 }

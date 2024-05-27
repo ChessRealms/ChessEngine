@@ -8,7 +8,7 @@ namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class PawnAttacks
 {
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
 
     static PawnAttacks()
     {
@@ -21,16 +21,16 @@ internal static class PawnAttacks
             black[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        AttackMasks = [.. black, .. white];
+        AttackMasks = [[.. black], [.. white]];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong GetAttackMask(int color, int square)
     {
-        DebugAsserts.ValidColor(color);
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
 
-        return AttackMasks[(color * 64) + square];
+        return AttackMasks[color][square];
     }
 
     /// <summary>
@@ -44,8 +44,8 @@ internal static class PawnAttacks
 
     private static ulong MaskPawnAttack(int color, int square)
     {
-        DebugAsserts.ValidColor(color);
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
 
         ulong board = SquareOps.ToBitboard(square);
         ulong attacks = 0UL;

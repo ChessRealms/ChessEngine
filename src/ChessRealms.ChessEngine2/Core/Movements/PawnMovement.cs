@@ -6,7 +6,7 @@ using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.MoveGeneration;
+namespace ChessRealms.ChessEngine2.Core.Movements;
 
 internal unsafe static class PawnMovement
 {
@@ -26,13 +26,13 @@ internal unsafe static class PawnMovement
 
     public static int WriteMovesToPtrUnsafe(Position* position, int color, int* dest, int offset = 0)
     {
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidColor(color);
         Debug.Assert(offset >= 0);
         
-        int* cursor = dest + offset;
+        int cursor = offset;
         int BBIndex = Position.BBIndex(Pieces.Pawn, color);
 
-        ulong empty = position->blockers[Colors.None] ^ SquareMapping.ALL_SQUARES;
+        ulong empty = ~position->blockers[Colors.None];
         ulong pawns = position->pieceBBs[BBIndex];
         int enpassant = position->enpassant;
 
@@ -45,162 +45,19 @@ internal unsafe static class PawnMovement
 
         int stepBack;
 
-        if (color == Colors.Black)
-        {
-            singlePush = South(pawns) & empty;
-            doublePush = South(singlePush) & empty & SquareMapping.RANK_5;
-            promotionRank = SquareMapping.RANK_1;
-            stepBack = Directions.North;
-        }
-        else
+        if (color == Colors.White)
         {
             singlePush = North(pawns) & empty;
             doublePush = North(singlePush) & empty & SquareMapping.RANK_4;
             promotionRank = SquareMapping.RANK_8;
             stepBack = Directions.South;
         }
-
-        while (BitboardOps.IsNotEmpty(singlePush))
-        {
-            int trgSquare = BitboardOps.Lsb(singlePush);
-            int srcSquare = trgSquare + stepBack;
-
-            if ((SquareOps.ToBitboard(trgSquare) & promotionRank) != 0)
-            {
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, trgSquare,
-                    promotion: Promotions.Knight);
-
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, trgSquare,
-                    promotion: Promotions.Bishop);
-
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, trgSquare,
-                    promotion: Promotions.Rook);
-
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, trgSquare,
-                    promotion: Promotions.Queen);
-            }
-                
-            {
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, trgSquare);
-            }
-
-            singlePush = BitboardOps.PopBitAt(singlePush, trgSquare);
-        }
-
-        while (BitboardOps.IsNotEmpty(doublePush))
-        {
-            int trgSquare = BitboardOps.Lsb(doublePush);
-            int srcSquare = trgSquare + (2 * stepBack);
-
-            *cursor++ = BinaryMoveOps.EncodeMove(
-                srcSquare, Pieces.Pawn, color, trgSquare, 
-                doublePush: 1);
-
-            doublePush = BitboardOps.PopBitAt(doublePush, trgSquare);
-        }
-
-        if (Squares.IsValid(enpassant))
-        {
-            ulong attack = PawnAttacks.GetAttackMask(enemyColor, enpassant);
-            ulong srcSquares = attack & pawns;
-
-            int srcSquare;
-            while (BitboardOps.IsNotEmpty(srcSquares))
-            {
-                srcSquare = BitboardOps.Lsb(srcSquares);
-
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Pawn, color, enpassant,
-                    enpassant: 1, capture: 1);
-
-                srcSquares = BitboardOps.PopBitAt(srcSquares, srcSquare);
-            }
-        }
-
-        // Generate Captures
-        while (BitboardOps.IsNotEmpty(pawns))
-        {
-            int srcSquare = BitboardOps.Lsb(pawns);
-            ulong attack = PawnAttacks.GetAttackMask(color, srcSquare);
-            ulong captures = attack & enemyPieces;
-
-            while (BitboardOps.IsNotEmpty(captures))
-            {
-                int targetSquare = BitboardOps.Lsb(captures);
-
-                if ((SquareOps.ToBitboard(targetSquare) & promotionRank) != 0)
-                {
-                    *cursor++ = BinaryMoveOps.EncodeMove(
-                        srcSquare, Pieces.Pawn, color, targetSquare,
-                        capture: 1, promotion: Promotions.Knight);
-
-                    *cursor++ = BinaryMoveOps.EncodeMove(
-                        srcSquare, Pieces.Pawn, color, targetSquare,
-                        capture: 1, promotion: Promotions.Bishop);
-
-                    *cursor++ = BinaryMoveOps.EncodeMove(
-                        srcSquare, Pieces.Pawn, color, targetSquare,
-                        capture: 1, promotion: Promotions.Rook);
-
-                    *cursor++ = BinaryMoveOps.EncodeMove(
-                        srcSquare, Pieces.Pawn, color, targetSquare,
-                        capture: 1, promotion: Promotions.Queen);
-                }
-                else
-                {
-                    *cursor++ = BinaryMoveOps.EncodeMove(
-                        srcSquare, Pieces.Pawn, color, targetSquare, capture: 1);
-                }
-
-                captures = BitboardOps.PopBitAt(captures, targetSquare);
-            }
-
-            pawns = BitboardOps.PopBitAt(pawns, srcSquare);
-        }
-
-        return (int)(cursor - cursor);
-    }
-
-    public static int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
-    {
-        DebugAsserts.ValidColor(color);
-        Debug.Assert(offset >= 0);
-        Debug.Assert(offset < dest.Length);
-
-        int cursor = offset;
-        int BBIndex = Position.BBIndex(Pieces.Pawn, color);
-
-        ulong empty = position.blockers[Colors.None] ^ SquareMapping.ALL_SQUARES;
-        ulong pawns = position.pieceBBs[BBIndex];
-        int enpassant = position.enpassant;
-
-        int enemyColor = Colors.Mirror(color);
-        ulong enemyPieces = position.blockers[enemyColor];
-
-        ulong singlePush;
-        ulong doublePush;
-        ulong promotionRank;
-
-        int stepBack;
-
-        if (color == Colors.Black)
+        else
         {
             singlePush = South(pawns) & empty;
             doublePush = South(singlePush) & empty & SquareMapping.RANK_5;
             promotionRank = SquareMapping.RANK_1;
             stepBack = Directions.North;
-        }
-        else
-        {
-            singlePush = North(pawns) & empty;
-            doublePush = North(singlePush) & empty & SquareMapping.RANK_4;
-            promotionRank = SquareMapping.RANK_8;
-            stepBack = Directions.South;
         }
 
         while (BitboardOps.IsNotEmpty(singlePush))
@@ -232,7 +89,7 @@ internal unsafe static class PawnMovement
                     srcSquare, Pieces.Pawn, color, trgSquare);
             }
 
-            singlePush = BitboardOps.PopBitAt(singlePush, trgSquare);
+            BitboardOps.PopBitAt(ref singlePush, trgSquare);
         }
 
         while (BitboardOps.IsNotEmpty(doublePush))
@@ -244,7 +101,7 @@ internal unsafe static class PawnMovement
                 srcSquare, Pieces.Pawn, color, trgSquare, 
                 doublePush: 1);
 
-            doublePush = BitboardOps.PopBitAt(doublePush, trgSquare);
+            BitboardOps.PopBitAt(ref doublePush, trgSquare);
         }
 
         if (Squares.IsValid(enpassant))
@@ -261,7 +118,7 @@ internal unsafe static class PawnMovement
                     srcSquare, Pieces.Pawn, color, enpassant,
                     enpassant: 1, capture: 1);
 
-                srcSquares = BitboardOps.PopBitAt(srcSquares, srcSquare);
+                BitboardOps.PopBitAt(ref srcSquares, srcSquare);
             }
         }
 
@@ -300,10 +157,156 @@ internal unsafe static class PawnMovement
                         srcSquare, Pieces.Pawn, color, targetSquare, capture: 1);
                 }
 
-                captures = BitboardOps.PopBitAt(captures, targetSquare);
+                BitboardOps.PopBitAt(ref captures, targetSquare);
             }
 
-            pawns = BitboardOps.PopBitAt(pawns, srcSquare);
+            BitboardOps.PopBitAt(ref pawns, srcSquare);
+        }
+
+        return cursor - offset;
+    }
+
+    public static int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)
+    {
+        DebugHelper.Assert.IsValidColor(color);
+        Debug.Assert(offset >= 0);
+        Debug.Assert(offset < dest.Length);
+
+        int cursor = offset;
+        int BBIndex = Position.BBIndex(Pieces.Pawn, color);
+
+        ulong empty = ~position.blockers[Colors.None];
+        ulong pawns = position.pieceBBs[BBIndex];
+        int enpassant = position.enpassant;
+
+        int enemyColor = Colors.Mirror(color);
+        ulong enemyPieces = position.blockers[enemyColor];
+
+        ulong singlePush;
+        ulong doublePush;
+        ulong promotionRank;
+
+        int stepBack;
+
+        if (color == Colors.White)
+        {
+            singlePush = North(pawns) & empty;
+            doublePush = North(singlePush) & empty & SquareMapping.RANK_4;
+            promotionRank = SquareMapping.RANK_8;
+            stepBack = Directions.South;
+        }
+        else
+        {
+            singlePush = South(pawns) & empty;
+            doublePush = South(singlePush) & empty & SquareMapping.RANK_5;
+            promotionRank = SquareMapping.RANK_1;
+            stepBack = Directions.North;
+        }
+
+        while (BitboardOps.IsNotEmpty(singlePush))
+        {
+            int trgSquare = BitboardOps.Lsb(singlePush);
+            int srcSquare = trgSquare + stepBack;
+
+            if ((SquareOps.ToBitboard(trgSquare) & promotionRank) != 0)
+            {
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, trgSquare,
+                    promotion: Promotions.Knight);
+
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, trgSquare,
+                    promotion: Promotions.Bishop);
+
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, trgSquare,
+                    promotion: Promotions.Rook);
+
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, trgSquare,
+                    promotion: Promotions.Queen);
+            }
+            else
+            {
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, trgSquare);
+            }
+
+            BitboardOps.PopBitAt(ref singlePush, trgSquare);
+        }
+
+        while (BitboardOps.IsNotEmpty(doublePush))
+        {
+            int trgSquare = BitboardOps.Lsb(doublePush);
+            int srcSquare = trgSquare + (2 * stepBack);
+
+            string trgS = SquareOps.ToAbbreviature(trgSquare);
+            string srcS = SquareOps.ToAbbreviature(srcSquare);
+
+            dest[cursor++] = BinaryMoveOps.EncodeMove(
+                srcSquare, Pieces.Pawn, color, trgSquare, 
+                doublePush: 1);
+
+            BitboardOps.PopBitAt(ref doublePush, trgSquare);
+        }
+
+        if (Squares.IsValid(enpassant))
+        {
+            ulong attack = PawnAttacks.GetAttackMask(enemyColor, enpassant);
+            ulong srcSquares = attack & pawns;
+
+            int srcSquare;
+            while (BitboardOps.IsNotEmpty(srcSquares))
+            {
+                srcSquare = BitboardOps.Lsb(srcSquares);
+
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, Pieces.Pawn, color, enpassant,
+                    enpassant: 1, capture: 1);
+
+                BitboardOps.PopBitAt(ref srcSquares, srcSquare);
+            }
+        }
+
+        // Generate Captures
+        while (BitboardOps.IsNotEmpty(pawns))
+        {
+            int srcSquare = BitboardOps.Lsb(pawns);
+            ulong attack = PawnAttacks.GetAttackMask(color, srcSquare);
+            ulong captures = attack & enemyPieces;
+
+            while (BitboardOps.IsNotEmpty(captures))
+            {
+                int targetSquare = BitboardOps.Lsb(captures);
+
+                if ((SquareOps.ToBitboard(targetSquare) & promotionRank) != 0)
+                {
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
+                        srcSquare, Pieces.Pawn, color, targetSquare,
+                        capture: 1, promotion: Promotions.Knight);
+
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
+                        srcSquare, Pieces.Pawn, color, targetSquare,
+                        capture: 1, promotion: Promotions.Bishop);
+
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
+                        srcSquare, Pieces.Pawn, color, targetSquare,
+                        capture: 1, promotion: Promotions.Rook);
+
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
+                        srcSquare, Pieces.Pawn, color, targetSquare,
+                        capture: 1, promotion: Promotions.Queen);
+                }
+                else
+                {
+                    dest[cursor++] = BinaryMoveOps.EncodeMove(
+                        srcSquare, Pieces.Pawn, color, targetSquare, capture: 1);
+                }
+
+                BitboardOps.PopBitAt(ref captures, targetSquare);
+            }
+
+            BitboardOps.PopBitAt(ref pawns, srcSquare);
         }
 
         return cursor - offset;

@@ -35,8 +35,6 @@ internal class BinaryMoveEncodingTests
             Assert.That(BinaryMoveOps.DecodeSrcColor(move), Is.EqualTo(srcColor));
 
             Assert.That(BinaryMoveOps.DecodeTrg(move), Is.EqualTo(trg));
-            Assert.That(BinaryMoveOps.DecodeTrgPiece(move), Is.EqualTo(trgPiece));
-            Assert.That(BinaryMoveOps.DecodeTrgColor(move), Is.EqualTo(trgColor));
 
             Assert.That(BinaryMoveOps.DecodeCapture(move), Is.EqualTo(capture));
             Assert.That(BinaryMoveOps.DecodeEnpassant(move), Is.EqualTo(enpassant));

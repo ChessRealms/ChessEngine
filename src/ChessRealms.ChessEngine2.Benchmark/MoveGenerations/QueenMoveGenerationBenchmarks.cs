@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -49,39 +49,9 @@ public unsafe class QueenMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
                 posPtr,
                 Colors.Black,
                 Pieces.Queen,
-                QueenAttacks.GetSliderAttack,
+                &QueenAttacks.GetSliderAttack,
                 movesPtr);
         }
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Queen_WriteQueenMovesToSpanArray()
-    {
-        QueenMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            movesArr);
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Queen_WriteQueenMovesToSpanList()
-    {
-        QueenMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            CollectionsMarshal.AsSpan(moveList));
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void Queen_WriteQueenMovesToUnsafePtr()
-    {
-        QueenMovement.WriteMovesToPtrUnsafe(
-            positionPtr,
-            Colors.Black,
-            movesArrPtr);
     }
 
 #if LEGACY_FUNC

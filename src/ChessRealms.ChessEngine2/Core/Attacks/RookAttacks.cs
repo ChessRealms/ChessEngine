@@ -1,8 +1,6 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
+﻿using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Debugs;
 using System.Collections.Immutable;
-using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Core.Attacks;
 
@@ -138,7 +136,8 @@ internal static class RookAttacks
     /// <returns> Attack mask. </returns>
     public static ulong GetSliderAttack(int square, ulong occupancy)
     {
-        DebugAsserts.ValidSquare(square);
+        DebugHelper.Assert.IsValidSquare(square);
+
         occupancy &= AttackMasks[square];
         occupancy *= MagicNumbers[square];
         occupancy >>= 64 - RelevantBits[square];
@@ -152,23 +151,28 @@ internal static class RookAttacks
     /// <returns> Attack mask (no outer squares). </returns>
     public static ulong MaskRookAttack(int square)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugHelper.Assert.IsValidSquare(square);
 
         ulong attacks = 0UL;
-        int r;
-        int f = SquareOps.File(square);
 
-        for (r = SquareOps.Rank(square) + 1; r <= 6; ++r)
-            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
-        for (r = SquareOps.Rank(square) - 1; r >= 1; --r)
-            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
-
-        r = SquareOps.Rank(square);
         
-        for (f = SquareOps.File(square) + 1; f <= 6; ++f)
+        for (int r = SquareOps.Rank(square) + 1, f = SquareOps.File(square); r <= 6; ++r)
+        {
             attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
-        for (f = SquareOps.File(square) - 1; f >= 1; --f)
+        }
+        for (int r = SquareOps.Rank(square) - 1, f = SquareOps.File(square); r >= 1; --r)
+        {
             attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+        }
+
+        for (int f = SquareOps.File(square) + 1, r = SquareOps.Rank(square); f <= 6; ++f)
+        {
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+        }
+        for (int f = SquareOps.File(square) - 1, r = SquareOps.Rank(square); f >= 1; --f)
+        {
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+        }
 
         return attacks;
     }
@@ -181,7 +185,7 @@ internal static class RookAttacks
     /// <returns> Attack mask. </returns>
     public static ulong MaskRookSliderAttackOnTheFly(int square, ulong blockers)
     {
-        Debug.Assert(Squares.IsValid(square));
+        DebugHelper.Assert.IsValidSquare(square);
 
         ulong attacks = 0UL;
         int r;

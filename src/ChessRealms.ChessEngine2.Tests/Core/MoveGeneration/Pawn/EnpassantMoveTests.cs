@@ -1,6 +1,6 @@
 ﻿using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Parsing;
 
@@ -89,7 +89,7 @@ internal class EnpassantMoveTests
 
         var m = movesSet.Select(x => new
         {
-            to = SquareOps.ToAbbriviature(BinaryMoveOps.DecodeTrg(x))
+            to = SquareOps.ToAbbreviature(BinaryMoveOps.DecodeTrg(x))
         });
 
         Assert.That(length, Is.EqualTo(expectedLength));

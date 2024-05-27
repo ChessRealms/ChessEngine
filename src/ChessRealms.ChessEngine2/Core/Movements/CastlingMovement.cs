@@ -2,13 +2,13 @@
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Types;
 
-namespace ChessRealms.ChessEngine2.Core.MoveGeneration;
+namespace ChessRealms.ChessEngine2.Core.Movements;
 
 internal static unsafe class CastlingMovement
 {
     public static int WriteMovesToUnsafePtr(Position* position, int color, int* dest, int offset = 0)
     {
-        int* cursor = dest;
+        int cursor = offset;
 
         if (color == Colors.Black)
         {
@@ -21,7 +21,7 @@ internal static unsafe class CastlingMovement
 
             if (BK_CastlingAvailable)
             {
-                *cursor++ = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     Squares.e8, Pieces.King, Colors.Black, Squares.g8,
                     castling: Castlings.BK);
             }
@@ -36,7 +36,7 @@ internal static unsafe class CastlingMovement
 
             if (BQ_CastlingAvailable)
             {
-                *cursor++ = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     Squares.e8, Pieces.King, Colors.Black, Squares.c8,
                     castling: Castlings.BQ);
             }
@@ -52,7 +52,7 @@ internal static unsafe class CastlingMovement
 
             if (WK_CastlingAvailable)
             {
-                *cursor++ = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     Squares.e1, Pieces.King, Colors.White, Squares.g1,
                     castling: Castlings.WK);
             }
@@ -67,13 +67,13 @@ internal static unsafe class CastlingMovement
 
             if (WQ_CastlingAvailable)
             {
-                *cursor++ = BinaryMoveOps.EncodeMove(
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
                     Squares.e1, Pieces.King, Colors.White, Squares.c1,
                     castling: Castlings.WQ);
             }
         }
 
-        return (int)(cursor - dest);
+        return cursor - offset;
     }
 
     public static int WriteMovesToSpan(ref Position position, int color, Span<int> dest, int offset = 0)

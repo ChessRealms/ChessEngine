@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 

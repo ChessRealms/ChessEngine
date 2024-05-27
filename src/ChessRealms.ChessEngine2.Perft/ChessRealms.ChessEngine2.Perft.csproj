@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -8,12 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Tests" />
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Benchmark" />
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Perft" />
+    <ProjectReference Include="..\ChessRealms.ChessEngine2\ChessRealms.ChessEngine2.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Core\Exceptions\" />
-  </ItemGroup>
 </Project>

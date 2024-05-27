@@ -1,6 +1,6 @@
 ﻿using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Parsing;
 

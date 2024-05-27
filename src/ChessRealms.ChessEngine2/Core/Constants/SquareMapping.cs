@@ -8,15 +8,15 @@ internal static class SquareMapping
 {
     public const ulong A_FILE = 0x0101010101010101;
 
-    public const ulong NOT_A_FILE = ~A_FILE;
+    public const ulong NOT_A_FILE = 0xfefefefefefefefe;
 
-    public const ulong NOT_AB_FILE = ~(A_FILE | (A_FILE * 2));
+    public const ulong NOT_AB_FILE = 0xfcfcfcfcfcfcfcfc;
 
     public const ulong H_FILE = 0x8080808080808080;
 
-    public const ulong NOT_H_FILE = ~H_FILE;
+    public const ulong NOT_H_FILE = 0x7f7f7f7f7f7f7f7f;
 
-    public const ulong NOT_HG_FILE = ~(H_FILE | (H_FILE / 2));
+    public const ulong NOT_HG_FILE = 0x3f3f3f3f3f3f3f3f;
 
     public const ulong RANK_1 = 0x00000000000000FF;
 

@@ -45,6 +45,14 @@ public static class Promotions
     public const int Bishop = 2;
     public const int Rook = 3;
     public const int Queen = 4;
+
+    public static bool IsValid(int promotion)
+    {
+        return promotion == Knight
+            || promotion == Bishop
+            || promotion == Rook
+            || promotion == Queen;
+    }
 }
 
 public static class Castlings
@@ -59,6 +67,21 @@ public static class Castlings
     public const int Black = BK | BQ;
 
     public const int All = White | Black;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsValid(int castlings)
+    {
+        return (All & castlings) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsValidSingle(int castling)
+    {
+        return WK == castling 
+            || WQ == castling
+            || BK == castling
+            || BQ == castling;
+    }
 }
 
 public static class Directions

@@ -1,30 +1,32 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Debugs;
+using System.Collections.Immutable;
 using System.Diagnostics;
 
-namespace ChessRealms.ChessEngine2.Core.MoveGeneration;
+namespace ChessRealms.ChessEngine2.Core.Movements;
 
-internal unsafe static class BishopMovement
+internal unsafe static class LeapingMovement
 {
     public static int WriteMovesToPtrUnsafe(
         Position* position, 
-        int color,
+        int color, 
+        int piece,
+        ImmutableArray<ulong> masksLookup,
         int* dest, 
         int offset = 0)
     {
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsLeapingPiece(piece);
         Debug.Assert(offset >= 0);
 
-        int* cursor = dest + offset;
+        int cursor = offset;
 
         int enemyColor = Colors.Mirror(color);
         ulong myBlockers = position->blockers[color];
         ulong enemyBlockers = position->blockers[enemyColor];
-        ulong allBlockers = myBlockers | enemyBlockers;
-        ulong pieceBB = position->pieceBBs[Position.BBIndex(Pieces.Bishop, color)];
+        ulong pieceBB = position->pieceBBs[Position.BBIndex(piece, color)];
 
         int srcSquare;
         int trgSquare;
@@ -33,15 +35,15 @@ internal unsafe static class BishopMovement
         {
             srcSquare = BitboardOps.Lsb(pieceBB);
 
-            ulong movesBB = ~myBlockers & BishopAttacks.GetSliderAttack(srcSquare, allBlockers);
+            ulong movesBB = ~myBlockers & masksLookup[srcSquare];
             ulong captures = enemyBlockers & movesBB;
             ulong normalMoves = captures ^ movesBB;
 
             while (BitboardOps.IsNotEmpty(captures))
             {
                 trgSquare = BitboardOps.Lsb(captures);
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Bishop, color, trgSquare, 
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, piece, color, trgSquare, 
                     capture: 1);
                 captures = BitboardOps.PopBitAt(captures, trgSquare);
             }
@@ -49,24 +51,27 @@ internal unsafe static class BishopMovement
             while (BitboardOps.IsNotEmpty(normalMoves))
             {
                 trgSquare = BitboardOps.Lsb(normalMoves);
-                *cursor++ = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Bishop, color, trgSquare);
+                dest[cursor++] = BinaryMoveOps.EncodeMove(
+                    srcSquare, piece, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);
             }
 
             pieceBB = BitboardOps.PopBitAt(pieceBB, srcSquare);
         }
 
-        return (int)(cursor - dest);
+        return cursor - offset;
     }
 
     public static int WriteMovesToSpan(
         ref Position position, 
-        int color,
+        int color, 
+        int piece,
+        ImmutableArray<ulong> masksLookup, 
         Span<int> dest, 
         int offset = 0)
     {
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsLeapingPiece(piece);
         Debug.Assert(offset >= 0);
 
         int cursor = offset;
@@ -74,8 +79,7 @@ internal unsafe static class BishopMovement
         int enemyColor = Colors.Mirror(color);
         ulong myBlockers = position.blockers[color];
         ulong enemyBlockers = position.blockers[enemyColor];
-        ulong allBlockers = myBlockers | enemyBlockers;
-        ulong pieceBB = position.pieceBBs[Position.BBIndex(Pieces.Bishop, color)];
+        ulong pieceBB = position.pieceBBs[Position.BBIndex(piece, color)];
 
         int srcSquare;
         int trgSquare;
@@ -84,7 +88,7 @@ internal unsafe static class BishopMovement
         {
             srcSquare = BitboardOps.Lsb(pieceBB); 
 
-            ulong movesBB = ~myBlockers & BishopAttacks.GetSliderAttack(srcSquare, allBlockers);
+            ulong movesBB = ~myBlockers & masksLookup[srcSquare];
             ulong captures = enemyBlockers & movesBB;
             ulong normalMoves = captures ^ movesBB;
 
@@ -92,7 +96,7 @@ internal unsafe static class BishopMovement
             {
                 trgSquare = BitboardOps.Lsb(captures);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Bishop, color, trgSquare, 
+                    srcSquare, piece, color, trgSquare, 
                     capture: 1);
                 captures = BitboardOps.PopBitAt(captures, trgSquare);
             }
@@ -101,7 +105,7 @@ internal unsafe static class BishopMovement
             {
                 trgSquare = BitboardOps.Lsb(normalMoves);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
-                    srcSquare, Pieces.Bishop, color, trgSquare);
+                    srcSquare, piece, color, trgSquare);
                 normalMoves = BitboardOps.PopBitAt(normalMoves, trgSquare);
             }
 

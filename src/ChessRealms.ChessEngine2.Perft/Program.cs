@@ -1,44 +1,23 @@
-﻿using ChessRealms.ChessEngine;
-using ChessRealms.ChessEngine.Core.Extensions;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Parsing;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Core.Movements;
+using ChessRealms.ChessEngine2.Core.Types;
+using ChessRealms.ChessEngine2.Parsing;
 using System.Diagnostics;
 using System.Text;
 
-if (args.Length != 2)
-{
-    Console.Error.WriteLine("Invalid arguments amount.");
-    Console.Error.WriteLine("Expected input: [depth] [fen]");
-    Environment.Exit(1);
-    return;
-}
+string fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 1 1";
+int depth = 5;
 
-if (!int.TryParse(args[0], out var depth) || depth < 1)
-{
-    Console.Error.WriteLine("Invalid 'depth'.");
-    Environment.Exit(1);
-    return;
-}
-
-ChessBoard board = new();
-
-if (!FenStrings.TryParse(args[1], ref board))
-{
-    Console.Error.WriteLine("Invalid 'fen'.");
-    Console.Error.WriteLine("FEN: {0}", args[1]);
-    Environment.Exit(1);
-    return;
-}
-
-
-Console.WriteLine("Depth: {0}", args[0]);
-Console.WriteLine("Fen:   {0}", args[1]);
+Console.WriteLine("Fen: {0}", fen);
+Console.WriteLine("Depth: {0}", depth);
 Console.WriteLine();
+
+_ = FenStrings.TryParse(fen, out Position pos);
 
 Stopwatch stopwatch = Stopwatch.StartNew();
 
-var nodes = Perft.Test(board, depth);
+var nodes = Perft.Test(pos, depth);
 
 stopwatch.Stop();
 
@@ -63,6 +42,7 @@ static class Perft
         public int Castles;
         public int Promotions;
         public int Checks;
+        public int Checkmates;
 
         public override readonly string ToString()
         {
@@ -73,16 +53,18 @@ static class Perft
             sb.AppendLine(string.Format("Castles: {0:n0}", Castles));
             sb.AppendLine(string.Format("Promotions: {0:n0}", Promotions));
             sb.AppendLine(string.Format("Checks: {0:n0}", Checks));
+            sb.AppendLine(string.Format("Checkmates: {0:n0}", Checkmates));
             return sb.ToString();
         }
     }
 
-    public static PerftResult Test(ChessBoard chessBoard, int depth, bool upper = true)
+    public static unsafe PerftResult Test(Position pos, int depth, bool upper = true)
     {
-        ChessBoard tmp = new();
+        Position tmpPos = new();
+        int* moves = stackalloc int[218];
 
-        Span<BinaryMove> moves = stackalloc BinaryMove[218];
-        int written = chessBoard.GetMoves(moves, chessBoard.CurrentColor);
+        int written = MoveGen.WriteMovesToUnsafePtr_v1(
+            &pos, pos.color, moves);
 
         if (depth == 1)
         {
@@ -90,33 +72,30 @@ static class Perft
 
             for (int i = 0; i < written; ++i)
             {
-                chessBoard.CopyTo(ref tmp);
+                pos.CopyTo(&tmpPos);
 
-                tmp.MakeMove(moves[i]);
+                MoveDriver.ApplyMove(ref tmpPos, moves[i]);
 
-                if (tmp.IsChecked())
+                if (tmpPos.IsKingChecked(tmpPos.color))
                 {
                     continue;
                 }
 
                 perftResult.Nodes += 1;
 
-                if (moves[i].IsCapture) perftResult.Captures += 1;
-                
-                if (moves[i].IsEnpassant)
+                if (BinaryMoveOps.DecodeCapture(moves[i]) != 0)
+                    perftResult.Captures += 1;
+
+                if (BinaryMoveOps.DecodeEnpassant(moves[i]) != 0)
                 {
                     perftResult.Ep += 1;
                 }
 
-                if (moves[i].Castling != Castling.None) perftResult.Castles += 1;
-                
-                if (moves[i].Promote != PromotePiece.None) perftResult.Promotions += 1;
+                if (BinaryMoveOps.DecodeCastling(moves[i]) != 0)
+                    perftResult.Castles += 1;
 
-                tmp.CurrentColor = ColorsExtensions.Opposite(tmp.CurrentColor);
-                if (tmp.IsChecked()) 
-                {
-                    perftResult.Checks += 1;
-                }
+                if (BinaryMoveOps.DecodePromotion(moves[i]) != 0)
+                    perftResult.Promotions += 1;
             }
 
             return perftResult;
@@ -126,18 +105,18 @@ static class Perft
 
         for (int i = 0; i < written; ++i)
         {
-            chessBoard.CopyTo(ref tmp);
-            
-            tmp.MakeMove(moves[i]);
-            
-            if (tmp.IsChecked())
+            pos.CopyTo(&tmpPos);
+
+            MoveDriver.ApplyMove(ref tmpPos, moves[i]);
+
+            if (tmpPos.IsKingChecked(tmpPos.color))
             {
                 continue;
             }
 
-            tmp.CurrentColor = chessBoard.CurrentColor.Opposite();
-            
-            var tmpRes = Test(tmp, depth - 1, false);
+            tmpPos.color = Colors.Mirror(tmpPos.color);
+
+            var tmpRes = Test(tmpPos, depth - 1, false);
 
             finalRes.Nodes += tmpRes.Nodes;
             finalRes.Captures += tmpRes.Captures;
@@ -148,7 +127,10 @@ static class Perft
 
             if (upper)
             {
-                Console.WriteLine("{0} {1:n0}", moves[i].ToString(), tmpRes.Nodes);
+                var src = SquareOps.ToAbbreviature(BinaryMoveOps.DecodeSrc(moves[i]));
+                var trg = SquareOps.ToAbbreviature(BinaryMoveOps.DecodeTrg(moves[i]));
+
+                Console.WriteLine("{0}{1} {2:n0}", src, trg, tmpRes.Nodes);
             }
         }
 

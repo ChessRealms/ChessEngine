@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.MoveGeneration;
+using ChessRealms.ChessEngine2.Core.Movements;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -27,20 +27,6 @@ public unsafe class AllMoveGenerationBenchmarks : MoveGenerationBenckmarksBase
     public void ALL_1_WriteMovesToUnsafePtr()
     {
         MoveGen.WriteMovesToUnsafePtr_v1(positionPtr, Colors.Black, movesArrPtr);
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void ALL_2_WriteMovesToSpanArray()
-    {
-        MoveGen.WriteMovesToSpan_v2(ref position, Colors.Black, movesArr);
-    }
-
-    [Benchmark]
-    [MethodImpl(MethodImplOptions.NoOptimization)]
-    public void ALL_2_WriteMovesToUnsafePtr()
-    {
-        MoveGen.WriteMovesToUnsafePtr_v2(positionPtr, Colors.Black, movesArrPtr);
     }
 
 #if LEGACY_FUNC

@@ -3,12 +3,18 @@ using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine2.Core.Types;
 
+[StructLayout(LayoutKind.Sequential)]
 public unsafe struct Position
 {
+    // To access 'all' blockers.
+    private const int All = Colors.None;
+
     internal fixed ulong pieceBBs[12];
     internal fixed ulong blockers[3];
 
@@ -28,8 +34,8 @@ public unsafe struct Position
 
     public Piece GetPieceAt(int square, int color)
     {
-        DebugAsserts.ValidSquare(square);
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
+        DebugHelper.Assert.IsValidColor(color);
 
         int bbIndex = BBIndex(Pieces.Pawn, color);
         int bbLastIndex = BBIndex(Pieces.King, color);
@@ -53,60 +59,69 @@ public unsafe struct Position
 
     public void SetPieceAt(int square, int piece, int color)
     {
-        DebugAsserts.ValidSquare(square);
-        DebugAsserts.ValidPiece(piece);
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
+        DebugHelper.Assert.IsValidPiece(piece);
+        DebugHelper.Assert.IsValidColor(color);
 
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
 
-        fixed (ulong* pieceBBs = this.pieceBBs)
-        {
-            pieceBBs[bbIndex] = BitboardOps.SetBitAt(pieceBBs[bbIndex], square);
-        }
-
-        fixed (ulong* blockers = this.blockers)
-        {
-            blockers[color] = BitboardOps.SetBitAt(blockers[color], square);
-            blockers[Colors.None] = BitboardOps.SetBitAt(blockers[Colors.None], square);
-        }
+        BitboardOps.SetBitAt(ref pieceBBs[bbIndex], square);
+        BitboardOps.SetBitAt(ref blockers[color], square);
+        BitboardOps.SetBitAt(ref blockers[All], square);
     }
 
     public void PopPieceAt(int square, int piece, int color)
     {
-        DebugAsserts.ValidSquare(square);
-        DebugAsserts.ValidPiece(piece);
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
+        DebugHelper.Assert.IsValidPiece(piece);
+        DebugHelper.Assert.IsValidColor(color);
 
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
 
-        fixed (ulong* pieceBBs = this.pieceBBs)
-        {
-            pieceBBs[bbIndex] = BitboardOps.PopBitAt(pieceBBs[bbIndex], square);
-        }
+        BitboardOps.PopBitAt(ref pieceBBs[bbIndex], square);
+        BitboardOps.PopBitAt(ref blockers[color], square);
+        BitboardOps.PopBitAt(ref blockers[All], square);
+    }
 
-        fixed (ulong* blockers = this.blockers)
-        {
-            blockers[color] = BitboardOps.PopBitAt(blockers[color], square);
-            blockers[Colors.None] = BitboardOps.PopBitAt(blockers[Colors.None], square);
-        }
+    public void PopPieceAt(int square, int color)
+    {
+        DebugHelper.Assert.IsValidSquare(square);
+        DebugHelper.Assert.IsValidColor(color);
+
+        int i = BBIndex(Pieces.Pawn, color);
+
+        BitboardOps.PopBitAt(ref pieceBBs[i], square);
+        BitboardOps.PopBitAt(ref pieceBBs[i + 1], square);
+        BitboardOps.PopBitAt(ref pieceBBs[i + 2], square);
+        BitboardOps.PopBitAt(ref pieceBBs[i + 3], square);
+        BitboardOps.PopBitAt(ref pieceBBs[i + 4], square);
+
+        BitboardOps.PopBitAt(ref blockers[color], square);
+        BitboardOps.PopBitAt(ref blockers[All], square);
+    }
+
+    public void MovePiece(int srcSquare, int trgSquare, int color, int piece)
+    {
+        PopPieceAt(srcSquare, piece, color);
+        SetPieceAt(trgSquare, piece, color);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int BBIndex(int piece, int color)
     {
-        DebugAsserts.ValidPiece(piece);
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidPiece(piece);
+        DebugHelper.Assert.IsValidColor(color);
 
-        return color * 6 + piece;
+        return (color * 6) + piece;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int PieceFromBBIndex(int bbIndex, int color)
     {
         Debug.Assert(IsValidBBIndex(bbIndex));
-        DebugAsserts.ValidColor(color);
+        DebugHelper.Assert.IsValidColor(color);
 
         return bbIndex - color * 6;
     }
@@ -115,6 +130,13 @@ public unsafe struct Position
     private static bool IsValidBBIndex(int bbIndex)
     {
         return bbIndex >= 0 && bbIndex < 12;
+    }
+
+    public bool IsKingChecked(int color)
+    {
+        int i = BBIndex(Pieces.King, color);
+        int square = BitboardOps.Lsb(pieceBBs[i]);
+        return IsSquareAttacked(square, Colors.Mirror(color));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,39 +150,75 @@ public unsafe struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsAttackedByPawn(int square, int enemyColor)
+    internal bool IsAttackedByPawn(int square, int enemyColor)
     {
-        return (PawnAttacks.GetAttackMask(Colors.Mirror(enemyColor), square)
-            & pieceBBs[BBIndex(Pieces.Pawn, enemyColor)]) != 0;
+        int i = BBIndex(Pieces.Pawn, enemyColor);
+        ulong enemy = pieceBBs[i];
+        ulong mask = PawnAttacks.GetAttackMask(Colors.Mirror(enemyColor), square);
+
+        return (mask & enemy) != 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsAttackedByKnight(int square, int enemyColor)
+    internal bool IsAttackedByKnight(int square, int enemyColor)
     {
-        return (KnightAttacks.AttackMasks[square]
-            & pieceBBs[BBIndex(Pieces.Knight, enemyColor)]) != 0;
+        int i = BBIndex(Pieces.Knight, enemyColor);
+        ulong enemy = pieceBBs[i];
+        ulong mask = KnightAttacks.AttackMasks[square];
+
+        return (mask & enemy) != 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsAttackedByBishop(int square, int enemyColor)
+    internal bool IsAttackedByBishop(int square, int enemyColor)
     {
-        return (BishopAttacks.GetSliderAttack(square, blockers[Colors.None])
-            & (pieceBBs[BBIndex(Pieces.Bishop, enemyColor)] 
-            | pieceBBs[BBIndex(Pieces.Queen, enemyColor)])) != 0;
+        int bb1 = BBIndex(Pieces.Bishop, enemyColor);
+        int bb2 = BBIndex(Pieces.Queen, enemyColor);
+        ulong enemy = pieceBBs[bb1] | pieceBBs[bb2];
+        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsAttackedByRook(int square, int enemyColor)
+    internal bool IsAttackedByRook(int square, int enemyColor)
     {
-        return (BishopAttacks.GetSliderAttack(square, blockers[Colors.None])
-            & (pieceBBs[BBIndex(Pieces.Rook, enemyColor)] 
-            | pieceBBs[BBIndex(Pieces.Queen, enemyColor)])) != 0;
+        int bb1 = BBIndex(Pieces.Rook, enemyColor);
+        int bb2 = BBIndex(Pieces.Queen, enemyColor);
+        ulong enemy = pieceBBs[bb1] | pieceBBs[bb2];
+        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
+
+        return (mask & enemy) != 0;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsAttackedByKing(int square, int enemyColor)
+    internal bool IsAttackedByKing(int square, int enemyColor)
     {
-        return (KingAttacks.AttackMasks[square]
-            & pieceBBs[BBIndex(Pieces.King, enemyColor)]) != 0;
+        int i = BBIndex(Pieces.King, enemyColor);
+        ulong enemy = pieceBBs[i];
+        ulong mask = KingAttacks.AttackMasks[square];
+
+        return (mask & enemy) != 0;
+    }
+
+    public unsafe void CopyTo(Position* dst)
+    {
+        fixed (Position* src = &this)
+        {
+            Buffer.MemoryCopy(src, dst, sizeof(Position), sizeof(Position));
+        }
+        //fixed (ulong* srcPieces = pieceBBs)
+        //fixed (ulong* dstPieces = dst.pieceBBs)
+        //fixed (ulong* srcBlockers = blockers)
+        //fixed (ulong* dstBlockers = dst.blockers)
+        //{
+        //    Buffer.MemoryCopy(srcPieces, dstPieces, sizeof(ulong) * 12, sizeof(ulong) * 12);
+        //    Buffer.MemoryCopy(srcBlockers, dstBlockers, sizeof(ulong) * 3, sizeof(ulong) * 3);
+
+        //    dst.castlings = castlings;
+        //    dst.color = color;
+        //    dst.enpassant = enpassant;
+        //    dst.halfMoveClock = halfMoveClock;
+        //    dst.fullMoveCount = fullMoveCount;
+        //}
     }
 }
