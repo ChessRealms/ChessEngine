@@ -62,7 +62,7 @@ static class Perft
         Position tmpPos = new();
         int* moves = stackalloc int[218];
 
-        int written = MoveGen.WriteMovesToUnsafePtr_v1(
+        int written = MoveGen.WriteMovesToPtrUnsafe(
             &pos, pos.color, moves);
 
         if (depth == 1)
@@ -73,7 +73,7 @@ static class Perft
             {
                 pos.CopyTo(&tmpPos);
 
-                MoveDriver.ApplyMove(ref tmpPos, moves[i]);
+                MoveDriver.MakeMove(ref tmpPos, moves[i]);
 
                 if (tmpPos.IsKingChecked(tmpPos.color))
                 {
@@ -106,7 +106,7 @@ static class Perft
         {
             pos.CopyTo(&tmpPos);
 
-            MoveDriver.ApplyMove(ref tmpPos, moves[i]);
+            MoveDriver.MakeMove(ref tmpPos, moves[i]);
 
             if (tmpPos.IsKingChecked(tmpPos.color))
             {

@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Common;
+using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
@@ -6,7 +7,7 @@ using ChessRealms.ChessEngine2.Parsing;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn;
 
-internal class QuietMoveTests
+internal unsafe class QuietMoveTests
 {
     private const string ParseFenError = "Cant parse fen string.";
 
@@ -30,16 +31,17 @@ internal class QuietMoveTests
             return;
         }
 
+        Position* positionPtr = &position;
+
         #region Assert by move count
-        Span<int> moves = stackalloc int[40];
-
-        int written = PawnMovement.WriteMovesToSpan(ref position, Colors.White, moves, 0);
-
+        int* moves = stackalloc int[40];
+        int written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, Colors.White, moves, 0);
+        
         Assert.That(written, Is.EqualTo(16));
         #endregion
 
         #region Assert by move equals
-        var movesSet = moves[..written].ToArray().ToHashSet();
+        HashSet<int> movesSet = UnsafeArrays.ToHashSet(moves, written);
 
         int a2a4 = BinaryMoveOps.EncodeMove(
             Squares.a2, Pieces.Pawn, Colors.White,
@@ -57,17 +59,5 @@ internal class QuietMoveTests
         Assert.That(movesSet, Does.Contain(d2d4));
         Assert.That(movesSet, Does.Contain(h2h3));
         #endregion
-    }
-
-    [Test]
-    public void QuietTest2()
-    {
-
-    }
-
-    [Test]
-    public void QuietTest3()
-    {
-
     }
 }

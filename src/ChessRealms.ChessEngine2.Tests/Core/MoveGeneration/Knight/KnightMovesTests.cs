@@ -1,14 +1,14 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
+﻿using ChessRealms.ChessEngine2.Common;
+using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
 using ChessRealms.ChessEngine2.Parsing;
-using System.Diagnostics;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Knight;
 
-internal class KnightMovesTests
+internal unsafe class KnightMovesTests
 {
     //     ASCII Board (as white)
     //
@@ -28,8 +28,7 @@ internal class KnightMovesTests
 
     public KnightMovesTests()
     {
-        bool parsed = FenStrings.TryParse(fen, out position);
-        Debug.Assert(parsed);
+        _ = FenStrings.TryParse(fen, out position);
     }
 
     [Test]
@@ -37,18 +36,24 @@ internal class KnightMovesTests
     {
         int color = Colors.White;
         int expectedWritten = 5;
+        int* moves = stackalloc int[expectedWritten];
+
+        int written; 
         
-        Span<int> moves = stackalloc int[expectedWritten];
-        int written = LeapingMovement.WriteMovesToSpan(
-            ref position, 
-            color, 
-            Pieces.Knight,
-            KnightAttacks.AttackMasks,
-            moves);
+        fixed (Position* positionPtr = &position)
+        {
+            written = LeapingMovement.WriteMovesToPtrUnsafe(
+                positionPtr,
+                color,
+                Pieces.Knight,
+                KnightAttacks.AttackMasks,
+                moves);
+        }
         
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        var moveSet = moves.ToArray().ToHashSet();
+        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
+        
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(
@@ -71,18 +76,24 @@ internal class KnightMovesTests
     {
         int color = Colors.Black;
         int expectedWritten = 5;
-
-        Span<int> moves = stackalloc int[expectedWritten];
-        int written = LeapingMovement.WriteMovesToSpan(
-            ref position,
-            Colors.Black,
-            Pieces.Knight,
-            KnightAttacks.AttackMasks,
-            moves);
+        int* moves = stackalloc int[expectedWritten];
         
+        int written;
+        
+        fixed (Position* positionPtr = &position)
+        {
+            written = LeapingMovement.WriteMovesToPtrUnsafe(
+                positionPtr,
+                Colors.Black,
+                Pieces.Knight,
+                KnightAttacks.AttackMasks,
+                moves);
+        }
+
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        var moveSet = moves.ToArray().ToHashSet();      
+        var moveSet = UnsafeArrays.ToHashSet(moves, written);      
+        
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(

@@ -4,16 +4,18 @@ using ChessRealms.ChessEngine2.Parsing;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration;
 
-internal class AllMovesTests
+internal unsafe class AllMovesTests
 {
     const string fen = "r3k2r/p1ppqpb1/bn1Ppnp1/4N3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 1 1";
 
     [Test]
     public void Test1_AsBlack()
     {
-        FenStrings.TryParse(fen, out Position position);
-        Span<int> moves = stackalloc int[218];
+        Assert.That(FenStrings.TryParse(fen, out Position position), Is.True);
+        Position* positionPtr = &position;
+        int* moves = stackalloc int[218];
 
-        int written = MoveGen.WriteMovesToSpan_v1(ref position, position.color, moves);
+        int written = MoveGen.WriteMovesToPtrUnsafe(positionPtr, position.color, moves);
+        Assert.That(written, Is.EqualTo(39));
     }
 }

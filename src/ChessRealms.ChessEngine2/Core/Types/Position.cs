@@ -1,9 +1,9 @@
 ﻿using ChessRealms.ChessEngine2.Core.Attacks;
 using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Extensions;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Debugs;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -97,6 +97,7 @@ public unsafe struct Position
         BitboardOps.PopBitAt(ref pieceBBs[i + 2], square);
         BitboardOps.PopBitAt(ref pieceBBs[i + 3], square);
         BitboardOps.PopBitAt(ref pieceBBs[i + 4], square);
+        BitboardOps.PopBitAt(ref pieceBBs[i + 5], square);
 
         BitboardOps.PopBitAt(ref blockers[color], square);
         BitboardOps.PopBitAt(ref blockers[All], square);
@@ -132,9 +133,9 @@ public unsafe struct Position
         return bbIndex >= 0 && bbIndex < 12;
     }
 
-    public bool IsKingChecked(int color)
+    public bool IsKingChecked(int kingColor)
     {
-        if (color == Colors.Black)
+        if (kingColor == Colors.Black)
         {
             int ks = BitboardOps.Lsb(pieceBBs[BitboardIndicies.BKing]);
 
@@ -154,30 +155,28 @@ public unsafe struct Position
                 || IsAttackedByBlackRook(ks)
                 || IsAttackedByBlackKing(ks);
         }
+    }
 
-        //int i = BBIndex(Pieces.King, color);
-        //int square = BitboardOps.Lsb(pieceBBs[i]);
-        //return IsSquareAttacked(square, Colors.Mirror(color));
+    // Should run a bit faster than universal version
+    // that calculates Bitboard indicies.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttackedByWhite(int square)
+    {
+        return IsAttackedByBlackPawn(square)
+            || IsAttackedByBlackKnight(square)
+            || IsAttackedByBlackBishop(square)
+            || IsAttackedByBlackRook(square)
+            || IsAttackedByBlackKing(square);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttacked(int square, int enemyColor)
+    public bool IsSquareAttackedByBlack(int square)
     {
-        return IsAttackedByPawn(square, enemyColor)
-            || IsAttackedByKnight(square, enemyColor)
-            || IsAttackedByBishop(square, enemyColor)
-            || IsAttackedByRook(square, enemyColor)
-            || IsAttackedByKing(square, enemyColor);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsAttackedByPawn(int square, int enemyColor)
-    {
-        int i = BBIndex(Pieces.Pawn, enemyColor);
-        ulong enemy = pieceBBs[i];
-        ulong mask = PawnAttacks.GetAttackMask(Colors.Mirror(enemyColor), square);
-
-        return (mask & enemy) != 0;
+        return IsAttackedByWhitePawn(square)
+            || IsAttackedByWhiteKnight(square)
+            || IsAttackedByWhiteBishop(square)
+            || IsAttackedByWhiteRook(square)
+            || IsAttackedByWhiteKing(square);
     }
 
     #region Is Attacked By Pawn
@@ -186,7 +185,7 @@ public unsafe struct Position
     {
         ulong enemy = pieceBBs[BitboardIndicies.WPawn];
         ulong mask = PawnAttacks.AttackMasks[Colors.Black][square];
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,28 +193,18 @@ public unsafe struct Position
     {
         ulong enemy = pieceBBs[BitboardIndicies.BPawn];
         ulong mask = PawnAttacks.AttackMasks[Colors.White][square];
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
     #endregion
 
     #region Is Attacked By Knight
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsAttackedByKnight(int square, int enemyColor)
-    {
-        int i = BBIndex(Pieces.Knight, enemyColor);
-        ulong enemy = pieceBBs[i];
-        ulong mask = KnightAttacks.AttackMasks[square];
-
-        return (mask & enemy) != 0;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByWhiteKnight(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WKnight];
         ulong mask = KnightAttacks.AttackMasks[square];
 
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -224,29 +213,18 @@ public unsafe struct Position
         ulong enemy = pieceBBs[BitboardIndicies.BKnight];
         ulong mask = KnightAttacks.AttackMasks[square];
 
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
     #endregion
 
     #region Is Attacked By Bishop
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsAttackedByBishop(int square, int enemyColor)
-    {
-        int bb1 = BBIndex(Pieces.Bishop, enemyColor);
-        int bb2 = BBIndex(Pieces.Queen, enemyColor);
-        ulong enemy = pieceBBs[bb1] | pieceBBs[bb2];
-        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
-
-        return (mask & enemy) != 0;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByWhiteBishop(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WBishop] | pieceBBs[BitboardIndicies.WQueen];
         ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
 
-        return (mask & enemy) != 0;
+        return (mask & enemy).IsTrue();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -255,29 +233,18 @@ public unsafe struct Position
         ulong enemy = pieceBBs[BitboardIndicies.BBishop] | pieceBBs[BitboardIndicies.BQueen];
         ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
 
-        return (mask & enemy) != 0;
+        return (mask & enemy).IsTrue();
     }
     #endregion
 
     #region Is Attacked By Rook
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsAttackedByRook(int square, int enemyColor)
-    {
-        int bb1 = BBIndex(Pieces.Rook, enemyColor);
-        int bb2 = BBIndex(Pieces.Queen, enemyColor);
-        ulong enemy = pieceBBs[bb1] | pieceBBs[bb2];
-        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
-
-        return (mask & enemy) != 0;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByWhiteRook(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WRook] | pieceBBs[BitboardIndicies.WQueen];
         ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
 
-        return (mask & enemy) != 0;
+        return (mask & enemy).IsTrue();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -286,27 +253,18 @@ public unsafe struct Position
         ulong enemy = pieceBBs[BitboardIndicies.BRook] | pieceBBs[BitboardIndicies.BQueen];
         ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
 
-        return (mask & enemy) != 0;
+        return (mask & enemy).IsTrue();
     }
     #endregion
 
     #region Is Attacked By King
-    internal bool IsAttackedByKing(int square, int enemyColor)
-    {
-        int i = BBIndex(Pieces.King, enemyColor);
-        ulong enemy = pieceBBs[i];
-        ulong mask = KingAttacks.AttackMasks[square];
-
-        return (mask & enemy) != 0;
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsAttackedByWhiteKing(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WKing];
         ulong mask = KingAttacks.AttackMasks[square];
 
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -315,7 +273,7 @@ public unsafe struct Position
         ulong enemy = pieceBBs[BitboardIndicies.BKing];
         ulong mask = KingAttacks.AttackMasks[square];
 
-        return (enemy & mask) != 0;
+        return (enemy & mask).IsTrue();
     }
     #endregion
 

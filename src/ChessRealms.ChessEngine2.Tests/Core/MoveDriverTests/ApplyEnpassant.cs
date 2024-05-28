@@ -19,7 +19,7 @@ internal class ApplyEnpassant
             Squares.b4, Pieces.Pawn, Colors.Black, Squares.c3,
             enpassant: 1, capture: 1);
 
-        MoveDriver.ApplyMove(ref position, epMove);
+        MoveDriver.MakeMove(ref position, epMove);
 
         var srcPawn = position.GetPieceAt(Squares.c3, Colors.Black);
         var trgPawn = position.GetPieceAt(Squares.c4, Colors.White);
@@ -44,7 +44,7 @@ internal class ApplyEnpassant
             Squares.f5, Pieces.Pawn, Colors.White, Squares.g6,
             enpassant: 1, capture: 1);
 
-        MoveDriver.ApplyMove(ref position, epMove);
+        MoveDriver.MakeMove(ref position, epMove);
 
         var srcPawn = position.GetPieceAt(Squares.g6, Colors.White);
         var trgPawn = position.GetPieceAt(Squares.g5, Colors.Black);
@@ -69,7 +69,7 @@ internal class ApplyEnpassant
             Squares.h5, Pieces.Pawn, Colors.White, Squares.g6,
             enpassant: 1, capture: 1);
 
-        MoveDriver.ApplyMove(ref position, epMove);
+        MoveDriver.MakeMove(ref position, epMove);
 
         var srcPawn = position.GetPieceAt(Squares.g6, Colors.White);
         var trgPawn = position.GetPieceAt(Squares.g5, Colors.Black);
@@ -94,7 +94,7 @@ internal class ApplyEnpassant
             Squares.b4, Pieces.Pawn, Colors.Black, Squares.c3,
             enpassant: 1, capture: 1);
 
-        MoveDriver.ApplyMove(ref position, epMove);
+        MoveDriver.MakeMove(ref position, epMove);
 
         var srcPawn = position.GetPieceAt(Squares.c3, Colors.Black);
         var trgPawn = position.GetPieceAt(Squares.c4, Colors.White);

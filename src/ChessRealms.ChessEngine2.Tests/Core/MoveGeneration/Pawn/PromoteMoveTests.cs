@@ -1,4 +1,5 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine2.Common;
+using ChessRealms.ChessEngine2.Core.Constants;
 using ChessRealms.ChessEngine2.Core.Math;
 using ChessRealms.ChessEngine2.Core.Movements;
 using ChessRealms.ChessEngine2.Core.Types;
@@ -6,7 +7,7 @@ using ChessRealms.ChessEngine2.Parsing;
 
 namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn;
 
-internal class PromoteMoveTests
+internal unsafe class PromoteMoveTests
 {
 
     //     ASCII Board (as white)
@@ -36,12 +37,19 @@ internal class PromoteMoveTests
     {
         int color = Colors.White;
         int expectedLength = 8;
-        Span<int> moves = stackalloc int[expectedLength];
+        int* moves = stackalloc int[expectedLength];
 
-        int written = PawnMovement.WriteMovesToSpan(ref position, color, moves);
-        var moveSet = moves.ToArray().ToHashSet();
+        int written;
+
+        fixed (Position* positionPtr = &position)
+        {
+            written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, color, moves);
+        }
+        
         Assert.That(written, Is.EqualTo(expectedLength));
 
+        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
+        
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(
@@ -79,11 +87,18 @@ internal class PromoteMoveTests
     {
         int color = Colors.Black;
         int expectedLength = 8;
-        Span<int> moves = stackalloc int[expectedLength];
+        int* moves = stackalloc int[expectedLength];
 
-        int written = PawnMovement.WriteMovesToSpan(ref position, color, moves);
-        var moveSet = moves.ToArray().ToHashSet();
+        int written; 
+        
+        fixed (Position* positionPtr = &position)
+        {
+            written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, color, moves);
+        }
+        
         Assert.That(written, Is.EqualTo(expectedLength));
+
+        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
 
         int[] expectedMoves =
         [
