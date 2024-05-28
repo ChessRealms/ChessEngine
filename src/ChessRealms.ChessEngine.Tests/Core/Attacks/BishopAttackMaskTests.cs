@@ -1,33 +1,32 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Tests.Extensions;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class BishopAttackMaskTests
+internal class BishopAttackMaskTests
 {
     [Test]
     public void From_D4()
     {
-        SquareIndex attackFrom = EnumSquare.d4;
+        int attackFrom = Squares.d4;
 
-        SquareIndex[] attacks =
+        int[] attacks =
         [
-            EnumSquare.b2,
-            EnumSquare.c3,
-            EnumSquare.e5,
-            EnumSquare.f6,
-            EnumSquare.g7,
-            EnumSquare.f2,
-            EnumSquare.e3,
-            EnumSquare.c5,
-            EnumSquare.b6
+            Squares.b2,
+            Squares.c3,
+            Squares.e5,
+            Squares.f6,
+            Squares.g7,
+            Squares.f2,
+            Squares.e3,
+            Squares.c5,
+            Squares.b6
         ];
-
+        
         ulong attackMask = BishopAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.ToBitBoard();
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }

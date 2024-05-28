@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine", "ChessRealms.ChessEngine\ChessRealms.ChessEngine.csproj", "{4C3BD2E2-C641-449C-811C-63B07B2F242C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Tests", "ChessRealms.ChessEngine.Tests\ChessRealms.ChessEngine.Tests.csproj", "{C08F425D-17ED-47C5-B027-0F20E84B6B80}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Console", "ChessRealms.ChessEngine.Console\ChessRealms.ChessEngine.Console.csproj", "{E9DB8606-0F41-4781-A499-8BD9103FA072}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.MagicBruteforce", "ChessRealms.MagicBruteforce\ChessRealms.MagicBruteforce.csproj", "{5C55E3CA-2541-4EA4-B4B6-3C5AAE87FB9D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Perft", "ChessRealms.ChessEngine.Perft\ChessRealms.ChessEngine.Perft.csproj", "{B52278FD-37F0-4955-8E90-FD365CBBC769}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChessEngine", "ChessEngine", "{0785FE11-03DA-45AC-8704-A67DE5C4777C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine", "ChessRealms.ChessEngine\ChessRealms.ChessEngine.csproj", "{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Tests", "ChessRealms.ChessEngine.Tests\ChessRealms.ChessEngine.Tests.csproj", "{530985CE-2BD3-437A-8C66-C50A98CEA318}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Benchmark", "ChessRealms.ChessEngine.Benchmark\ChessRealms.ChessEngine.Benchmark.csproj", "{029E70A1-269B-4F1F-A132-60011E54392D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessRealms.ChessEngine.Perft", "ChessRealms.ChessEngine.Perft\ChessRealms.ChessEngine.Perft.csproj", "{2C20D484-BE51-452B-A393-F8F0C969F72E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,29 +21,35 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4C3BD2E2-C641-449C-811C-63B07B2F242C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C3BD2E2-C641-449C-811C-63B07B2F242C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C3BD2E2-C641-449C-811C-63B07B2F242C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C3BD2E2-C641-449C-811C-63B07B2F242C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C08F425D-17ED-47C5-B027-0F20E84B6B80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C08F425D-17ED-47C5-B027-0F20E84B6B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C08F425D-17ED-47C5-B027-0F20E84B6B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C08F425D-17ED-47C5-B027-0F20E84B6B80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9DB8606-0F41-4781-A499-8BD9103FA072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E9DB8606-0F41-4781-A499-8BD9103FA072}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E9DB8606-0F41-4781-A499-8BD9103FA072}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E9DB8606-0F41-4781-A499-8BD9103FA072}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5C55E3CA-2541-4EA4-B4B6-3C5AAE87FB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5C55E3CA-2541-4EA4-B4B6-3C5AAE87FB9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C55E3CA-2541-4EA4-B4B6-3C5AAE87FB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C55E3CA-2541-4EA4-B4B6-3C5AAE87FB9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B52278FD-37F0-4955-8E90-FD365CBBC769}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{530985CE-2BD3-437A-8C66-C50A98CEA318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{530985CE-2BD3-437A-8C66-C50A98CEA318}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{530985CE-2BD3-437A-8C66-C50A98CEA318}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{530985CE-2BD3-437A-8C66-C50A98CEA318}.Release|Any CPU.Build.0 = Release|Any CPU
+		{029E70A1-269B-4F1F-A132-60011E54392D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{029E70A1-269B-4F1F-A132-60011E54392D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{029E70A1-269B-4F1F-A132-60011E54392D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{029E70A1-269B-4F1F-A132-60011E54392D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C20D484-BE51-452B-A393-F8F0C969F72E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C20D484-BE51-452B-A393-F8F0C969F72E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C20D484-BE51-452B-A393-F8F0C969F72E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C20D484-BE51-452B-A393-F8F0C969F72E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E8906E4A-0DDD-45E8-8C0B-8FBB4B5D832A} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
+		{530985CE-2BD3-437A-8C66-C50A98CEA318} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
+		{029E70A1-269B-4F1F-A132-60011E54392D} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
+		{2C20D484-BE51-452B-A393-F8F0C969F72E} = {0785FE11-03DA-45AC-8704-A67DE5C4777C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E65FD084-D2F8-4F38-93AC-24C1EB66CE8A}

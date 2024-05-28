@@ -1,24 +1,22 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Debugs;
 using System.Collections.Immutable;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class RookAttacks
 {
     /// <summary>
-    /// Pre-calculated rook slider attacks. Shape of array is <c>[64][4096]</c>.
+    /// Pre-calculated rook slider attacks. Shape of array is <c>[64 * 4096]</c>.
     /// </summary>
-    internal static readonly ImmutableArray<ImmutableArray<ulong>> SliderAttacks;
+    public static readonly ImmutableArray<ulong> SliderAttacks;
 
     /// <summary>
     /// Pre-calculated rook attack masks (no outer squares) for each square index from 0 to 63.
     /// </summary>
-    internal static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
-    /// <summary>
-    /// Pre-calculated bit counts for each rook attack mask.
-    /// </summary>
-    internal static readonly ImmutableArray<int> RelevantBits =
+    public static readonly ImmutableArray<int> RelevantBits = 
     [
          12, 11, 11, 11, 11, 11, 11, 12,
          11, 10, 10, 10, 10, 10, 10, 11,
@@ -29,11 +27,8 @@ internal static class RookAttacks
          11, 10, 10, 10, 10, 10, 10, 11,
          12, 11, 11, 11, 11, 11, 11, 12
     ];
-        
-    /// <summary>
-    /// Pre-calculated rook magic numbers for each square index from 0 to 63.
-    /// </summary>
-    internal static readonly ImmutableArray<ulong> MagicNumbers =
+
+    private static readonly ImmutableArray<ulong> MagicNumbers = 
     [
         0x0C80108004400020,
         0x0240002000100042,
@@ -103,13 +98,12 @@ internal static class RookAttacks
 
     static RookAttacks()
     {
-        ulong[] attackMasks = new ulong[64];
-        ulong[][] sliderAttacks = new ulong[64][];
+        var attackMasks = new ulong[64];
+        var sliderAttacks = new ulong[64 * 4096];
 
         for (int square = 0; square < 64; ++square)
         {
             attackMasks[square] = MaskRookAttack(square);
-            sliderAttacks[square] = new ulong[4096];
 
             int occupancyIndicies = 1 << RelevantBits[square];
 
@@ -117,14 +111,21 @@ internal static class RookAttacks
             {
                 ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], attackMasks[square]);
                 
-                ulong magicIndex = (occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]);
+                int magicIndex = (int)((occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]));
 
-                sliderAttacks[square][magicIndex] = MaskRookSliderAttackOnTheFly(square, occupancy);
+                ulong mask = MaskRookSliderAttackOnTheFly(square, occupancy);
+
+                sliderAttacks[(square * 4096) + magicIndex] = mask;
             }
         }
 
         AttackMasks = [.. attackMasks];
-        SliderAttacks = sliderAttacks.Select(x => x.ToImmutableArray()).ToImmutableArray();
+        SliderAttacks = [.. sliderAttacks];
+    }
+
+    public static void InvokeInit()
+    {
+        _ = SliderAttacks[0];
     }
 
     /// <summary>
@@ -133,12 +134,14 @@ internal static class RookAttacks
     /// <param name="square"> Index of square at chessboard. </param>
     /// <param name="occupancy"> Occupancy at chessboard. </param>
     /// <returns> Attack mask. </returns>
-    internal static BitBoard GetSliderAttack(SquareIndex square, ulong occupancy)
+    public static ulong GetSliderAttack(int square, ulong occupancy)
     {
+        DebugHelper.Assert.IsValidSquare(square);
+
         occupancy &= AttackMasks[square];
         occupancy *= MagicNumbers[square];
         occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[square][(int)occupancy];
+        return SliderAttacks[(square * 4096) + unchecked((int)occupancy)];
     }
 
     /// <summary>
@@ -146,28 +149,29 @@ internal static class RookAttacks
     /// </summary>
     /// <param name="square"> Index of square at chessboard. </param>
     /// <returns> Attack mask (no outer squares). </returns>
-    internal static BitBoard MaskRookAttack(SquareIndex square)
+    public static ulong MaskRookAttack(int square)
     {
+        DebugHelper.Assert.IsValidSquare(square);
+
         ulong attacks = 0UL;
 
-        for (int r = square.Rank + 1; r <= 6; ++r)
+        
+        for (int r = SquareOps.Rank(square) + 1, f = SquareOps.File(square); r <= 6; ++r)
         {
-            attacks |= SquareIndex.FromFileRank(square.File, r).Board;
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+        }
+        for (int r = SquareOps.Rank(square) - 1, f = SquareOps.File(square); r >= 1; --r)
+        {
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
         }
 
-        for (int r = square.Rank - 1; r >= 1; --r)
+        for (int f = SquareOps.File(square) + 1, r = SquareOps.Rank(square); f <= 6; ++f)
         {
-            attacks |= SquareIndex.FromFileRank(square.File, r).Board;
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
         }
-
-        for (int f = square.File + 1; f <= 6; ++f)
+        for (int f = SquareOps.File(square) - 1, r = SquareOps.Rank(square); f >= 1; --f)
         {
-            attacks |= SquareIndex.FromFileRank(f, square.Rank).Board;
-        }
-
-        for (int f = square.File - 1; f >= 1; --f)
-        {
-            attacks |= SquareIndex.FromFileRank(f, square.Rank).Board;
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
         }
 
         return attacks;
@@ -179,56 +183,46 @@ internal static class RookAttacks
     /// <param name="square"> Index of square at chessboard. </param>
     /// <param name="blockers"> Board of blockers. </param>
     /// <returns> Attack mask. </returns>
-    internal static ulong MaskRookSliderAttackOnTheFly(SquareIndex square, BitBoard blockers)
+    public static ulong MaskRookSliderAttackOnTheFly(int square, ulong blockers)
     {
+        DebugHelper.Assert.IsValidSquare(square);
+
         ulong attacks = 0UL;
+        int r;
+        int f = SquareOps.File(square);
 
-        for (int r = square.Rank + 1; r <= 7; ++r)
+        for (r = SquareOps.Rank(square) + 1; r <= 7; ++r)
         {
-            ulong board = SquareIndex.FromFileRank(square.File, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int r = square.Rank - 1; r >= 0; --r)
+        for (r = SquareOps.Rank(square) - 1; r >= 0; --r)
         {
-            ulong board = SquareIndex.FromFileRank(square.File, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int f = square.File + 1; f <= 7; ++f)
+        r = SquareOps.Rank(square);
+
+        for (f = SquareOps.File(square) + 1; f <= 7; ++f)
         {
-            ulong board = SquareIndex.FromFileRank(f, square.Rank).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int f = square.File - 1; f >= 0; --f)
+        for (f = SquareOps.File(square) - 1; f >= 0; --f)
         {
-            ulong board = SquareIndex.FromFileRank(f, square.Rank).Board;
-
+            ulong board = SquareOps.ToBitboard(SquareOps.FromFileRank(f, r));
             attacks |= board;
-
             if ((board & blockers) != 0)
-            {
                 break;
-            }
         }
 
         return attacks;

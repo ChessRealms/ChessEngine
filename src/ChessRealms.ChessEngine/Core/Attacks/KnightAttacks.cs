@@ -1,28 +1,37 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
-using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Math;
 using System.Collections.Immutable;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class KnightAttacks
 {
-    internal static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
     static KnightAttacks()
     {
-        ulong[] masks = new ulong[64];
+        var attackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            masks[square] = MaskKnightAttack(square);
+            attackMasks[square] = MaskKnightAttack(square);
         }
 
-        AttackMasks = [.. masks];
+        AttackMasks = [.. attackMasks];
     }
 
-    internal static ulong MaskKnightAttack(SquareIndex square)
+    /// <summary>
+    /// Triggers static ctor().
+    /// </summary>
+    public static void InvokeInit()
     {
-        ulong board = square.Board;
+        // Touch variable to trigger static ctor.
+        _ = AttackMasks[0];
+    }
+
+    public static ulong MaskKnightAttack(int square)
+    {
+        ulong board = SquareOps.ToBitboard(square);
         ulong attacks = 0UL;
 
         attacks |= board >> 17 & SquareMapping.NOT_H_FILE;

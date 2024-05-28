@@ -1,12 +1,14 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
-using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Debugs;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class PawnAttacks
 {
-    internal static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
+    public static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
 
     static PawnAttacks()
     {
@@ -15,21 +17,40 @@ internal static class PawnAttacks
 
         for (int square = 0; square < 64; ++square)
         {
-            white[square] = MaskPawnAttack(ChessConstants.COLOR_WHITE, square);
-            black[square] = MaskPawnAttack(ChessConstants.COLOR_BLACK, square);
+            white[square] = MaskPawnAttack(Colors.White, square);
+            black[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        ImmutableArray<ulong>[] masks = [[.. black], [.. white]];
-
-        AttackMasks = [.. masks];
+        AttackMasks = [[.. black], [.. white]];
     }
 
-    private static ulong MaskPawnAttack(int color, SquareIndex square)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong GetAttackMask(int color, int square)
     {
-        ulong board = square.Board;
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
+
+        return AttackMasks[color][square];
+    }
+
+    /// <summary>
+    /// Triggers static ctor().
+    /// </summary>
+    public static void InvokeInit()
+    {
+        // Touch variable to trigger its init (calls static ctor).
+        _ = AttackMasks[0];
+    }
+
+    private static ulong MaskPawnAttack(int color, int square)
+    {
+        DebugHelper.Assert.IsValidColor(color);
+        DebugHelper.Assert.IsValidSquare(square);
+
+        ulong board = SquareOps.ToBitboard(square);
         ulong attacks = 0UL;
 
-        if (color == ChessConstants.COLOR_WHITE)
+        if (color == Colors.White)
         {
             attacks |= board << 7 & SquareMapping.NOT_H_FILE;
             attacks |= board << 9 & SquareMapping.NOT_A_FILE;

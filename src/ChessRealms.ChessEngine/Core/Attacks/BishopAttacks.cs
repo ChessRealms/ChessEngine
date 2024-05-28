@@ -1,24 +1,22 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Debugs;
 using System.Collections.Immutable;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class BishopAttacks
 {
     /// <summary>
-    /// Pre-calculated bishop slider attacks. Shape of array is <c>[64][512].</c>
+    /// Pre-calculated bishop slider attacks. Shape of array is <c>[64 * 512].</c>
     /// </summary>
-    internal static readonly ImmutableArray<ImmutableArray<ulong>> SliderAttacks;
+    public static readonly ImmutableArray<ulong> SliderAttacks;
 
     /// <summary>
     /// Pre-calculated bishop attack masks (no outer squares) for each square index from 0 to 63.
     /// </summary>
-    internal static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
-    /// <summary>
-    /// Pre-calculated bit counts for each bishop attack mask.
-    /// </summary>
-    internal static readonly ImmutableArray<int> RelevantBits =
+    public static readonly int[] RelevantBits = 
     [
          6, 5, 5, 5, 5, 5, 5, 6,
          5, 5, 5, 5, 5, 5, 5, 5,
@@ -30,10 +28,7 @@ internal static class BishopAttacks
          6, 5, 5, 5, 5, 5, 5, 6
     ];
 
-    /// <summary>
-    /// Pre-calculated bishop magic numbers for each square index from 0 to 63.
-    /// </summary>
-    internal static readonly ImmutableArray<ulong> MagicNumbers =
+    public static readonly ImmutableArray<ulong> MagicNumbers = 
     [
         0x0002100148088080,
         0x24502C0B20620000,
@@ -103,28 +98,34 @@ internal static class BishopAttacks
 
     static BishopAttacks()
     {
-        ulong[] attackMasks = new ulong[64];
-        ulong[][] sliderAttacks = new ulong[64][];
+        var attackMasks = new ulong[64];
+        var sliderAttacks = new ulong[64 * 512];
 
         for (int square = 0; square < 64; ++square)
         {
             attackMasks[square] = MaskBishopAttack(square);
-            sliderAttacks[square] = new ulong[512];
-
+            
             int occupancyIndicies = 1 << RelevantBits[square];
 
             for (int index = 0; index < occupancyIndicies; ++index)
             {
                 ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], attackMasks[square]);
                 
-                ulong magicIndex = (occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]);
+                int magicIndex = (int)((occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]));
 
-                sliderAttacks[square][magicIndex] = MaskBishopSliderAttackOnTheFly(square, occupancy);
+                ulong mask = MaskBishopSliderAttackOnTheFly(square, occupancy);
+
+                sliderAttacks[(square * 512) + magicIndex] = mask;
             }
         }
 
         AttackMasks = [.. attackMasks];
-        SliderAttacks = sliderAttacks.Select(x => x.ToImmutableArray()).ToImmutableArray();
+        SliderAttacks = [.. sliderAttacks];
+    }
+
+    public static void InvokeInit()
+    {
+        _ = SliderAttacks[0];
     }
 
     /// <summary>
@@ -133,12 +134,14 @@ internal static class BishopAttacks
     /// <param name="square"> Index of square at chessboard. </param>
     /// <param name="occupancy"> Occupancy at chessboard. </param>
     /// <returns> Attack mask. </returns>
-    internal static BitBoard GetSliderAttack(SquareIndex square, ulong occupancy)
+    public static ulong GetSliderAttack(int square, ulong occupancy)
     {
+        DebugHelper.Assert.IsValidSquare(square);
+
         occupancy &= AttackMasks[square];
         occupancy *= MagicNumbers[square];
         occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[square][(int)occupancy];
+        return SliderAttacks[(square * 512) + unchecked((int)occupancy)];
     }
 
     /// <summary>
@@ -146,29 +149,34 @@ internal static class BishopAttacks
     /// </summary>
     /// <param name="square"> Index of square at chessboard. </param>
     /// <returns> Attack mask (no outer squares). </returns>
-    internal static ulong MaskBishopAttack(SquareIndex square)
+    public static ulong MaskBishopAttack(int square)
     {
         ulong attacks = 0UL;
+        int r, f;
 
-        for (int r = square.Rank + 1, f = square.File + 1; r <= 6 && f <= 6; ++r, ++f)
-        {
-            attacks |= SquareIndex.FromFileRank(f, r).Board;
-        }
+        r = SquareOps.Rank(square) + 1;
+        f = SquareOps.File(square) + 1;
+        
+        while (r <= 6 && f <= 6)
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f++, r++));
 
-        for (int r = square.Rank - 1, f = square.File + 1; r >= 1 && f <= 6; --r, ++f)
-        {
-            attacks |= SquareIndex.FromFileRank(f, r).Board;
-        }
+        r = SquareOps.Rank(square) - 1;
+        f = SquareOps.File(square) + 1;
+        
+        while (r >= 1 && f <= 6)
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f++, r--));
 
-        for (int r = square.Rank + 1, f = square.File - 1; r <= 6 && f >= 1; ++r, --f)
-        {
-            attacks |= SquareIndex.FromFileRank(f, r).Board;
-        }
+        r = SquareOps.Rank(square) + 1;
+        f = SquareOps.File(square) - 1;
+        
+        while (r <= 6 && f >= 1)
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f--, r++));
 
-        for (int r = square.Rank - 1, f = square.File - 1; r >= 1 && f >= 1; --r, --f)
-        {
-            attacks |= SquareIndex.FromFileRank(f, r).Board;
-        }
+        r = SquareOps.Rank(square) - 1;
+        f = SquareOps.File(square) - 1;
+
+        while (r >= 1 && f >= 1)
+            attacks |= SquareOps.ToBitboard(SquareOps.FromFileRank(f--, r--));
 
         return attacks;
     }
@@ -179,56 +187,53 @@ internal static class BishopAttacks
     /// <param name="square"> Index of square at chessboard. </param>
     /// <param name="blockers"> Board of blockers. </param>
     /// <returns> Attack mask. </returns>
-    internal static ulong MaskBishopSliderAttackOnTheFly(SquareIndex square, ulong blockers)
+    public static ulong MaskBishopSliderAttackOnTheFly(int square, ulong blockers)
     {
         ulong attacks = 0UL;
+        int r, f;
 
-        for (int r = square.Rank + 1, f = square.File + 1; r <= 7 && f <= 7; ++r, ++f)
+        r = SquareOps.Rank(square) + 1;
+        f = SquareOps.File(square) + 1;
+
+        while (r <= 7 && f <= 7)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f++, r++));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int r = square.Rank - 1, f = square.File + 1; r >= 0 && f <= 7; --r, ++f)
+        r = SquareOps.Rank(square) - 1;
+        f = SquareOps.File(square) + 1;
+
+        while (r >= 0 && f <= 7)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f++, r--));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int r = square.Rank + 1, f = square.File - 1; r <= 7 && f >= 0; ++r, --f)
+        r = SquareOps.Rank(square) + 1;
+        f = SquareOps.File(square) - 1;
+
+        while (r <= 7 && f >= 0)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f--, r++));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
-        for (int r = square.Rank - 1, f = square.File - 1; r >= 0 && f >= 0; --r, --f)
+        r = SquareOps.Rank(square) - 1;
+        f = SquareOps.File(square) - 1;
+
+        while (r >= 0 && f >= 0)
         {
-            ulong board = SquareIndex.FromFileRank(f, r).Board;
-
-            attacks |= board;
-
-            if ((board & blockers) != 0)
-            {
+            ulong squareAtBoard = SquareOps.ToBitboard(SquareOps.FromFileRank(f--, r--));
+            attacks |= squareAtBoard;
+            if ((squareAtBoard & blockers) != 0)
                 break;
-            }
         }
 
         return attacks;

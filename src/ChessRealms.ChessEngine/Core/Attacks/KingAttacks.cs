@@ -1,28 +1,33 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
-using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Math;
 using System.Collections.Immutable;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
 internal static class KingAttacks
 {
-    internal static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ImmutableArray<ulong> AttackMasks;
 
     static KingAttacks()
     {
-        ulong[] masks = new ulong[64];
+        var attackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            masks[square] = MaskKingAttack(square);
+            attackMasks[square] = MaskKingAttack(square);
         }
 
-        AttackMasks = [.. masks];
+        AttackMasks = [.. attackMasks];
     }
 
-    private static ulong MaskKingAttack(SquareIndex square)
+    public static void InvokeInit()
     {
-        ulong board = square.Board;
+        _ = AttackMasks[0];
+    }
+
+    public static ulong MaskKingAttack(int square)
+    {
+        ulong board = SquareOps.ToBitboard(square);
         ulong attacks = 0UL;
 
         attacks |= board << 8;

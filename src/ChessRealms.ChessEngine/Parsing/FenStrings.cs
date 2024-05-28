@@ -1,18 +1,19 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
+﻿using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Core.Math;
+using ChessRealms.ChessEngine2.Core.Types;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-using static ChessRealms.ChessEngine.Core.Constants.ChessConstants;
-
-namespace ChessRealms.ChessEngine.Parsing;
+namespace ChessRealms.ChessEngine2.Parsing;
 
 public static partial class FenStrings
 {
     public const string StartPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    public const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/Pp2P3/2N2Q1p/1PPBBPPP/R3K2R b KQkq a4 0 1";
-
-    public static bool TryParse(string fen, ref ChessBoard chessBoard)
+    
+    public static bool TryParse(string fen, out Position position)
     {
+        position = new();
+
         Match match = FenRegex().Match(fen);
 
         if (!match.Success)
@@ -32,7 +33,7 @@ public static partial class FenStrings
         #region Read pieces
         // Fen string represented as piece in next positions a8-h8/a7-h8/.../a1-h1.
         // So we setup a8 as start index.
-        SquareIndex squareIndex = EnumSquare.a8;
+        int squareIndex = Squares.a8;
 
         for (int i = 0; i < piecePlacementSpan.Length; ++i)
         {
@@ -51,69 +52,93 @@ public static partial class FenStrings
             }
             else
             {
-                int color = char.IsUpper(piecePlacementSpan[i]) ? COLOR_WHITE : COLOR_BLACK;
+                int color = char.IsUpper(piecePlacementSpan[i]) ? Colors.White : Colors.Black;
                 int piece = char.ToLower(piecePlacementSpan[i]) switch
                 {
-                    'p' => PIECE_PAWN,
-                    'n' => PIECE_KNIGHT,
-                    'b' => PIECE_BISHOP,
-                    'r' => PIECE_ROOK,
-                    'q' => PIECE_QUEEN,
-                    _ => PIECE_KING
+                    'p' => Pieces.Pawn,
+                    'n' => Pieces.Knight,
+                    'b' => Pieces.Bishop,
+                    'r' => Pieces.Rook,
+                    'q' => Pieces.Queen,
+                    'k' => Pieces.King,
+                    _ => Pieces.None
                 };
 
-                chessBoard.SetPieceAt(squareIndex, new Piece(piece, color));
+                if (Pieces.IsValid(piece))
+                {
+                    position.SetPieceAt(squareIndex, piece, color);
+                }
+
                 ++squareIndex;
             }
         }
         #endregion
 
         #region Side To Move
-        chessBoard.CurrentColor = sideToMoveSpan.Equals("w", StringComparison.OrdinalIgnoreCase) 
-            ? PieceColor.White
-            : PieceColor.Black;
+        position.color = sideToMoveSpan.Equals("w", StringComparison.OrdinalIgnoreCase) 
+            ? Colors.White
+            : Colors.Black;
         #endregion
 
         #region Castling
         if (castlingSpan.Contains("K", StringComparison.Ordinal))
         {
-            chessBoard.CastlingState |= Castling.WK;
+            position.castlings |= Castlings.WK;
         }
 
         if (castlingSpan.Contains("Q", StringComparison.Ordinal))
         {
-            chessBoard.CastlingState |= Castling.WQ;
+            position.castlings |= Castlings.WQ;
         }
 
         if (castlingSpan.Contains("k", StringComparison.Ordinal))
         {
-            chessBoard.CastlingState |= Castling.BK;
+            position.castlings |= Castlings.BK;
         }
 
         if (castlingSpan.Contains("q", StringComparison.Ordinal))
         {
-            chessBoard.CastlingState |= Castling.BQ;
+            position.castlings |= Castlings.BQ;
         }
         #endregion
 
         #region EnPassant & HalfMoveClock & FullMoveNumber
-        if (SquareIndex.TryParse(enPassantSpan, out var enPassantSquare))
+        if (TryParseSquare(enPassantSpan, out var enPassantSquare))
         {
-            chessBoard.Enpassant = enPassantSquare;
+            position.enpassant = enPassantSquare;
         }
         
         if (int.TryParse(halfMoveClockSpan, out var halfMoveClock))
         {
-            chessBoard.HalfMoveClock = halfMoveClock;
+            position.halfMoveClock = halfMoveClock;
         }
         
         if (int.TryParse(fullMoveNumberSpan, out var fullMoveNumber))
         {
-            chessBoard.FullMoveNumber = fullMoveNumber;
+            position.fullMoveCount = fullMoveNumber;
         }
         #endregion
 
         return true;
+    }
+
+    // TODO: Perhaps move this somewhere elese in future.
+    private static bool TryParseSquare(ReadOnlySpan<char> fileRankSpan, out int square)
+    {
+        if (fileRankSpan.Length > 1)
+        {
+            int file = fileRankSpan[0] - 'a';
+            int rank = fileRankSpan[1] - '1';
+
+            if (SquareOps.ValidateFileRank(file) && SquareOps.ValidateFileRank(rank))
+            {
+                square = SquareOps.FromFileRank(file, rank);
+                return true;
+            }
+        }
+
+        square = -1;
+        return false;
     }
 
     [GeneratedRegex(

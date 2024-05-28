@@ -1,8 +1,9 @@
-﻿using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Math;
+using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Core.Attacks;
 
-public static class Occupancy
+internal static class Occupancy
 {
     /// <summary>
     /// Set occupancy by specified occupancy index and attackMask. 
@@ -12,20 +13,18 @@ public static class Occupancy
     /// <param name="bitsCount"> Bits count of <paramref name="attackMask"/>. </param>
     /// <param name="attackMask"> Attack mask. </param>
     /// <returns> Occupancy BitBoard. </returns>
-    public static BitBoard CreateAtIndex(int occupancyIndex, int bitsCount, BitBoard attackMask)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong CreateAtIndex(int occupancyIndex, int bitsCount, ulong attackMask)
     {
-        BitBoard occupancy = 0;
+        ulong occupancy = 0;
 
         for (int i = 0; i < bitsCount; ++i)
         {
-            SquareIndex s = attackMask.Ls1b();
-
-            attackMask = attackMask.PopBitAt(s);
+            int square = BitboardOps.Lsb(attackMask);
+            attackMask = BitboardOps.PopBitAt(attackMask, square);
 
             if ((occupancyIndex & 1 << i) != 0)
-            {
-                occupancy = occupancy.SetBitAt(s);
-            }
+                occupancy = BitboardOps.SetBitAt(occupancy, square);
         }
 
         return occupancy;

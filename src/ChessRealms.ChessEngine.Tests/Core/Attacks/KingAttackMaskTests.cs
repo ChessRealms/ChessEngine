@@ -1,95 +1,93 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Tests.Extensions;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class KingAttackMaskTests
+internal class KingAttackMaskTests
 {
     [Test]
     public void From_D4()
     {
-        SquareIndex attackFrom = EnumSquare.d4;
-
-        SquareIndex[] attacks =
+        int attackFrom = Squares.d4;
+        int[] attacks =
         [
-            EnumSquare.c3, EnumSquare.c4, EnumSquare.c5,
-            EnumSquare.d3, EnumSquare.d5,
-            EnumSquare.e3, EnumSquare.e4, EnumSquare.e5
+            Squares.c3, Squares.c4, Squares.c5,
+            Squares.d3, Squares.d5,
+            Squares.e3, Squares.e4, Squares.e5
         ];
-
+        
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
-        ulong attackMatch = attackMask ^ attacks.ToBitBoard();
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(attackMatch, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_A1()
     {
-        SquareIndex attackFrom = EnumSquare.a1;
-
-        SquareIndex attack1 = EnumSquare.a2;
-        SquareIndex attack2 = EnumSquare.b1;
-        SquareIndex attack3 = EnumSquare.b2;
-
+        int attackFrom = Squares.a1;
+        int[] attacks =
+        [
+            Squares.a2,
+            Squares.b1,
+            Squares.b2
+        ];
+        
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
-        ulong attackMatch = attackMask;
+        ulong expected = attacks.ToBitboard();
 
-        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
-
-        Assert.That(attackMatch, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_A8()
     {
-        SquareIndex attackFrom = EnumSquare.a8;
-
-        SquareIndex attack1 = EnumSquare.a7;
-        SquareIndex attack2 = EnumSquare.b7;
-        SquareIndex attack3 = EnumSquare.b8;
-
+        int attackFrom = Squares.a8;
+        int[] attacks =
+        [
+            Squares.a7,
+            Squares.b7,
+            Squares.b8
+        ];
+        
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
-        ulong attackMatch = attackMask;
+        ulong expected = attacks.ToBitboard();
 
-        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
-
-        Assert.That(attackMatch, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_H1()
     {
-        SquareIndex attackFrom = EnumSquare.h1;
-
-        SquareIndex attack1 = EnumSquare.h2;
-        SquareIndex attack2 = EnumSquare.g1;
-        SquareIndex attack3 = EnumSquare.g2;
+        int attackFrom = Squares.h1;
+        int[] attacks =
+        [
+            Squares.h2,
+            Squares.g1,
+            Squares.g2
+        ];
 
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
-        ulong attackMatch = attackMask;
+        ulong expected = attacks.ToBitboard();
 
-        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
-
-        Assert.That(attackMatch, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_H8()
     {
-        SquareIndex attackFrom = EnumSquare.h8;
-
-        SquareIndex attack1 = EnumSquare.h7;
-        SquareIndex attack2 = EnumSquare.g7;
-        SquareIndex attack3 = EnumSquare.g8;
+        int attackFrom = Squares.h8;
+        int[] attacks =
+        [
+            Squares.h7,
+            Squares.g7,
+            Squares.g8
+        ];
 
         ulong attackMask = KingAttacks.AttackMasks[attackFrom];
-        ulong attackMatch = attackMask;
+        ulong expected = attacks.ToBitboard();
 
-        attackMatch ^= attack1.Board | attack2.Board | attack3.Board;
-
-        Assert.That(attackMatch, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }

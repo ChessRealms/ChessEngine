@@ -1,10 +1,10 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Tests.Extensions;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
-public class RookSliderAttackLookupTests
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
+
+internal class RookSliderAttackLookupTests
 {
     [Test]
     public void From_E4()
@@ -21,34 +21,33 @@ public class RookSliderAttackLookupTests
         // 7 . . . . . . . .
         // 8 . . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.e4;
+        int attackFrom = Squares.e4;
 
-        SquareIndex[] blockerSquares =
+        int[] blockerSquares =
         [
-            EnumSquare.b4,
-            EnumSquare.g4,
-            EnumSquare.e5
+            Squares.b4,
+            Squares.g4,
+            Squares.e5
         ];
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.e1,
-            EnumSquare.e2,
-            EnumSquare.e3,
-            EnumSquare.e5,
-            EnumSquare.b4,
-            EnumSquare.c4,
-            EnumSquare.d4,
-            EnumSquare.f4,
-            EnumSquare.g4
+            Squares.e1,
+            Squares.e2,
+            Squares.e3,
+            Squares.e5,
+            Squares.b4,
+            Squares.c4,
+            Squares.d4,
+            Squares.f4,
+            Squares.g4
         ];
 
-        ulong blockers = blockerSquares.ToBitBoard();
+        ulong blockers = blockerSquares.ToBitboard();
         ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
@@ -66,25 +65,24 @@ public class RookSliderAttackLookupTests
         // 7 * . . . . . . .
         // 8 * . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.a1;
+        int attackFrom = Squares.a1;
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.a2, EnumSquare.b1,
-            EnumSquare.a3, EnumSquare.c1,
-            EnumSquare.a4, EnumSquare.d1,
-            EnumSquare.a5, EnumSquare.e1,
-            EnumSquare.a6, EnumSquare.f1,
-            EnumSquare.a7, EnumSquare.g1,
-            EnumSquare.a8, EnumSquare.h1
+            Squares.a2, Squares.b1,
+            Squares.a3, Squares.c1,
+            Squares.a4, Squares.d1,
+            Squares.a5, Squares.e1,
+            Squares.a6, Squares.f1,
+            Squares.a7, Squares.g1,
+            Squares.a8, Squares.h1
         ];
 
         ulong blockers = 0UL;
         ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
@@ -102,27 +100,26 @@ public class RookSliderAttackLookupTests
         // 7 . . . . . . . .
         // 8 . . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.h1;
+        int attackFrom = Squares.h1;
 
-        SquareIndex[] blockerSquares =
+        int[] blockerSquares =
         [
-            EnumSquare.d1,
-            EnumSquare.h5
+            Squares.d1,
+            Squares.h5
         ];
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.d1, EnumSquare.h2,
-            EnumSquare.e1, EnumSquare.h3,
-            EnumSquare.f1, EnumSquare.h4,
-            EnumSquare.g1, EnumSquare.h5
+            Squares.d1, Squares.h2,
+            Squares.e1, Squares.h3,
+            Squares.f1, Squares.h4,
+            Squares.g1, Squares.h5
         ];
 
-        ulong blockers = blockerSquares.ToBitBoard();
+        ulong blockers = blockerSquares.ToBitboard();
         ulong attackMask = RookAttacks.GetSliderAttack(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }

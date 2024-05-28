@@ -1,80 +1,90 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Tests.Extensions;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class KinghtAttackMaskTests
+internal class KinghtAttackMaskTests
 {
     [Test]
     public void From_D5()
     {
-        SquareIndex attackFrom = EnumSquare.d5;
-
-        SquareIndex[] attacks =
+        int attackFrom = Squares.d5;
+        int[] attacks =
         [
-            EnumSquare.e7, EnumSquare.c3,
-            EnumSquare.f6, EnumSquare.b4,
-            EnumSquare.f4, EnumSquare.b6,
-            EnumSquare.e3, EnumSquare.c7
+            Squares.e7, Squares.c3,
+            Squares.f6, Squares.b4,
+            Squares.f4, Squares.b6,
+            Squares.e3, Squares.c7
         ];
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.ToBitBoard();
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_A1()
     {
-        SquareIndex attackFrom = EnumSquare.a1;
-        SquareIndex attack1 = EnumSquare.b3;
-        SquareIndex attack2 = EnumSquare.c2;
+        int attackFrom = Squares.a1;
+        int[] attacks =
+        [
+            Squares.b3,
+            Squares.c2
+        ];
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_A8()
     {
-        SquareIndex attackFrom = EnumSquare.a8;
-        SquareIndex attack1 = EnumSquare.b6;
-        SquareIndex attack2 = EnumSquare.c7;
+        int attackFrom = Squares.a8;
+        int[] attacks =
+        [
+            Squares.b6,
+            Squares.c7
+        ];
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_H1()
     {
-        SquareIndex attackFrom = EnumSquare.h1;
-        SquareIndex attack1 = EnumSquare.f2;
-        SquareIndex attack2 = EnumSquare.g3;
+        int attackFrom = Squares.h1;
+        int[] attacks =
+        [
+            Squares.f2,
+            Squares.g3
+        ];
 
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_H8()
     {
-        SquareIndex attackFrom = EnumSquare.h8;
-        SquareIndex attack1 = EnumSquare.f7;
-        SquareIndex attack2 = EnumSquare.g6;
-
+        int attackFrom = Squares.h8;
+        int[] attacks =
+        [
+            Squares.f7,
+            Squares.g6
+        ];
+        
         ulong attackMask = KnightAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ (attack1.Board | attack2.Board);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }

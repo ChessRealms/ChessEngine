@@ -9,8 +9,12 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="ChessRealms.ChessEngine.Tests" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Benchmark" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Perft" />
     <InternalsVisibleTo Include="ChessRealms.MagicBruteforce" />
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Console" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Core\Exceptions\" />
+  </ItemGroup>
 </Project>

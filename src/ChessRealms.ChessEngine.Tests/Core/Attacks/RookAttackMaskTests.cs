@@ -1,59 +1,59 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class RookAttackMaskTests
+internal class RookAttackMaskTests
 {
     [Test]
     public void From_D4()
     {
-        SquareIndex attackFrom = EnumSquare.d4;
+        int attackFrom = Squares.d4;
 
-        SquareIndex[] attacks =
+        int[] attacks =
         [
-            EnumSquare.d2,
-            EnumSquare.d3,
-            EnumSquare.d5,
-            EnumSquare.d6,
-            EnumSquare.d7,
-            EnumSquare.b4,
-            EnumSquare.c4,
-            EnumSquare.e4,
-            EnumSquare.f4,
-            EnumSquare.g4
+            Squares.d2,
+            Squares.d3,
+            Squares.d5,
+            Squares.d6,
+            Squares.d7,
+            Squares.b4,
+            Squares.c4,
+            Squares.e4,
+            Squares.f4,
+            Squares.g4
         ];
 
         ulong attackMask = RookAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.Select(a => a.Board).Aggregate((b1, b2) => b1 | b2);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
     public void From_D1()
     {
-        SquareIndex attackFrom = EnumSquare.d1;
+        int attackFrom = Squares.d1;
 
-        SquareIndex[] attacks =
+        int[] attacks =
         [
-            EnumSquare.d2,
-            EnumSquare.d3,
-            EnumSquare.d4,
-            EnumSquare.d5,
-            EnumSquare.d6,
-            EnumSquare.d7,
-            EnumSquare.b1,
-            EnumSquare.c1,
-            EnumSquare.e1,
-            EnumSquare.f1,
-            EnumSquare.g1
+            Squares.d2,
+            Squares.d3,
+            Squares.d4,
+            Squares.d5,
+            Squares.d6,
+            Squares.d7,
+            Squares.b1,
+            Squares.c1,
+            Squares.e1,
+            Squares.f1,
+            Squares.g1
         ];
 
         ulong attackMask = RookAttacks.AttackMasks[attackFrom];
-        ulong matchAttack = attackMask ^ attacks.Select(a => a.Board).Aggregate((b1, b2) => b1 | b2);
+        ulong expected = attacks.ToBitboard();
 
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }

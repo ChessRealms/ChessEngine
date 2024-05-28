@@ -1,11 +1,10 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
-using ChessRealms.ChessEngine.Core.Types.Enums;
-using ChessRealms.ChessEngine.Tests.Extensions;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
+using ChessRealms.ChessEngine2.Core.Constants;
+using ChessRealms.ChessEngine2.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
 
-public class BishopSliderAttackOnTheFlyTests
+internal class BishopSliderAttackOnTheFlyTests
 {
     [Test]
     public void From_E4()
@@ -21,32 +20,31 @@ public class BishopSliderAttackOnTheFlyTests
         // 7 . * . . . . . .
         // 8 . . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.e4;
+        int attackFrom = Squares.e4;
 
-        SquareIndex[] blockerSquares =
+        int[] blockerSquares =
         [
-            EnumSquare.d3,
-            EnumSquare.b7,
-            EnumSquare.f5,
-            EnumSquare.f3
+            Squares.d3,
+            Squares.b7,
+            Squares.f5,
+            Squares.f3
         ];
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.d3,
-            EnumSquare.b7,
-            EnumSquare.c6,
-            EnumSquare.d5,
-            EnumSquare.f5,
-            EnumSquare.f3
+            Squares.d3,
+            Squares.b7,
+            Squares.c6,
+            Squares.d5,
+            Squares.f5,
+            Squares.f3
         ];
 
-        ulong blockers = blockerSquares.ToBitBoard();
+        ulong blockers = blockerSquares.ToBitboard();
         ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
@@ -63,31 +61,30 @@ public class BishopSliderAttackOnTheFlyTests
         // 7 . . . . . . . .
         // 8 . . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.d4;
+        int attackFrom = Squares.d4;
 
-        SquareIndex[] blockerSquares =
+        int[] blockerSquares =
         [
-            EnumSquare.c3,
-            EnumSquare.e3,
-            EnumSquare.c5,
-            EnumSquare.f6
+            Squares.c3,
+            Squares.e3,
+            Squares.c5,
+            Squares.f6
         ];
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.c3,
-            EnumSquare.e3,
-            EnumSquare.c5,
-            EnumSquare.e5,
-            EnumSquare.f6
+            Squares.c3,
+            Squares.e3,
+            Squares.c5,
+            Squares.e5,
+            Squares.f6
         ];
 
-        ulong blockers = blockerSquares.ToBitBoard();
+        ulong blockers = blockerSquares.ToBitboard();
         ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
@@ -104,24 +101,23 @@ public class BishopSliderAttackOnTheFlyTests
         // 7 . . . . . . * .
         // 8 . . . . . . . *
 
-        SquareIndex attackFrom = EnumSquare.a1;
-        SquareIndex[] expectedAttacks =
+        int attackFrom = Squares.a1;
+        int[] expectedAttacks =
         [
-            EnumSquare.b2,
-            EnumSquare.c3,
-            EnumSquare.d4,
-            EnumSquare.e5,
-            EnumSquare.f6,
-            EnumSquare.g7,
-            EnumSquare.h8
+            Squares.b2,
+            Squares.c3,
+            Squares.d4,
+            Squares.e5,
+            Squares.f6,
+            Squares.g7,
+            Squares.h8
         ];
 
         ulong blockers = 0UL;
         ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 
     [Test]
@@ -138,26 +134,25 @@ public class BishopSliderAttackOnTheFlyTests
         // 7 . . . . . . . .
         // 8 . . . . . . . .
 
-        SquareIndex attackFrom = EnumSquare.h1;
+        int attackFrom = Squares.h1;
 
-        SquareIndex[] blockerSquares =
+        int[] blockerSquares =
         [
-            EnumSquare.d5
+            Squares.d5
         ];
 
-        SquareIndex[] expectedAttacks =
+        int[] expectedAttacks =
         [
-            EnumSquare.g2,
-            EnumSquare.f3,
-            EnumSquare.e4,
-            EnumSquare.d5
+            Squares.g2,
+            Squares.f3,
+            Squares.e4,
+            Squares.d5
         ];
 
-        ulong blockers = blockerSquares.ToBitBoard();
+        ulong blockers = blockerSquares.ToBitboard();
         ulong attackMask = BishopAttacks.MaskBishopSliderAttackOnTheFly(attackFrom, blockers);
+        ulong expected = expectedAttacks.ToBitboard();
 
-        ulong matchAttack = attackMask ^ expectedAttacks.ToBitBoard();
-
-        Assert.That(matchAttack, Is.EqualTo(0));
+        Assert.That(attackMask, Is.EqualTo(expected));
     }
 }
