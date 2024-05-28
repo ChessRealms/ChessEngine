@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChessRealms.ChessEngine2\ChessRealms.ChessEngine2.csproj" />
+    <ProjectReference Include="..\ChessRealms.ChessEngine\ChessRealms.ChessEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

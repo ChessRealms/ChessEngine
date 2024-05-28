@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Tests" />
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Benchmark" />
-    <InternalsVisibleTo Include="ChessRealms.ChessEngine2.Perft" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Tests" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Benchmark" />
+    <InternalsVisibleTo Include="ChessRealms.ChessEngine.Perft" />
     <InternalsVisibleTo Include="ChessRealms.MagicBruteforce" />
   </ItemGroup>
 
