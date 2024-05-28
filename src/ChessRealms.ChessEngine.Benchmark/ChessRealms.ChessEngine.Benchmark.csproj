@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChessRealms.ChessEngine.Perft\ChessRealms.ChessEngine.Perft.csproj" />
     <ProjectReference Include="..\ChessRealms.ChessEngine\ChessRealms.ChessEngine.csproj" />
   </ItemGroup>
 
