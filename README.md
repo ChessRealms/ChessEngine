@@ -1,1 +1,27 @@
 # ChessEngine
+
+Chess engine with bitboard representation with no external dependencies. Only C# and .NET 8.
+
+### To Do:
+- [X] Basic bitboard and square management operations.
+- [X] Movegen for all moves.
+- [X] Parsing FEN to `Position`.
+- [X] Simple Perft (no hashtables or parallel calculations).
+- [ ] Play game functional.
+- [ ] UCI.
+- [ ] Hashtables for Perft.
+
+### Perft benchmarks
+Current perft benchmarks for _Initial Position_ `rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1` with _depth_ `6`.
+
+- No hashtables.
+- No parralel calculations. Everying is in 1 thread.
+
+See also about Perft: https://www.chessprogramming.org/Perft_Results
+
+Benchmarks collected using `BenchmarkDotNet`.
+
+| Method           | Mean    | Error    | StdDev   |
+|----------------- |--------:|---------:|---------:|
+| StartPos_Depth_6 | 3.601 s | 0.0556 s | 0.0520 s |
+
