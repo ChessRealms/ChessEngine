@@ -16,7 +16,7 @@ internal static class RookAttacks
     /// </summary>
     public static readonly ImmutableArray<ulong> AttackMasks;
 
-    private static readonly ImmutableArray<int> RelevantBits = 
+    public static readonly ImmutableArray<int> RelevantBits = 
     [
          12, 11, 11, 11, 11, 11, 11, 12,
          11, 10, 10, 10, 10, 10, 10, 11,

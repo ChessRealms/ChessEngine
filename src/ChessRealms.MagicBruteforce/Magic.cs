@@ -1,5 +1,4 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Types;
+﻿using ChessRealms.ChessEngine2.Core.Attacks;
 using System.Numerics;
 
 namespace ChessRealms.MagicBruteforce;
@@ -11,7 +10,7 @@ static class Magic
         return (ulong)(rnd.NextInt64() & rnd.NextInt64() & rnd.NextInt64());
     }
 
-    public static ulong FindMagic(SquareIndex square, int iterations, bool isBishop, Random rnd)
+    public static ulong FindMagic(int square, int iterations, bool isBishop, Random rnd)
     {
         ulong[] occupancies = new ulong[4096];
         ulong[] attacks = new ulong[4096];
