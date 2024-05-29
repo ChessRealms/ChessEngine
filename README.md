@@ -7,9 +7,12 @@ Chess engine with bitboard representation with no external dependencies. Only C#
 - [X] Movegen for all moves.
 - [X] Parsing FEN to `Position`.
 - [X] Simple Perft (no hashtables or parallel calculations).
-- [ ] Play game functional.
-- [ ] UCI.
+- [ ] Algebraic notation parsing.
+- [ ] PGN (optional).
 - [ ] Hashtables for Perft.
+- [ ] UCI.
+- [ ] Play game functional.
+
 
 ### Perft benchmarks
 Current perft benchmarks for _Initial Position_ `rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1` with _depth_ `6`.
