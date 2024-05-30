@@ -1,6 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
@@ -18,7 +18,7 @@ internal static unsafe class KingAttacks
             AttackMasks[square] = MaskKingAttack(square);
         }
 
-        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
+        AttackMasksPtr = (ulong*)GCHandle.Alloc(AttackMasks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
     }
 
     public static void InvokeInit()

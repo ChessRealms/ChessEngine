@@ -1,6 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Debugs;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
@@ -123,10 +123,11 @@ internal static unsafe class RookAttacks
             }
         }
 
-        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
-        SliderAttacksPtr = (ulong*)Unsafe.AsPointer(ref SliderAttacks[0]);
-        RelevantBitsPtr = (int*)Unsafe.AsPointer(ref RelevantBits[0]);
-        MagicNumbersPtr = (ulong*)Unsafe.AsPointer(ref MagicNumbers[0]);
+        
+        AttackMasksPtr = (ulong*)GCHandle.Alloc(AttackMasks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        SliderAttacksPtr = (ulong*)GCHandle.Alloc(SliderAttacks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        RelevantBitsPtr = (int*)GCHandle.Alloc(RelevantBits, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        MagicNumbersPtr = (ulong*)GCHandle.Alloc(MagicNumbers, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
     }
 
     public static void InvokeInit()

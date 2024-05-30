@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Math;
 using System.Text;
 
@@ -6,8 +7,8 @@ namespace ChessRealms.ChessEngine.Debugs;
 
 internal static partial class DebugHelper
 {    
-    public const string DEBUG = "DEBUG"; 
-    
+    public const string DEBUG = "DEBUG";
+
     public static string MoveToString(int move)
     {
         var sb = new StringBuilder();
@@ -37,6 +38,27 @@ internal static partial class DebugHelper
             sb.Append('x');
 
         sb.Append(SquareOps.ToAbbreviature(trg));
+
+        return sb.ToString();
+    }
+
+    public static string BitboardToString(ulong bitboard)
+    {
+        var sb = new StringBuilder();
+
+        for (int r = 7; r >= 0; --r)
+        {
+            for (int f = 0; f < 8; ++f)
+            {
+                var s = SquareOps.FromFileRank(f, r);
+                var b = SquareOps.ToBitboard(s);
+
+                sb.Append(' ');
+                sb.Append((bitboard & b).IsTrue() ? '*' : '.');
+            }
+
+            sb.AppendLine();
+        }
 
         return sb.ToString();
     }

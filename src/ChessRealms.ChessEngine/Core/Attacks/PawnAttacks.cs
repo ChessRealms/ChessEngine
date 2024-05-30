@@ -2,6 +2,7 @@
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Debugs;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ChessRealms.ChessEngine.Core.Attacks;
 
@@ -20,7 +21,7 @@ internal static unsafe class PawnAttacks
             AttackMasks[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
+        AttackMasksPtr = (ulong*)GCHandle.Alloc(AttackMasks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
