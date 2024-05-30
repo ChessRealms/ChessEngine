@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Parsing;
+using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine.Benchmark;

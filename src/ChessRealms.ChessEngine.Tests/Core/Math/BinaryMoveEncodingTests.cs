@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.Math;
+namespace ChessRealms.ChessEngine.Tests.Core.Math;
 
 internal class BinaryMoveEncodingTests
 {

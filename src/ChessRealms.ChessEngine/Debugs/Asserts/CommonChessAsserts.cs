@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine.Core.Constants;
 using System.Diagnostics;
 
-namespace ChessRealms.ChessEngine2.Debugs;
+namespace ChessRealms.ChessEngine.Debugs;
 
 internal static partial class DebugHelper
 {

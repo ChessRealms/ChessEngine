@@ -1,11 +1,11 @@
-﻿using ChessRealms.ChessEngine2.Common;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Movements;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Parsing;
+﻿using ChessRealms.ChessEngine.Common;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Movements;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Pawn;
+namespace ChessRealms.ChessEngine.Tests.Core.MoveGeneration.Pawn;
 
 internal unsafe class PromoteMoveTests
 {

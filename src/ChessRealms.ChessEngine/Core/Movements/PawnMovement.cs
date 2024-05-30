@@ -1,12 +1,12 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Debugs;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Movements;
+namespace ChessRealms.ChessEngine.Core.Movements;
 
 internal unsafe static class PawnMovement
 {
@@ -106,7 +106,7 @@ internal unsafe static class PawnMovement
 
         if (Squares.IsValid(enpassant))
         {
-            ulong attack = PawnAttacks.AttackMasks[enemyColor][enpassant];
+            ulong attack = PawnAttacks.GetAttackMask(enemyColor, enpassant);
             ulong srcSquares = attack & pawns;
 
             int srcSquare;
@@ -125,7 +125,7 @@ internal unsafe static class PawnMovement
         while (BitboardOps.IsNotEmpty(pawns))
         {
             int srcSquare = BitboardOps.Lsb(pawns);
-            ulong attack = PawnAttacks.AttackMasks[color][srcSquare];
+            ulong attack = PawnAttacks.GetAttackMask(color, srcSquare);
             ulong captures = attack & enemyPieces;
 
             while (BitboardOps.IsNotEmpty(captures))

@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.PositionManagement;
+namespace ChessRealms.ChessEngine.Tests.Core.PositionManagement;
 
 internal class SetPieceTests
 {

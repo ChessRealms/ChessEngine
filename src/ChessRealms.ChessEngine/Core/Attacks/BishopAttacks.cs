@@ -1,20 +1,22 @@
-﻿using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Debugs;
-using System.Collections.Immutable;
+﻿using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Debugs;
+using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class BishopAttacks
+internal static unsafe class BishopAttacks
 {
     /// <summary>
     /// Pre-calculated bishop slider attacks. Shape of array is <c>[64 * 512].</c>
     /// </summary>
-    public static readonly ImmutableArray<ulong> SliderAttacks;
+    public static readonly ulong[] SliderAttacks;
+    public static readonly ulong* SliderAttacksPtr;
 
     /// <summary>
     /// Pre-calculated bishop attack masks (no outer squares) for each square index from 0 to 63.
     /// </summary>
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ulong[] AttackMasks;
+    public static readonly ulong* AttackMasksPtr;
 
     public static readonly int[] RelevantBits = 
     [
@@ -27,8 +29,9 @@ internal static class BishopAttacks
          5, 5, 5, 5, 5, 5, 5, 5,
          6, 5, 5, 5, 5, 5, 5, 6
     ];
+    public static readonly int* RelevantBitsPtr;
 
-    public static readonly ImmutableArray<ulong> MagicNumbers = 
+    public static readonly ulong[] MagicNumbers = 
     [
         0x0002100148088080,
         0x24502C0B20620000,
@@ -95,32 +98,35 @@ internal static class BishopAttacks
         0x1050208809080492,
         0x0010E008004C4441
     ];
+    public static readonly ulong* MagicNumbersPtr;
 
     static BishopAttacks()
     {
-        var attackMasks = new ulong[64];
-        var sliderAttacks = new ulong[64 * 512];
+        AttackMasks = new ulong[64];
+        SliderAttacks = new ulong[64 * 512];
 
         for (int square = 0; square < 64; ++square)
         {
-            attackMasks[square] = MaskBishopAttack(square);
+            AttackMasks[square] = MaskBishopAttack(square);
             
             int occupancyIndicies = 1 << RelevantBits[square];
 
             for (int index = 0; index < occupancyIndicies; ++index)
             {
-                ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], attackMasks[square]);
+                ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], AttackMasks[square]);
                 
                 int magicIndex = (int)((occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]));
 
                 ulong mask = MaskBishopSliderAttackOnTheFly(square, occupancy);
 
-                sliderAttacks[(square * 512) + magicIndex] = mask;
+                SliderAttacks[(square * 512) + magicIndex] = mask;
             }
         }
 
-        AttackMasks = [.. attackMasks];
-        SliderAttacks = [.. sliderAttacks];
+        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
+        SliderAttacksPtr = (ulong*)Unsafe.AsPointer(ref SliderAttacks[0]);
+        RelevantBitsPtr = (int*)Unsafe.AsPointer(ref RelevantBits[0]);
+        MagicNumbersPtr = (ulong*)Unsafe.AsPointer(ref MagicNumbers[0]);
     }
 
     public static void InvokeInit()
@@ -138,10 +144,10 @@ internal static class BishopAttacks
     {
         DebugHelper.Assert.IsValidSquare(square);
 
-        occupancy &= AttackMasks[square];
-        occupancy *= MagicNumbers[square];
-        occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[(square * 512) + unchecked((int)occupancy)];
+        occupancy &= AttackMasksPtr[square];
+        occupancy *= MagicNumbersPtr[square];
+        occupancy >>= 64 - RelevantBitsPtr[square];
+        return SliderAttacksPtr[(square * 512) + unchecked((int)occupancy)];
     }
 
     /// <summary>

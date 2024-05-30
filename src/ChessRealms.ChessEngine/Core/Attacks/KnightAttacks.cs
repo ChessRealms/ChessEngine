@@ -1,23 +1,24 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using System.Collections.Immutable;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class KnightAttacks
+internal static unsafe class KnightAttacks
 {
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ulong[] AttackMasks;
+    public static readonly ulong* AttackMasksPtr;
 
     static KnightAttacks()
     {
-        var attackMasks = new ulong[64];
+        AttackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            attackMasks[square] = MaskKnightAttack(square);
+            AttackMasks[square] = MaskKnightAttack(square);
         }
 
-        AttackMasks = [.. attackMasks];
+        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Constants;
+namespace ChessRealms.ChessEngine.Core.Constants;
 
 public static class Colors
 {

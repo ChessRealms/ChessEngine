@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Math;
+﻿using ChessRealms.ChessEngine.Core.Math;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
 internal static class Occupancy
 {

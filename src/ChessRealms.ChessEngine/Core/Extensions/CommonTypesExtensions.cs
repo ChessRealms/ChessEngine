@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Extensions;
+namespace ChessRealms.ChessEngine.Core.Extensions;
 
 internal static class CommonTypesExtensions
 {

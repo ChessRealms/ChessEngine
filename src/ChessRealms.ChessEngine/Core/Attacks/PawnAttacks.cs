@@ -1,27 +1,26 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Debugs;
-using System.Collections.Immutable;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Debugs;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class PawnAttacks
+internal static unsafe class PawnAttacks
 {
-    public static readonly ImmutableArray<ImmutableArray<ulong>> AttackMasks;
+    public static readonly ulong[] AttackMasks;
+    public static readonly ulong* AttackMasksPtr;
 
     static PawnAttacks()
     {
-        ulong[] white = new ulong[64];
-        ulong[] black = new ulong[64];
+        AttackMasks = new ulong[64 * 2];
 
         for (int square = 0; square < 64; ++square)
         {
-            white[square] = MaskPawnAttack(Colors.White, square);
-            black[square] = MaskPawnAttack(Colors.Black, square);
+            AttackMasks[square + 64] = MaskPawnAttack(Colors.White, square);
+            AttackMasks[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        AttackMasks = [[.. black], [.. white]];
+        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,7 +29,7 @@ internal static class PawnAttacks
         DebugHelper.Assert.IsValidColor(color);
         DebugHelper.Assert.IsValidSquare(square);
 
-        return AttackMasks[color][square];
+        return AttackMasks[(color * 64) + square];
     }
 
     /// <summary>

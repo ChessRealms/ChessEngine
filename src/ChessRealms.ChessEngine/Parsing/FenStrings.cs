@@ -1,10 +1,9 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Types;
-using System.Diagnostics;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Types;
 using System.Text.RegularExpressions;
 
-namespace ChessRealms.ChessEngine2.Parsing;
+namespace ChessRealms.ChessEngine.Parsing;
 
 public static partial class FenStrings
 {

@@ -1,13 +1,13 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Extensions;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Debugs;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Extensions;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace ChessRealms.ChessEngine2.Core.Types;
+namespace ChessRealms.ChessEngine.Core.Types;
 
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct Position
@@ -184,7 +184,7 @@ public unsafe struct Position
     internal bool IsAttackedByWhitePawn(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WPawn];
-        ulong mask = PawnAttacks.AttackMasks[Colors.Black][square];
+        ulong mask = PawnAttacks.GetAttackMask(Colors.Black, square);
         return (enemy & mask).IsTrue();
     }
 
@@ -192,7 +192,7 @@ public unsafe struct Position
     internal bool IsAttackedByBlackPawn(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.BPawn];
-        ulong mask = PawnAttacks.AttackMasks[Colors.White][square];
+        ulong mask = PawnAttacks.GetAttackMask(Colors.White, square);
         return (enemy & mask).IsTrue();
     }
     #endregion

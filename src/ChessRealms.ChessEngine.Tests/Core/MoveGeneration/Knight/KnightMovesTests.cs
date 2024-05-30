@@ -1,12 +1,12 @@
-﻿using ChessRealms.ChessEngine2.Common;
-using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Movements;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Parsing;
+﻿using ChessRealms.ChessEngine.Common;
+using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Movements;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration.Knight;
+namespace ChessRealms.ChessEngine.Tests.Core.MoveGeneration.Knight;
 
 internal unsafe class KnightMovesTests
 {
@@ -34,8 +34,8 @@ internal unsafe class KnightMovesTests
     [Test]
     public void Test_AsWhite()
     {
-        int color = Colors.White;
-        int expectedWritten = 5;
+        const int color = Colors.White;
+        const int expectedWritten = 5;
         int* moves = stackalloc int[expectedWritten];
 
         int written; 
@@ -46,7 +46,7 @@ internal unsafe class KnightMovesTests
                 positionPtr,
                 color,
                 Pieces.Knight,
-                KnightAttacks.AttackMasks,
+                KnightAttacks.AttackMasksPtr,
                 moves);
         }
         
@@ -74,8 +74,8 @@ internal unsafe class KnightMovesTests
     [Test]
     public void Test_AsBlack()
     {
-        int color = Colors.Black;
-        int expectedWritten = 5;
+        const int color = Colors.Black;
+        const int expectedWritten = 5;
         int* moves = stackalloc int[expectedWritten];
         
         int written;
@@ -86,7 +86,7 @@ internal unsafe class KnightMovesTests
                 positionPtr,
                 Colors.Black,
                 Pieces.Knight,
-                KnightAttacks.AttackMasks,
+                KnightAttacks.AttackMasksPtr,
                 moves);
         }
 

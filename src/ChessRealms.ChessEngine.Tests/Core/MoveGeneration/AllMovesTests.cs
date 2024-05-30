@@ -1,8 +1,8 @@
-﻿using ChessRealms.ChessEngine2.Core.Movements;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Parsing;
+﻿using ChessRealms.ChessEngine.Core.Movements;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.MoveGeneration;
+namespace ChessRealms.ChessEngine.Tests.Core.MoveGeneration;
 
 internal unsafe class AllMovesTests
 {
@@ -14,8 +14,8 @@ internal unsafe class AllMovesTests
         Assert.That(FenStrings.TryParse(fen, out Position position), Is.True);
         Position* positionPtr = &position;
         int* moves = stackalloc int[218];
-
         int written = MoveGen.WriteMovesToPtrUnsafe(positionPtr, position.color, moves);
+
         Assert.That(written, Is.EqualTo(39));
     }
 }
