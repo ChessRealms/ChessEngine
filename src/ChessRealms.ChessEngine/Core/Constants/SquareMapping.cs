@@ -1,4 +1,4 @@
-﻿namespace ChessRealms.ChessEngine2.Core.Constants;
+﻿namespace ChessRealms.ChessEngine.Core.Constants;
 
 /// <summary>
 /// Little-Endian File-Rank Mapping Constants. 

@@ -1,8 +1,8 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine2.Core.Movements;
+namespace ChessRealms.ChessEngine.Core.Movements;
 
 internal static unsafe class MoveGen
 {
@@ -14,7 +14,7 @@ internal static unsafe class MoveGen
         
         cursor += LeapingMovement.WriteMovesToPtrUnsafe(
             position, color, Pieces.Knight, 
-            KnightAttacks.AttackMasks, moves, cursor);
+            KnightAttacks.AttackMasksPtr, moves, cursor);
         
         cursor += SlidingMovement.WriteMovesToPtrUnsafe(
             position, color, Pieces.Bishop,
@@ -30,7 +30,7 @@ internal static unsafe class MoveGen
         
         cursor += LeapingMovement.WriteMovesToPtrUnsafe(
             position, color, Pieces.King, 
-            KingAttacks.AttackMasks, moves, cursor);
+            KingAttacks.AttackMasksPtr, moves, cursor);
 
         cursor += CastlingMovement.WriteMovesToUnsafePtr(position, color, moves, cursor);
 

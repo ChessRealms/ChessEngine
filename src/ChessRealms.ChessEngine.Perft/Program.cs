@@ -1,9 +1,9 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Movements;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Parsing;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Movements;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Parsing;
 using System.Diagnostics;
 using System.Text;
 
@@ -32,7 +32,7 @@ Console.WriteLine("Seconds: {0}", stopwatch.Elapsed.TotalSeconds);
 Console.WriteLine("Elapsed: {0}", stopwatch.Elapsed);
 Console.WriteLine("ElapsedMilliseconds: {0}", stopwatch.ElapsedMilliseconds);
 Console.WriteLine();
-Console.WriteLine("Nodes/s: {0}", nodes.Nodes / stopwatch.Elapsed.TotalSeconds);
+Console.WriteLine("Nodes/s: {0:n0}", nodes.Nodes / stopwatch.Elapsed.TotalSeconds);
 Console.WriteLine();
 
 namespace Perft

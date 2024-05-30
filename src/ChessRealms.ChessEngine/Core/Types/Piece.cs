@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine.Core.Constants;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Types;
+namespace ChessRealms.ChessEngine.Core.Types;
 
 public readonly struct Piece(int piece, int color)
 {

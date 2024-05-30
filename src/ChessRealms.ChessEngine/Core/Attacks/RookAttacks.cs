@@ -1,22 +1,24 @@
-﻿using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Debugs;
-using System.Collections.Immutable;
+﻿using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Debugs;
+using System.Runtime.InteropServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class RookAttacks
+internal static unsafe class RookAttacks
 {
     /// <summary>
     /// Pre-calculated rook slider attacks. Shape of array is <c>[64 * 4096]</c>.
     /// </summary>
-    public static readonly ImmutableArray<ulong> SliderAttacks;
+    public static readonly ulong[] SliderAttacks;
+    public static readonly ulong* SliderAttacksPtr;
 
     /// <summary>
     /// Pre-calculated rook attack masks (no outer squares) for each square index from 0 to 63.
     /// </summary>
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ulong[] AttackMasks;
+    public static readonly ulong* AttackMasksPtr;
 
-    public static readonly ImmutableArray<int> RelevantBits = 
+    public static readonly int[] RelevantBits = 
     [
          12, 11, 11, 11, 11, 11, 11, 12,
          11, 10, 10, 10, 10, 10, 10, 11,
@@ -27,8 +29,9 @@ internal static class RookAttacks
          11, 10, 10, 10, 10, 10, 10, 11,
          12, 11, 11, 11, 11, 11, 11, 12
     ];
+    public static readonly int* RelevantBitsPtr;
 
-    private static readonly ImmutableArray<ulong> MagicNumbers = 
+    private static readonly ulong[] MagicNumbers = 
     [
         0x0C80108004400020,
         0x0240002000100042,
@@ -95,32 +98,36 @@ internal static class RookAttacks
         0x5100408802101104,
         0x0821002C81040042
     ];
+    private static readonly ulong* MagicNumbersPtr;
 
     static RookAttacks()
     {
-        var attackMasks = new ulong[64];
-        var sliderAttacks = new ulong[64 * 4096];
+        AttackMasks = new ulong[64];
+        SliderAttacks = new ulong[64 * 4096];
 
         for (int square = 0; square < 64; ++square)
         {
-            attackMasks[square] = MaskRookAttack(square);
+            AttackMasks[square] = MaskRookAttack(square);
 
             int occupancyIndicies = 1 << RelevantBits[square];
 
             for (int index = 0; index < occupancyIndicies; ++index)
             {
-                ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], attackMasks[square]);
+                ulong occupancy = Occupancy.CreateAtIndex(index, RelevantBits[square], AttackMasks[square]);
                 
                 int magicIndex = (int)((occupancy * MagicNumbers[square]) >> (64 - RelevantBits[square]));
 
                 ulong mask = MaskRookSliderAttackOnTheFly(square, occupancy);
 
-                sliderAttacks[(square * 4096) + magicIndex] = mask;
+                SliderAttacks[(square * 4096) + magicIndex] = mask;
             }
         }
 
-        AttackMasks = [.. attackMasks];
-        SliderAttacks = [.. sliderAttacks];
+        
+        AttackMasksPtr = (ulong*)GCHandle.Alloc(AttackMasks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        SliderAttacksPtr = (ulong*)GCHandle.Alloc(SliderAttacks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        RelevantBitsPtr = (int*)GCHandle.Alloc(RelevantBits, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
+        MagicNumbersPtr = (ulong*)GCHandle.Alloc(MagicNumbers, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
     }
 
     public static void InvokeInit()
@@ -138,10 +145,10 @@ internal static class RookAttacks
     {
         DebugHelper.Assert.IsValidSquare(square);
 
-        occupancy &= AttackMasks[square];
-        occupancy *= MagicNumbers[square];
-        occupancy >>= 64 - RelevantBits[square];
-        return SliderAttacks[(square * 4096) + unchecked((int)occupancy)];
+        occupancy &= AttackMasksPtr[square];
+        occupancy *= MagicNumbersPtr[square];
+        occupancy >>= 64 - RelevantBitsPtr[square];
+        return SliderAttacksPtr[(square * 4096) + unchecked((int)occupancy)];
     }
 
     /// <summary>

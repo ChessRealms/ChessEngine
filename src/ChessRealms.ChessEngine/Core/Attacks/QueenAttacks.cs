@@ -1,4 +1,4 @@
-﻿namespace ChessRealms.ChessEngine2.Core.Attacks;
+﻿namespace ChessRealms.ChessEngine.Core.Attacks;
 
 internal static class QueenAttacks
 {

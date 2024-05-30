@@ -1,4 +1,4 @@
-﻿namespace ChessRealms.ChessEngine2.Common;
+﻿namespace ChessRealms.ChessEngine.Common;
 
 public static unsafe class UnsafeArrays
 {

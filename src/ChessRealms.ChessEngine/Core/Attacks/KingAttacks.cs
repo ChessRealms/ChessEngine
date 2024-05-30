@@ -1,23 +1,24 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using System.Collections.Immutable;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using System.Runtime.InteropServices;
 
-namespace ChessRealms.ChessEngine2.Core.Attacks;
+namespace ChessRealms.ChessEngine.Core.Attacks;
 
-internal static class KingAttacks
+internal static unsafe class KingAttacks
 {
-    public static readonly ImmutableArray<ulong> AttackMasks;
+    public static readonly ulong[] AttackMasks;
+    public static readonly ulong* AttackMasksPtr;
 
     static KingAttacks()
     {
-        var attackMasks = new ulong[64];
+        AttackMasks = new ulong[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            attackMasks[square] = MaskKingAttack(square);
+            AttackMasks[square] = MaskKingAttack(square);
         }
 
-        AttackMasks = [.. attackMasks];
+        AttackMasksPtr = (ulong*)GCHandle.Alloc(AttackMasks, GCHandleType.Pinned).AddrOfPinnedObject().ToPointer();
     }
 
     public static void InvokeInit()

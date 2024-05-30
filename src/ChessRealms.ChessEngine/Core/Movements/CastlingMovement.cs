@@ -1,8 +1,8 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Types;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Types;
 
-namespace ChessRealms.ChessEngine2.Core.Movements;
+namespace ChessRealms.ChessEngine.Core.Movements;
 
 internal static unsafe class CastlingMovement
 {

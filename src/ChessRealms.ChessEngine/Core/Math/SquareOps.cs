@@ -1,8 +1,8 @@
-﻿using ChessRealms.ChessEngine2.Debugs;
+﻿using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Math;
+namespace ChessRealms.ChessEngine.Core.Math;
 
 public static class SquareOps
 {
@@ -38,6 +38,18 @@ public static class SquareOps
     public static bool ValidateFileRank(int fileOrRank)
     {
         return fileOrRank >= MinFileRank && fileOrRank <= MaxFileRank;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool ValidateFile(char file)
+    {
+        return file >= 'a' && file <= 'h';
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool ValidateRank(char rank)
+    {
+        return rank >= '1' && rank <= '8';
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,10 +1,10 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Core.Math;
-using ChessRealms.ChessEngine2.Core.Types;
-using ChessRealms.ChessEngine2.Debugs;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Core.Types;
+using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 
-namespace ChessRealms.ChessEngine2.Core.Movements;
+namespace ChessRealms.ChessEngine.Core.Movements;
 
 internal unsafe static class SlidingMovement
 {

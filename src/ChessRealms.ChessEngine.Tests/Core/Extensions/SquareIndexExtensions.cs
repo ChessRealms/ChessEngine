@@ -1,6 +1,6 @@
-﻿using ChessRealms.ChessEngine2.Core.Math;
+﻿using ChessRealms.ChessEngine.Core.Math;
 
-namespace ChessRealms.ChessEngine2.Tests.Extensions;
+namespace ChessRealms.ChessEngine.Tests.Extensions;
 
 internal static class SquareIndexExtensions
 {

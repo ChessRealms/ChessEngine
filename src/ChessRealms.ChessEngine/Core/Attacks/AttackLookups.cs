@@ -1,8 +1,8 @@
-﻿namespace ChessRealms.ChessEngine2.Core.Attacks;
+﻿namespace ChessRealms.ChessEngine.Core.Attacks;
 
 internal static class AttackLookups
 {
-    public static void InvokeInit()
+    public static unsafe void InvokeInit()
     {
         PawnAttacks.InvokeInit();
         KnightAttacks.InvokeInit();

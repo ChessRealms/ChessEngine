@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Math;
+namespace ChessRealms.ChessEngine.Core.Math;
 
 public static class BitboardOps
 {

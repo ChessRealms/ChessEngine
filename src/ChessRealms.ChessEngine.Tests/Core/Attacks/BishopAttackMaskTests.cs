@@ -1,9 +1,10 @@
-﻿using ChessRealms.ChessEngine2.Core.Attacks;
-using ChessRealms.ChessEngine2.Core.Constants;
-using ChessRealms.ChessEngine2.Tests.Extensions;
+﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Tests.Extensions;
 
-namespace ChessRealms.ChessEngine2.Tests.Core.Attacks;
+namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
+[TestFixture]
 internal class BishopAttackMaskTests
 {
     [Test]

@@ -1,7 +1,7 @@
-﻿using ChessRealms.ChessEngine2.Core.Constants;
+﻿using ChessRealms.ChessEngine.Core.Constants;
 using System.Runtime.CompilerServices;
 
-namespace ChessRealms.ChessEngine2.Core.Math;
+namespace ChessRealms.ChessEngine.Core.Math;
 
 internal static class BinaryMoveOps
 {

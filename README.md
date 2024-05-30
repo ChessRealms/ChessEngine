@@ -35,5 +35,5 @@ Benchmarks collected using `BenchmarkDotNet`.
 
 | Method           | Mean    | Error    | StdDev   |
 |----------------- |--------:|---------:|---------:|
-| StartPos_Depth_6 | 3.601 s | 0.0556 s | 0.0520 s |
+| StartPos_Depth_6 | 3.309 s | 0.0484 s | 0.0429 s |
 
