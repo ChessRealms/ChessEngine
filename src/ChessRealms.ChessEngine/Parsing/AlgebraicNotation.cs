@@ -27,7 +27,7 @@ public static class AlgebraicNotation
     /// </returns>
     public static bool TryParseMove(ReadOnlySpan<char> moveSpan, out (int src, int trg) move)
     {
-        bool validate = moveSpan.Length < 4
+        bool validate = moveSpan.Length > 3
             && SquareOps.ValidateFile(moveSpan[0])
             && SquareOps.ValidateRank(moveSpan[1])
             && SquareOps.ValidateFile(moveSpan[2])
