@@ -20,7 +20,7 @@ internal static unsafe class PawnAttacks
             AttackMasks[square] = MaskPawnAttack(Colors.Black, square);
         }
 
-        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks);
+        AttackMasksPtr = (ulong*)Unsafe.AsPointer(ref AttackMasks[0]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,7 +29,7 @@ internal static unsafe class PawnAttacks
         DebugHelper.Assert.IsValidColor(color);
         DebugHelper.Assert.IsValidSquare(square);
 
-        return AttackMasks[(color * 64) + square];
+        return AttackMasksPtr[(color * 64) + square];
     }
 
     /// <summary>

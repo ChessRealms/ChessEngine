@@ -16,6 +16,6 @@ internal unsafe class AllMovesTests
         int* moves = stackalloc int[218];
         int written = MoveGen.WriteMovesToPtrUnsafe(positionPtr, position.color, moves);
 
-        Assert.That(written, Is.EqualTo(39));
+        Assert.That(written, Is.EqualTo(41));
     }
 }

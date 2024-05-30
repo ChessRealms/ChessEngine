@@ -139,21 +139,13 @@ public unsafe struct Position
         {
             int ks = BitboardOps.Lsb(pieceBBs[BitboardIndicies.BKing]);
 
-            return IsAttackedByWhitePawn(ks)
-                || IsAttackedByWhiteKnight(ks)
-                || IsAttackedByWhiteBishop(ks)
-                || IsAttackedByWhiteRook(ks)
-                || IsAttackedByWhiteKing(ks);
+            return IsSquareAttackedByWhite(ks);
         }
         else
         {
             int ks = BitboardOps.Lsb(pieceBBs[BitboardIndicies.WKing]);
 
-            return IsAttackedByBlackPawn(ks)
-                || IsAttackedByBlackKnight(ks)
-                || IsAttackedByBlackBishop(ks)
-                || IsAttackedByBlackRook(ks)
-                || IsAttackedByBlackKing(ks);
+            return IsSquareAttackedByBlack(ks);
         }
     }
 
@@ -162,21 +154,21 @@ public unsafe struct Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsSquareAttackedByWhite(int square)
     {
-        return IsAttackedByBlackPawn(square)
-            || IsAttackedByBlackKnight(square)
-            || IsAttackedByBlackBishop(square)
-            || IsAttackedByBlackRook(square)
-            || IsAttackedByBlackKing(square);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedByBlack(int square)
-    {
         return IsAttackedByWhitePawn(square)
             || IsAttackedByWhiteKnight(square)
             || IsAttackedByWhiteBishop(square)
             || IsAttackedByWhiteRook(square)
             || IsAttackedByWhiteKing(square);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttackedByBlack(int square)
+    {
+        return IsAttackedByBlackPawn(square)
+            || IsAttackedByBlackKnight(square)
+            || IsAttackedByBlackBishop(square)
+            || IsAttackedByBlackRook(square)
+            || IsAttackedByBlackKing(square);
     }
 
     #region Is Attacked By Pawn

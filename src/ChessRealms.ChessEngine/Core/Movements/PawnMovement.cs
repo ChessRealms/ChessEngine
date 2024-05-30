@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Debugs;
@@ -65,7 +66,7 @@ internal unsafe static class PawnMovement
             int trgSquare = BitboardOps.Lsb(singlePush);
             int srcSquare = trgSquare + stepBack;
 
-            if ((SquareOps.ToBitboard(trgSquare) & promotionRank) != 0)
+            if ((SquareOps.ToBitboard(trgSquare) & promotionRank).IsTrue())
             {
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
                     srcSquare, Pieces.Pawn, color, trgSquare,
@@ -132,7 +133,7 @@ internal unsafe static class PawnMovement
             {
                 int targetSquare = BitboardOps.Lsb(captures);
 
-                if ((SquareOps.ToBitboard(targetSquare) & promotionRank) != 0)
+                if ((SquareOps.ToBitboard(targetSquare) & promotionRank).IsTrue())
                 {
                     dest[cursor++] = BinaryMoveOps.EncodeMove(
                         srcSquare, Pieces.Pawn, color, targetSquare,

@@ -4,6 +4,7 @@ using ChessRealms.ChessEngine.Tests.Extensions;
 
 namespace ChessRealms.ChessEngine.Tests.Core.Attacks;
 
+[TestFixture]
 internal class BishopAttackMaskTests
 {
     [Test]
