@@ -1,5 +1,6 @@
 ﻿using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
+using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -49,6 +50,25 @@ public static class AlgebraicNotation
     public static int ParseSquare(ReadOnlySpan<char> fileRankSpan)
     {
         Debug.Assert(fileRankSpan.Length > 1);
+        Debug.Assert(SquareOps.ValidateFile(fileRankSpan[0]));
+        Debug.Assert(SquareOps.ValidateRank(fileRankSpan[1]));
+
         return SquareOps.FromFileRank(fileRankSpan[0] - 'a', fileRankSpan[1] - '1');
+    }
+
+    public static bool TryParseSquare(ReadOnlySpan<char> fileRankSpan, out int square)
+    {
+        bool validate = fileRankSpan.Length > 1
+            && SquareOps.ValidateFile(fileRankSpan[0])
+            && SquareOps.ValidateRank(fileRankSpan[1]);
+
+        if (validate)
+        {
+            square = ParseSquare(fileRankSpan);
+            return true;
+        }
+
+        square = Squares.Empty;
+        return false;
     }
 }

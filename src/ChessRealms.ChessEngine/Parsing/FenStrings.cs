@@ -102,7 +102,7 @@ public static partial class FenStrings
         #endregion
 
         #region EnPassant & HalfMoveClock & FullMoveNumber
-        if (TryParseSquare(enPassantSpan, out var enPassantSquare))
+        if (AlgebraicNotation.TryParseSquare(enPassantSpan, out int enPassantSquare))
         {
             position.enpassant = enPassantSquare;
         }
@@ -121,30 +121,11 @@ public static partial class FenStrings
         return true;
     }
 
-    // TODO: Perhaps move this somewhere elese in future.
-    private static bool TryParseSquare(ReadOnlySpan<char> fileRankSpan, out int square)
-    {
-        if (fileRankSpan.Length > 1)
-        {
-            int file = fileRankSpan[0] - 'a';
-            int rank = fileRankSpan[1] - '1';
-
-            if (SquareOps.ValidateFileRank(file) && SquareOps.ValidateFileRank(rank))
-            {
-                square = SquareOps.FromFileRank(file, rank);
-                return true;
-            }
-        }
-
-        square = -1;
-        return false;
-    }
-
     [GeneratedRegex(
         "^(?<PiecePlacement>((?<RankItem>[pnbrqkPNBRQK1-8]{1,8})\\/?){8})\\s+" +
         "(?<SideToMove>b|w)\\s+" +
         "(?<Castling>-|K?Q?k?q?)\\s+" +
-        "(?<EnPassant>-|[a-h][3-6])\\s+" +
+        "(?<EnPassant>-|[a-h][36])\\s+" +
         "(?<HalfMoveClock>\\d+)\\s+" +
         "(?<FullMoveNumber>\\d+)\\s*$", RegexOptions.Compiled | RegexOptions.ExplicitCapture)]
     private static partial Regex FenRegex();
