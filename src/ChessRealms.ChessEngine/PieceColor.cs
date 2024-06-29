@@ -1,12 +1,13 @@
-﻿using System.Runtime.CompilerServices;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine;
 
 public enum PieceColor
 {
-    Black = 0,
-    White = 1,
-    None = 2
+    Black = Colors.Black,
+    White = Colors.White,
+    None = Colors.None
 }
 
 public static class PieceColorExtensions

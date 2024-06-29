@@ -1,12 +1,14 @@
-﻿namespace ChessRealms.ChessEngine;
+﻿using ChessRealms.ChessEngine.Core.Constants;
+
+namespace ChessRealms.ChessEngine;
 
 public enum PieceValue
 {
-    Pawn = 0,
-    Knight = 1,
-    Bishop = 2,
-    Rook = 3,
-    Queen = 4,
-    King = 5,
-    None = 6
+    Pawn = Pieces.Pawn,
+    Knight = Pieces.Knight,
+    Bishop = Pieces.Bishop,
+    Rook = Pieces.Rook,
+    Queen = Pieces.Queen,
+    King = Pieces.King,
+    None = Pieces.None
 }
