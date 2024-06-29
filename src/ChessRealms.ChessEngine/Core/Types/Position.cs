@@ -12,9 +12,6 @@ namespace ChessRealms.ChessEngine.Core.Types;
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct Position
 {
-    // To access 'all' blockers.
-    private const int All = Colors.None;
-
     internal fixed ulong pieceBBs[12];
     internal fixed ulong blockers[3];
 
@@ -27,10 +24,15 @@ public unsafe struct Position
 
     public Position()
     {
+        color = Colors.White;
         castlings = Castlings.None;
         enpassant = Squares.Empty;
+        fullMoveCount = 0;
         halfMoveClock = 1;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SwitchColor() => color = Colors.Mirror(color);
 
     public Piece GetPieceAt(int square, int color)
     {
@@ -68,7 +70,7 @@ public unsafe struct Position
 
         BitboardOps.SetBitAt(ref pieceBBs[bbIndex], square);
         BitboardOps.SetBitAt(ref blockers[color], square);
-        BitboardOps.SetBitAt(ref blockers[All], square);
+        BitboardOps.SetBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
     public void PopPieceAt(int square, int piece, int color)
@@ -82,7 +84,7 @@ public unsafe struct Position
 
         BitboardOps.PopBitAt(ref pieceBBs[bbIndex], square);
         BitboardOps.PopBitAt(ref blockers[color], square);
-        BitboardOps.PopBitAt(ref blockers[All], square);
+        BitboardOps.PopBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
     public void PopPieceAt(int square, int color)
@@ -100,7 +102,7 @@ public unsafe struct Position
         BitboardOps.PopBitAt(ref pieceBBs[i + 5], square);
 
         BitboardOps.PopBitAt(ref blockers[color], square);
-        BitboardOps.PopBitAt(ref blockers[All], square);
+        BitboardOps.PopBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
     public void MovePiece(int srcSquare, int trgSquare, int color, int piece)
@@ -132,6 +134,8 @@ public unsafe struct Position
     {
         return bbIndex >= 0 && bbIndex < 12;
     }
+
+    public bool IsKingChecked() => IsKingChecked(color);
 
     public bool IsKingChecked(int kingColor)
     {
@@ -214,7 +218,7 @@ public unsafe struct Position
     internal bool IsAttackedByWhiteBishop(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WBishop] | pieceBBs[BitboardIndicies.WQueen];
-        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
+        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[BitboardIndicies.AllBlockers]);
 
         return (mask & enemy).IsTrue();
     }
@@ -223,7 +227,7 @@ public unsafe struct Position
     internal bool IsAttackedByBlackBishop(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.BBishop] | pieceBBs[BitboardIndicies.BQueen];
-        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[All]);
+        ulong mask = BishopAttacks.GetSliderAttack(square, blockers[BitboardIndicies.AllBlockers]);
 
         return (mask & enemy).IsTrue();
     }
@@ -234,7 +238,7 @@ public unsafe struct Position
     internal bool IsAttackedByWhiteRook(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.WRook] | pieceBBs[BitboardIndicies.WQueen];
-        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
+        ulong mask = RookAttacks.GetSliderAttack(square, blockers[BitboardIndicies.AllBlockers]);
 
         return (mask & enemy).IsTrue();
     }
@@ -243,7 +247,7 @@ public unsafe struct Position
     internal bool IsAttackedByBlackRook(int square)
     {
         ulong enemy = pieceBBs[BitboardIndicies.BRook] | pieceBBs[BitboardIndicies.BQueen];
-        ulong mask = RookAttacks.GetSliderAttack(square, blockers[All]);
+        ulong mask = RookAttacks.GetSliderAttack(square, blockers[BitboardIndicies.AllBlockers]);
 
         return (mask & enemy).IsTrue();
     }
@@ -275,5 +279,56 @@ public unsafe struct Position
         {
             Buffer.MemoryCopy(src, dst, sizeof(Position), sizeof(Position));
         }
+    }
+
+    /// <summary>
+    /// Creates default position filled with setuped pieces at its default positions.
+    /// </summary>
+    /// <returns> Default Position. </returns>
+    public static Position CreateDefault()
+    {
+        const ulong bPawns      = SquareMapping.RANK_8 >> 8;
+        const ulong bKnights    = (1ul << Squares.b8) | (1ul << Squares.g8);
+        const ulong bBishops    = (1ul << Squares.c8) | (1ul << Squares.f8);
+        const ulong bRooks      = (1ul << Squares.a8) | (1ul << Squares.h8);
+        const ulong bQueen      = 1ul << Squares.d8;
+        const ulong bKing       = 1ul << Squares.e8;
+        const ulong bAll        = SquareMapping.RANK_8 | bPawns;
+
+        const ulong wPawns      = SquareMapping.RANK_1 << 8;
+        const ulong wKnights    = (1ul << Squares.b1) | (1ul << Squares.g1);
+        const ulong wBishops    = (1ul << Squares.c1) | (1ul << Squares.f1);
+        const ulong wRooks      = (1ul << Squares.a1) | (1ul << Squares.h1);
+        const ulong wQueen      = 1ul << Squares.d1;
+        const ulong wKing       = 1ul << Squares.e1;
+        const ulong wAll        = SquareMapping.RANK_1 | wPawns;
+
+        Position position = new();
+
+        position.pieceBBs[BitboardIndicies.BPawn]   = bPawns;
+        position.pieceBBs[BitboardIndicies.BKnight] = bKnights;
+        position.pieceBBs[BitboardIndicies.BBishop] = bBishops;
+        position.pieceBBs[BitboardIndicies.BRook]   = bRooks;
+        position.pieceBBs[BitboardIndicies.BQueen]  = bQueen;
+        position.pieceBBs[BitboardIndicies.BKing]   = bKing;
+
+        position.pieceBBs[BitboardIndicies.WPawn]   = wPawns;
+        position.pieceBBs[BitboardIndicies.WKnight] = wKnights;
+        position.pieceBBs[BitboardIndicies.WBishop] = wBishops;
+        position.pieceBBs[BitboardIndicies.WRook]   = wRooks;
+        position.pieceBBs[BitboardIndicies.WQueen]  = wQueen;
+        position.pieceBBs[BitboardIndicies.WKing]   = wKing;
+
+        position.blockers[BitboardIndicies.BBlockers]   = bAll;
+        position.blockers[BitboardIndicies.WBlockers]   = wAll;
+        position.blockers[BitboardIndicies.AllBlockers] = bAll | wAll;
+
+        position.color          = Colors.White;
+        position.castlings      = Castlings.None;
+        position.enpassant      = Squares.Empty;
+        position.fullMoveCount  = 0;
+        position.halfMoveClock  = 1;
+
+        return position;
     }
 }

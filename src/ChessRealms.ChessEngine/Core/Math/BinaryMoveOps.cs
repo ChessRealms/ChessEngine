@@ -40,6 +40,8 @@ internal static class BinaryMoveOps
     // 4 bit (15 << 28)
     public const int Castling = -268435456;
 
+    public const int NoneMove = 0;
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int EncodeMove(
         int srcSquare, 
