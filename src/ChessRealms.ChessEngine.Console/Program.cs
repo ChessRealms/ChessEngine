@@ -42,8 +42,12 @@ static void PrintBoard(ref ChessGame chessGame)
     Span<ChessPiece> pieces = stackalloc ChessPiece[64];
     chessGame.GetBoardToSpan(pieces);
 
+    Console.WriteLine("   a b c d e f g h");
+
     for (int r = 7; r >= 0; --r)
     {
+        Console.Write(" {0} ", r + 1);
+
         for (int f = 0; f < 8; ++f)
         {
             int square = SquareOps.FromFileRank(f, r);
