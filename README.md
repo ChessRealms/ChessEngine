@@ -35,5 +35,51 @@ Benchmarks collected using `BenchmarkDotNet`.
 
 | Method           | Mean    | Error    | StdDev   |
 |----------------- |--------:|---------:|---------:|
-| StartPos_Depth_6 | 3.309 s | 0.0484 s | 0.0429 s |
+| StartPos_Depth_6 | 3.564 s | 0.0484 s | 0.0429 s |
 
+_This is average result._
+_Sometimes benchmarks could be a bit faster or a bit slower._
+_(`~3.443 s` or `~3.613 s`)_
+
+### Example of usage
+
+#### Create chess game
+
+Create start position board.
+
+`ChessGame chessGame = new();`
+
+Or 
+
+```
+string fen = "";
+_ = ChessGame.TryCreateFromFen(fen, out ChessGame chessGame);
+```
+
+#### Make move
+
+```
+string moveInput = "a2a4";
+var (src, trg) = AlgebraicNotation.ParseMove(inputMove);
+MoveResult moveResult = chessGame.MakeMove(src, trg);
+Console.WriteLine(moveResult);
+// >> Move
+// There also could be 'Check', 'Capture', 'Checkmate', 'Stalemate'.
+// MoveResult is enums with flags.
+```
+
+#### Get Board
+
+```
+Span<ChessPiece> pieces = stackalloc ChessPiece[64];
+chessGame.GetBoardToSpan(pieces);
+
+Console.WriteLine("{0}, {1}", 
+	pieces[0].PieceColor, 
+	pieces[0].PieceValue);
+
+// >> Black, Rook
+```
+
+Empty squares are equal to `ChessPiece.Empty`.
+Or just check it with `piece.IsEmpty()`.
