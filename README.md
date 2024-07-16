@@ -60,8 +60,8 @@ _ = ChessGame.TryCreateFromFen(fen, out ChessGame chessGame);
 
 ```
 string moveInput = "a2a4";
-var (src, trg) = AlgebraicNotation.ParseMove(inputMove);
-MoveResult moveResult = chessGame.MakeMove(src, trg);
+AlgebraicMove move = AlgebraicMove.Parse(inputMove);
+MoveResult moveResult = chessGame.MakeMove(in move);
 Console.WriteLine(moveResult);
 // >> Move
 // There also could be 'Check', 'Capture', 'Checkmate', 'Stalemate'.
@@ -78,7 +78,7 @@ Console.WriteLine("{0}, {1}",
 	pieces[0].PieceColor, 
 	pieces[0].PieceValue);
 
-// >> Black, Rook
+// >> White, Rook
 ```
 
 Empty squares are equal to `ChessPiece.Empty`.

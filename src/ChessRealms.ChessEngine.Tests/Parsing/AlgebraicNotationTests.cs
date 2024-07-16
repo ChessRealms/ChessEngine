@@ -18,7 +18,7 @@ internal class AlgebraicNotationTests
     public void ParseMove_A1H8()
     {
         string a1h8 = "a1h8";
-        var (src, trg) = AlgebraicNotation.ParseMove(a1h8);
+        var (src, trg) = AlgebraicNotation.ParseAlgebraicMove(a1h8);
         Assert.Multiple(() =>
         {
             Assert.That(src, Is.EqualTo(Squares.a1));

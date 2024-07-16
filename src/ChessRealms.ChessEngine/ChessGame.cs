@@ -48,7 +48,7 @@ public unsafe struct ChessGame
                 if (BitboardOps.GetBitAt(whiteBlockers, i).IsTrue())
                     piece = position.GetPieceAt(square: i, Colors.White);
                 else
-                    piece = position.GetPieceAt(i, Colors.Black);
+                    piece = position.GetPieceAt(square: i, Colors.Black);
 
                 destination[i] = new ChessPiece(
                     (PieceColor)piece.Color, 
@@ -61,9 +61,9 @@ public unsafe struct ChessGame
         }
     }
 
-    public MoveResult MakeMove(int src, int trg) 
+    public MoveResult MakeMove(in AlgebraicMove algebraicMove) 
     {
-        if (!Squares.IsValid(src) || !Squares.IsValid(trg))
+        if (!algebraicMove.IsValid())
         {
             return MoveResult.None;
         }
@@ -83,7 +83,7 @@ public unsafe struct ChessGame
             int mSrc = BinaryMoveOps.DecodeSrc(moves[i]);
             int mTrg = BinaryMoveOps.DecodeTrg(moves[i]);
 
-            if (src == mSrc && trg == mTrg)
+            if (algebraicMove.Src == mSrc && algebraicMove.Trg == mTrg)
             {
                 MoveDriver.MakeMove(ref position, moves[i]);
 

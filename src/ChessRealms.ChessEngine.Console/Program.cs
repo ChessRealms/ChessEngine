@@ -1,6 +1,5 @@
 ﻿using ChessRealms.ChessEngine;
 using ChessRealms.ChessEngine.Core.Math;
-using ChessRealms.ChessEngine.Parsing;
 
 MoveResult lastMoveResult = MoveResult.None;
 ChessGame chessGame = new();
@@ -21,29 +20,39 @@ while (true)
     }
 
     Console.Write("Enter move: ");
+
     string? inputMove = Console.ReadLine();
-    if (string.IsNullOrEmpty(inputMove) || inputMove.Length < 4)
+    bool success = AlgebraicMove.TryParse(inputMove, out var move) 
+        && (lastMoveResult = chessGame.MakeMove(in move)) != MoveResult.None;
+
+    if (!success)
     {
         Console.WriteLine("invalid move");
         Console.Write("Press Enter");
         Console.ReadLine();
         continue;
     }
-
-    var (src, trg) = AlgebraicNotation.ParseMove(inputMove);
-    lastMoveResult = chessGame.MakeMove(src, trg);
 }
 
-Console.WriteLine("{0} win!!! (press any key to exit)", chessGame.CurrentColor);
+if (lastMoveResult.HasFlag(MoveResult.Checkmate))
+{
+    Console.WriteLine("{0} win!!!", chessGame.CurrentColor);
+}
+else
+{
+    Console.WriteLine("Draw.");
+}
+
+Console.WriteLine("Press any key to exit...");
 Console.ReadKey();
 
 static void PrintBoard(ref ChessGame chessGame)
 {
-    Span<ChessPiece> pieces = stackalloc ChessPiece[64];
-    chessGame.GetBoardToSpan(pieces);
+    Span<ChessPiece> pieceSpan = stackalloc ChessPiece[64];
+    chessGame.GetBoardToSpan(pieceSpan);
 
     Console.WriteLine("   a b c d e f g h");
-
+    
     for (int r = 7; r >= 0; --r)
     {
         Console.Write(" {0} ", r + 1);
@@ -52,13 +61,13 @@ static void PrintBoard(ref ChessGame chessGame)
         {
             int square = SquareOps.FromFileRank(f, r);
 
-            if (pieces[square].IsEmpty()) 
+            if (pieceSpan[square].IsEmpty()) 
             {
                 Console.Write('.');
             }
             else
             {
-                Console.Write(PieceToString(ref pieces[square]));
+                Console.Write(PieceToString(ref pieceSpan[square]));
             }
 
             Console.Write(' ');

@@ -1,6 +1,5 @@
 ﻿using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
-using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -8,14 +7,19 @@ namespace ChessRealms.ChessEngine.Parsing;
 
 public static class AlgebraicNotation
 {
-    public static (int src, int trg) ParseMove(ReadOnlySpan<char> moveSpan)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="moveSpan"></param>
+    /// <returns></returns>
+    public static AlgebraicMove ParseAlgebraicMove(ReadOnlySpan<char> moveSpan)
     {
         Debug.Assert(moveSpan.Length > 3);
 
         int src = ParseSquare(moveSpan[..2]);
         int trg = ParseSquare(moveSpan[2..]);
 
-        return (src, trg);
+        return new(src, trg);
     }
 
     /// <summary>
@@ -26,7 +30,7 @@ public static class AlgebraicNotation
     /// <returns> 
     /// <see langword="true"/> if text was successfully parsed; otherwise, <see langword="false"/>
     /// </returns>
-    public static bool TryParseMove(ReadOnlySpan<char> moveSpan, out (int src, int trg) move)
+    public static bool TryParseAlgebraicMove(ReadOnlySpan<char> moveSpan, out AlgebraicMove move)
     {
         bool validate = moveSpan.Length > 3
             && SquareOps.ValidateFile(moveSpan[0])
@@ -36,13 +40,13 @@ public static class AlgebraicNotation
         
         if (validate)
         {
-            move.src = ParseSquare(moveSpan[..2]);
-            move.trg = ParseSquare(moveSpan[2..]);
+            move = new AlgebraicMove(
+                src: ParseSquare(moveSpan[..2]),
+                trg: ParseSquare(moveSpan[2..]));
             return true;
         }
 
-        move.src = Squares.Empty;
-        move.trg = Squares.Empty;
+        move = AlgebraicMove.Empty;
         return false;
     }
 
