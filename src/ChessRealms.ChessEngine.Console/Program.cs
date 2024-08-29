@@ -1,4 +1,5 @@
 ﻿using ChessRealms.ChessEngine;
+using ChessRealms.ChessEngine.Common;
 using ChessRealms.ChessEngine.Core.Math;
 
 MoveResult lastMoveResult = MoveResult.None;
@@ -81,12 +82,12 @@ static char PieceToString(ref ChessPiece piece)
 {
     char p = piece.Value switch
     {
-        PieceValue.Pawn => 'p',
-        PieceValue.Knight => 'k',
-        PieceValue.Bishop => 'b',
-        PieceValue.Rook => 'r',
-        PieceValue.Queen => 'q',
-        PieceValue.King => 'k',
+        PieceValue.Pawn => PieceCharsets.Ascii.Pawn,
+        PieceValue.Knight => PieceCharsets.Ascii.Knight,
+        PieceValue.Bishop => PieceCharsets.Ascii.Bishop,
+        PieceValue.Rook => PieceCharsets.Ascii.Rook,
+        PieceValue.Queen => PieceCharsets.Ascii.Queen,
+        PieceValue.King => PieceCharsets.Ascii.King,
         _ => '\0'
     };
 
