@@ -1,5 +1,4 @@
 ﻿using ChessRealms.ChessEngine.Core.Attacks;
-using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Movements;
 using ChessRealms.ChessEngine.Core.Types;
@@ -115,7 +114,7 @@ namespace Perft
                     continue;
                 }
 
-                tmpPos.color = Colors.Mirror(tmpPos.color);
+                tmpPos.SwitchColor();
 
                 var tmpRes = Test(tmpPos, depth - 1, false);
 
