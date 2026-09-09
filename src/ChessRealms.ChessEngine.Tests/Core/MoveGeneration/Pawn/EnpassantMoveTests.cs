@@ -1,4 +1,3 @@
-﻿using ChessRealms.ChessEngine.Common;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Movements;
@@ -36,19 +35,19 @@ internal unsafe class EnpassantMoveTests
             return;
         }
 
-        Position* positionPtr = &position;
+
         int us = Colors.White;
 
         #region Assert by moves count
-        int* moves = stackalloc int[40];
-        int written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, us, moves);
+        Span<int> moves = stackalloc int[40];
+        int written = PawnMovement.WriteMoves(ref position, us, moves);
         int expectedLength = 13;
 
         Assert.That(written, Is.EqualTo(expectedLength));
         #endregion
 
         #region Assert by specified moves
-        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
+        HashSet<int> moveSet = moves[..written].ToArray().ToHashSet();
         int expectedEnpassant = BinaryMoveOps.EncodeMove(
             Squares.b5, Pieces.Pawn, us, Squares.a6,
             capture: 1, enpassant: 1);
@@ -81,20 +80,20 @@ internal unsafe class EnpassantMoveTests
             return;
         }
 
-        Position* positionPtr = &position;
+
 
         int us = Colors.Black;
 
         #region Assert by moves count
-        int* moves = stackalloc int[40];
-        int written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, us, moves);
+        Span<int> moves = stackalloc int[40];
+        int written = PawnMovement.WriteMoves(ref position, us, moves);
         int expectedLength = 15;
 
         Assert.That(written, Is.EqualTo(expectedLength));
         #endregion
 
         #region Assert by specified moves
-        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
+        HashSet<int> moveSet = moves[..written].ToArray().ToHashSet();
 
         int expectedEnpassant1 = BinaryMoveOps.EncodeMove(
             Squares.f4, Pieces.Pawn, us, Squares.g3,

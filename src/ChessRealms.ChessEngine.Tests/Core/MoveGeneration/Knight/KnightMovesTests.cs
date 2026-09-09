@@ -1,4 +1,3 @@
-﻿using ChessRealms.ChessEngine.Common;
 using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
@@ -28,7 +27,8 @@ internal unsafe class KnightMovesTests
 
     public KnightMovesTests()
     {
-        _ = FenStrings.TryParse(fen, out position);
+        // Deliberately synthetic geometry fixture: no kings and pawns on back ranks.
+        Assert.That(FenStrings.TryParseSyntax(fen, out position), Is.True);
     }
 
     [Test]
@@ -36,24 +36,18 @@ internal unsafe class KnightMovesTests
     {
         const int color = Colors.White;
         const int expectedWritten = 5;
-        int* moves = stackalloc int[expectedWritten];
+        Span<int> moves = stackalloc int[expectedWritten];
+        int written = LeapingMovement.WriteMoves(
+            ref position,
+            color,
+            Pieces.Knight,
+            KnightAttacks.AttackMasksPtr,
+            moves);
 
-        int written; 
-        
-        fixed (Position* positionPtr = &position)
-        {
-            written = LeapingMovement.WriteMovesToPtrUnsafe(
-                positionPtr,
-                color,
-                Pieces.Knight,
-                KnightAttacks.AttackMasksPtr,
-                moves);
-        }
-        
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
-        
+        HashSet<int> moveSet = moves[..written].ToArray().ToHashSet();
+
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(
@@ -76,24 +70,18 @@ internal unsafe class KnightMovesTests
     {
         const int color = Colors.Black;
         const int expectedWritten = 5;
-        int* moves = stackalloc int[expectedWritten];
-        
-        int written;
-        
-        fixed (Position* positionPtr = &position)
-        {
-            written = LeapingMovement.WriteMovesToPtrUnsafe(
-                positionPtr,
-                Colors.Black,
-                Pieces.Knight,
-                KnightAttacks.AttackMasksPtr,
-                moves);
-        }
+        Span<int> moves = stackalloc int[expectedWritten];
+        int written = LeapingMovement.WriteMoves(
+            ref position,
+            Colors.Black,
+            Pieces.Knight,
+            KnightAttacks.AttackMasksPtr,
+            moves);
 
         Assert.That(written, Is.EqualTo(expectedWritten));
 
-        var moveSet = UnsafeArrays.ToHashSet(moves, written);      
-        
+        var moveSet = moves[..written].ToArray().ToHashSet();
+
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(

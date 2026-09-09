@@ -1,4 +1,3 @@
-﻿using ChessRealms.ChessEngine.Common;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Movements;
@@ -33,23 +32,17 @@ internal unsafe class PromoteMoveTests
     }
 
     [Test]
-    public void Test_Promotes_White() 
+    public void Test_Promotes_White()
     {
         int color = Colors.White;
         int expectedLength = 8;
-        int* moves = stackalloc int[expectedLength];
+        Span<int> moves = stackalloc int[expectedLength];
+        int written = PawnMovement.WriteMoves(ref position, color, moves);
 
-        int written;
-
-        fixed (Position* positionPtr = &position)
-        {
-            written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, color, moves);
-        }
-        
         Assert.That(written, Is.EqualTo(expectedLength));
 
-        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
-        
+        HashSet<int> moveSet = moves[..written].ToArray().ToHashSet();
+
         int[] expectedMoves =
         [
             BinaryMoveOps.EncodeMove(
@@ -64,7 +57,7 @@ internal unsafe class PromoteMoveTests
             BinaryMoveOps.EncodeMove(
                 Squares.f7, Pieces.Pawn, color, Squares.f8,
                 promotion: Promotions.Queen),
-            
+
             BinaryMoveOps.EncodeMove(
                 Squares.f7, Pieces.Pawn, color, Squares.e8,
                 promotion: Promotions.Knight, capture: 1),
@@ -83,22 +76,16 @@ internal unsafe class PromoteMoveTests
     }
 
     [Test]
-    public void Test_Promotes_Black() 
+    public void Test_Promotes_Black()
     {
         int color = Colors.Black;
         int expectedLength = 8;
-        int* moves = stackalloc int[expectedLength];
+        Span<int> moves = stackalloc int[expectedLength];
+        int written = PawnMovement.WriteMoves(ref position, color, moves);
 
-        int written; 
-        
-        fixed (Position* positionPtr = &position)
-        {
-            written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, color, moves);
-        }
-        
         Assert.That(written, Is.EqualTo(expectedLength));
 
-        HashSet<int> moveSet = UnsafeArrays.ToHashSet(moves, written);
+        HashSet<int> moveSet = moves[..written].ToArray().ToHashSet();
 
         int[] expectedMoves =
         [
@@ -114,7 +101,7 @@ internal unsafe class PromoteMoveTests
             BinaryMoveOps.EncodeMove(
                 Squares.d2, Pieces.Pawn, color, Squares.d1,
                 promotion: Promotions.Queen),
-            
+
             BinaryMoveOps.EncodeMove(
                 Squares.d2, Pieces.Pawn, color, Squares.c1,
                 promotion: Promotions.Knight, capture: 1),

@@ -1,4 +1,3 @@
-﻿using ChessRealms.ChessEngine.Common;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Movements;
@@ -31,17 +30,17 @@ internal unsafe class QuietMoveTests
             return;
         }
 
-        Position* positionPtr = &position;
+
 
         #region Assert by move count
-        int* moves = stackalloc int[40];
-        int written = PawnMovement.WriteMovesToPtrUnsafe(positionPtr, Colors.White, moves, 0);
-        
+        Span<int> moves = stackalloc int[40];
+        int written = PawnMovement.WriteMoves(ref position, Colors.White, moves, 0);
+
         Assert.That(written, Is.EqualTo(16));
         #endregion
 
         #region Assert by move equals
-        HashSet<int> movesSet = UnsafeArrays.ToHashSet(moves, written);
+        HashSet<int> movesSet = moves[..written].ToArray().ToHashSet();
 
         int a2a4 = BinaryMoveOps.EncodeMove(
             Squares.a2, Pieces.Pawn, Colors.White,

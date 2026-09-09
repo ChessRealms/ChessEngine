@@ -1,4 +1,4 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Types;
@@ -20,8 +20,15 @@ internal static class MoveDriver
          7, 15, 15, 15,  3, 15, 15, 11
     ];
 
-    public static unsafe void MakeMove(ref Position position, int move)
+    public static void MakeMove(ref Position position, int move, bool updateCounters = true)
     {
+        if (updateCounters)
+        {
+            position.halfMoveClock = BinaryMoveOps.DecodeSrcPiece(move) == Pieces.Pawn
+                || BinaryMoveOps.DecodeCapture(move) != 0 ? 0 : position.halfMoveClock + 1;
+            if (BinaryMoveOps.DecodeSrcColor(move) == Colors.Black)
+                position.fullMoveCount = position.fullMoveCount + 1;
+        }
         position.enpassant = Squares.Empty;
 
         int castling = BinaryMoveOps.DecodeCastling(move);
@@ -75,28 +82,8 @@ internal static class MoveDriver
 
             position.MovePiece(src, trg, srcColor, Pieces.Pawn);
 
-            #region Set EP
-            ulong enemyNeighborPawns;
-            int stepToBack;
-
-            if (srcColor == Colors.White)
-            {
-                enemyNeighborPawns = position.pieceBBs[0] & SquareMapping.RANK_4;
-                stepToBack = Directions.South;
-            }
-            else
-            {
-                enemyNeighborPawns = position.pieceBBs[6] & SquareMapping.RANK_5;
-                stepToBack = Directions.North;
-            }
-
-            ulong epMask = SquareOps.ToBitboard(trg - 1) | SquareOps.ToBitboard(trg + 1);
-
-            if ((epMask & enemyNeighborPawns) != 0)
-            {
-                position.enpassant = trg + stepToBack;
-            }
-            #endregion
+            // Standard FEN records the target even when no capture is available.
+            position.enpassant = (src + trg) / 2;
         }
         else
         {

@@ -1,4 +1,4 @@
-﻿using ChessRealms.ChessEngine.Core.Movements;
+using ChessRealms.ChessEngine.Core.Movements;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Parsing;
 
@@ -12,9 +12,9 @@ internal unsafe class AllMovesTests
     public void Test1_AsBlack()
     {
         Assert.That(FenStrings.TryParse(fen, out Position position), Is.True);
-        Position* positionPtr = &position;
-        int* moves = stackalloc int[218];
-        int written = MoveGen.WriteMovesToPtrUnsafe(positionPtr, position.color, moves);
+
+        Span<int> moves = stackalloc int[MoveGen.MaxMoves];
+        int written = MoveGen.WriteMoves(ref position, position.color, moves);
 
         Assert.That(written, Is.EqualTo(41));
     }
