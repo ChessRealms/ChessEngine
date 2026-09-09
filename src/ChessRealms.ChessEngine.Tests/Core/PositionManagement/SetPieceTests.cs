@@ -1,225 +1,211 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Types;
 
 namespace ChessRealms.ChessEngine.Tests.Core.PositionManagement;
 
 internal class SetPieceTests
 {
-    private static int GenerateSquare() => Random.Shared.Next(0, 64);
-
-    [Test]
-    public void SetWhitePawn()
+    [Test, Combinatorial]
+    public void SetWhitePawn([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.Pawn;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackPawn()
+    [Test, Combinatorial]
+    public void SetBlackPawn([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.Black;
         int piece = Pieces.Pawn;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetWhiteKnight()
+    [Test, Combinatorial]
+    public void SetWhiteKnight([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.Knight;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackKnight()
+    [Test, Combinatorial]
+    public void SetBlackKnight([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.Black;
         int piece = Pieces.Knight;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetWhiteBishop()
+    [Test, Combinatorial]
+    public void SetWhiteBishop([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.Bishop;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackBishop()
+    [Test, Combinatorial]
+    public void SetBlackBishop([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.Black;
-        int piece = Pieces.Knight;
+        int piece = Pieces.Bishop;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetWhiteRook()
+    [Test, Combinatorial]
+    public void SetWhiteRook([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.Rook;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackRook()
+    [Test, Combinatorial]
+    public void SetBlackRook([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.Black;
         int piece = Pieces.Rook;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetWhiteQueen()
+    [Test, Combinatorial]
+    public void SetWhiteQueen([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.Queen;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackQueen()
+    [Test, Combinatorial]
+    public void SetBlackQueen([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.Black;
         int piece = Pieces.Queen;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetWhiteKing()
+    [Test, Combinatorial]
+    public void SetWhiteKing([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
         int color = Colors.White;
         int piece = Pieces.King;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 
-    [Test]
-    public void SetBlackKing()
+    [Test, Combinatorial]
+    public void SetBlackKing([Range(0, 63)] int square)
     {
-        int square = GenerateSquare();
-        int color = Colors.White;
+        int color = Colors.Black;
         int piece = Pieces.King;
 
         Position position = new();
         position.SetPieceAt(square, piece, color);
-        Piece whiteBishop = position.GetPieceAt(square, color);
+        Piece actualPiece = position.GetPieceAt(square, color);
 
         Assert.Multiple(() =>
         {
-            Assert.That(whiteBishop.Color, Is.EqualTo(color));
-            Assert.That(whiteBishop.Value, Is.EqualTo(piece));
+            Assert.That(actualPiece.Color, Is.EqualTo(color));
+            Assert.That(actualPiece.Value, Is.EqualTo(piece));
         });
     }
 }

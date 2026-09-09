@@ -1,0 +1,27 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore src/ChessRealms.ChessEngine.sln
+      - name: Release build
+        run: dotnet build src/ChessRealms.ChessEngine.sln --configuration Release --no-restore
+      - name: Fast tests
+        run: dotnet test src/ChessRealms.ChessEngine.sln --configuration Release --no-build --filter "TestCategory!=Deep"
