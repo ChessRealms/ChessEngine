@@ -7,10 +7,12 @@ using ChessRealms.ChessEngine.Benchmark;
 Console.WriteLine("Hello, Benckmarks!");
 Console.WriteLine();
 
-var config = DefaultConfig.Instance
+// Preserve the original full run; allow CLI job selection for smoke checks.
+IConfig config = args.Length == 0 ? DefaultConfig.Instance
     .AddJob(Job
          .MediumRun
          .WithLaunchCount(1)
-         .WithToolchain(InProcessEmitToolchain.DontLogOutput));
+         .WithToolchain(InProcessEmitToolchain.DontLogOutput))
+    : DefaultConfig.Instance;
 
-BenchmarkRunner.Run<PerftBenchmarks>(config);
+BenchmarkRunner.Run<PerftBenchmarks>(config, args: args);
