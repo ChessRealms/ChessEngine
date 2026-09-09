@@ -83,7 +83,7 @@ CLI configuration instead.
 See [the .NET 10 migration record](docs/dotnet-10-migration.md) for package
 compatibility sources, baseline results and validation limits.
 
-Deferred promotion, completion and history scenarios are in
+Implemented game rules and remaining support boundaries are in
 [docs/known-issues.md](docs/known-issues.md).
 
 ### To Do:
@@ -95,7 +95,7 @@ Deferred promotion, completion and history scenarios are in
 - [ ] PGN (optional).
 - [ ] Hashtables for Perft.
 - [ ] UCI.
-- [ ] Play game functional.
+- [X] Standard game API, history, undo and draw rules.
 
 
 ### Historical perft benchmarks (.NET 8)
@@ -129,45 +129,44 @@ _This is average result._
 _Sometimes benchmarks could be a bit faster or a bit slower._
 _(`~3.443 s` or `~3.613 s`)_
 
-### Example of usage
+### Game API
 
-#### Create chess game
+See [the complete API guide](docs/game-rules-api.md) for contracts, FEN validation,
+FIDE draw rules, compatibility changes and exact dead-position detection limits.
 
-Create start position board.
+```csharp
+using ChessRealms.ChessEngine;
 
-`ChessGame chessGame = new();`
-
-Or 
-
-```
-string fen = "";
-_ = ChessGame.TryCreateFromFen(fen, out ChessGame chessGame);
-```
-
-#### Make move
-
-```
-string moveInput = "a2a4";
-AlgebraicMove move = AlgebraicMove.Parse(inputMove);
-MoveResult moveResult = chessGame.MakeMove(in move);
-Console.WriteLine(moveResult);
-// >> Move
-// There also could be 'Check', 'Capture', 'Checkmate', 'Stalemate'.
-// MoveResult is enums with flags.
+var game = new ChessGame();
+var moves = game.GetLegalMoves();            // read-only snapshot, initially 20
+var copy = game.Clone();                    // independent history and repetitions
+var result = copy.MakeMove(AlgebraicMove.Parse("e2e4"));
+Console.WriteLine(copy.ToFen());            // ... b KQkq e3 0 1
+Console.WriteLine(copy.Outcome);            // result, winner, reason
+copy.UndoMove();
+Console.WriteLine(copy.Position == game.Position); // True
 ```
 
-#### Get Board
+Promotion is explicit: use `a7a8q`, `a7a8r`, `a7a8b`, or `a7a8n`.
+A required promotion without a suffix is rejected without changing the game.
 
-```
-Span<ChessPiece> pieces = stackalloc ChessPiece[64];
-chessGame.GetBoardToSpan(pieces);
+```csharp
+if (ChessGame.TryCreateFromFen("7k/P7/8/8/8/8/8/7K w - - 0 1", out var promotion))
+    promotion.MakeMove(AlgebraicMove.Parse("a7a8n"));
 
-Console.WriteLine("{0}, {1}", 
-	pieces[0].PieceColor, 
-	pieces[0].PieceValue);
-
-// >> White, Rook
+if (game.AvailableDrawClaims.HasFlag(DrawClaim.ThreefoldRepetition))
+    game.ClaimDraw(DrawClaim.ThreefoldRepetition);
 ```
 
-Empty squares are equal to `ChessPiece.Empty`.
-Or just check it with `piece.IsEmpty()`.
+Threefold repetition and 50 moves require a claim; fivefold and 75 moves finish
+automatically, with checkmate taking priority. Intended-move claims are supported.
+The side to move always switches after a successful move, including checkmate;
+display the winner from `Outcome.Winner`.
+
+`ChessGame` is now a class: use `Clone()` for analysis copies. Failed FEN creation
+returns null; FEN parsing is strict. Counters use built-in `BigInteger` and preserve
+large decimal values exactly. FEN import starts fresh repetition history.
+`GetBoardToSpan` still fills a 64-element board (a1 = 0; empty = `ChessPiece.Empty`).
+
+Console commands: `moves`, `fen`, `undo`, `claim3 [move]`, `claim50 [move]`,
+`quit`, or a coordinate move. Undo is available after game completion.
