@@ -8,25 +8,28 @@ dependencies. All six projects target .NET 10.
 Install the stable [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 version **10.0.401**, as pinned in `global.json`. `rollForward: disable` requires
 this exact SDK; `allowPrerelease: false` excludes previews. CI reads the same file.
+Install PowerShell 7 (`pwsh`) and Git for the solution structure check. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for repository layout and contribution rules.
 Run from the repository root:
 
 ```sh
 dotnet --version
-dotnet restore src/ChessRealms.ChessEngine.sln --locked-mode
-dotnet build src/ChessRealms.ChessEngine.sln --configuration Release --no-restore
-dotnet test src/ChessRealms.ChessEngine.sln --configuration Release --no-build --filter "TestCategory!=Deep"
+pwsh -NoProfile -File scripts/Verify-SolutionStructure.ps1
+dotnet restore ChessRealms.ChessEngine.slnx --locked-mode
+dotnet build ChessRealms.ChessEngine.slnx --configuration Release --no-restore
+dotnet test ChessRealms.ChessEngine.slnx --configuration Release --no-build --filter "TestCategory!=Deep"
 ```
 
-For the ordinary developer loop, `cd src` and run `dotnet test`. This builds and
-runs all ordinary tests, including fast perft; no settings file is required.
-The solution lives in `src`, so commands from the repository root need its path.
+For the ordinary developer loop, run `dotnet test` from the repository root.
+This builds and runs all ordinary tests, including fast perft; no settings file is required.
+The solution lives at the repository root; all six projects remain in `src`.
 Tests continue to use NUnit 3 through VSTest, explicitly selected in `global.json`.
 The existing filters and NUnit `Explicit` behavior are unchanged.
 
 Committed `packages.lock.json` files pin direct and transitive package versions
 and content hashes. CI uses `--locked-mode` to reject dependency drift. When
 intentionally updating packages, run
-`dotnet restore src/ChessRealms.ChessEngine.sln --force-evaluate`, review the
+`dotnet restore ChessRealms.ChessEngine.slnx --force-evaluate`, review the
 lock-file changes, and repeat the checks above. When updating the SDK, update
 `global.json` and this README together, then regenerate/review the lock files with
 that SDK. Restore requires access to NuGet.org or a cache containing the locked packages.
@@ -43,21 +46,22 @@ that SDK. Restore requires access to NuGet.org or a cache containing the locked 
   opt-in for cost, not failing tests being suppressed. Select them explicitly:
 
 ```sh
-dotnet test src/ChessRealms.ChessEngine.sln --configuration Release --no-build --filter "TestCategory=Deep"
+dotnet test ChessRealms.ChessEngine.slnx --configuration Release --no-build --filter "TestCategory=Deep"
 ```
 
 Run both test commands after the Release build, which compiles all tests. Tests,
 the console perft runner and benchmarks use the same `PerftDriver` implementation.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs restore, Release build and the
-same fast-test command on Windows and Linux with SDK 10.0.401, on pushes and pull requests.
+GitHub Actions (`.github/workflows/ci.yml`) checks solution structure, then runs
+locked restore, Release build and the same fast-test command on Windows and Linux
+with SDK 10.0.401, on pushes and pull requests.
 Deep tests are not part of the default CI job. A local pass does not establish
 that either GitHub Actions job has passed.
 
 Optional coverage check using the existing VSTest collector:
 
 ```sh
-dotnet test src/ChessRealms.ChessEngine.sln -c Release --no-build --filter "TestCategory!=Deep" --collect:"XPlat Code Coverage"
+dotnet test ChessRealms.ChessEngine.slnx -c Release --no-build --filter "TestCategory!=Deep" --collect:"XPlat Code Coverage"
 ```
 
 ### Tool smoke checks
