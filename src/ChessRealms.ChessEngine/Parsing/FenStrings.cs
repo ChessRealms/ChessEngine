@@ -1,131 +1,122 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Types;
-using System.Text.RegularExpressions;
+using System.Globalization;
+using System.Numerics;
+using System.Text;
 
 namespace ChessRealms.ChessEngine.Parsing;
 
-public static partial class FenStrings
+public static class FenStrings
 {
     public const string StartPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    
-    public static bool TryParse(string fen, out Position position)
+
+    public static bool TryParse(string? fen, out Position position)
+    {
+        if (TryParseSyntax(fen, out var candidate) && PositionValidation.IsValid(candidate))
+        {
+            position = candidate;
+            return true;
+        }
+        position = new();
+        return false;
+    }
+
+    // Internal geometric move-generation fixtures may deliberately omit kings.
+    // This entry point must never be used to construct a public game.
+    internal static bool TryParseSyntax(string? fen, out Position position)
     {
         position = new();
-
-        Match match = FenRegex().Match(fen);
-
-        if (!match.Success)
+        if (fen is null) return false;
+        string[] fields = fen.Split(' ');
+        if (fields.Length != 6 || fields.Any(string.IsNullOrEmpty)) return false;
+        var ranks = fields[0].Split('/');
+        if (ranks.Length != 8) return false;
+        Position candidate = new();
+        for (int rank = 0; rank < 8; rank++)
         {
-            return false;
-        }
-
-        var groups = match.Groups;
-
-        ReadOnlySpan<char> piecePlacementSpan   = groups["PiecePlacement"].ValueSpan;
-        ReadOnlySpan<char> sideToMoveSpan       = groups["SideToMove"].ValueSpan;
-        ReadOnlySpan<char> castlingSpan         = groups["Castling"].ValueSpan;
-        ReadOnlySpan<char> enPassantSpan        = groups["EnPassant"].ValueSpan;
-        ReadOnlySpan<char> halfMoveClockSpan    = groups["HalfMoveClock"].ValueSpan;
-        ReadOnlySpan<char> fullMoveNumberSpan   = groups["FullMoveNumber"].ValueSpan;
-
-        #region Read pieces
-        // Fen string represented as piece in next positions a8-h8/a7-h8/.../a1-h1.
-        // So we setup a8 as start index.
-        int squareIndex = Squares.a8;
-
-        for (int i = 0; i < piecePlacementSpan.Length; ++i)
-        {
-            if (!char.IsLetterOrDigit(piecePlacementSpan[i]))
+            int file = 0;
+            bool previousDigit = false;
+            foreach (char c in ranks[rank])
             {
-                // Move to next rank. '-16' insted of '-8' related to ordering
-                // from 'a' to 'h' and next increments of 'squareIndex'.
-                squareIndex -= 16;
-                continue;
-            }
-
-            if (char.IsDigit(piecePlacementSpan[i]))
-            {
-                int spaces = (int) char.GetNumericValue(piecePlacementSpan[i]);
-                squareIndex += spaces;
-            }
-            else
-            {
-                int color = char.IsUpper(piecePlacementSpan[i]) ? Colors.White : Colors.Black;
-                int piece = char.ToLower(piecePlacementSpan[i]) switch
+                if (c is >= '1' and <= '8')
                 {
-                    'p' => Pieces.Pawn,
-                    'n' => Pieces.Knight,
-                    'b' => Pieces.Bishop,
-                    'r' => Pieces.Rook,
-                    'q' => Pieces.Queen,
-                    'k' => Pieces.King,
-                    _ => Pieces.None
-                };
-
-                if (Pieces.IsValid(piece))
-                {
-                    position.SetPieceAt(squareIndex, piece, color);
+                    if (previousDigit) return false;
+                    file += c - '0';
+                    previousDigit = true;
                 }
-
-                ++squareIndex;
+                else
+                {
+                    int piece = "pnbrqk".IndexOf(char.ToLowerInvariant(c));
+                    if (piece < 0 || !"pnbrqkPNBRQK".Contains(c) || file >= 8) return false;
+                    candidate.SetPieceAt((7 - rank) * 8 + file++, piece, char.IsUpper(c) ? Colors.White : Colors.Black);
+                    previousDigit = false;
+                }
+                if (file > 8) return false;
+            }
+            if (file != 8) return false;
+        }
+        if (fields[1] is not ("w" or "b")) return false;
+        candidate.color = fields[1] == "w" ? Colors.White : Colors.Black;
+        if (fields[2] != "-")
+        {
+            int lastIndex = -1;
+            foreach (char c in fields[2])
+            {
+                int index = "KQkq".IndexOf(c);
+                if (index <= lastIndex) return false;
+                candidate.castlings |= 1 << index;
+                lastIndex = index;
             }
         }
-        #endregion
-
-        #region Side To Move
-        position.color = sideToMoveSpan.Equals("w", StringComparison.OrdinalIgnoreCase) 
-            ? Colors.White
-            : Colors.Black;
-        #endregion
-
-        #region Castling
-        if (castlingSpan.Contains("K", StringComparison.Ordinal))
+        if (fields[3] != "-")
         {
-            position.castlings |= Castlings.WK;
+            if (!AlgebraicNotation.TryParseSquare(fields[3], out candidate.enpassant)
+                || fields[3][1] is not ('3' or '6')) return false;
         }
-
-        if (castlingSpan.Contains("Q", StringComparison.Ordinal))
-        {
-            position.castlings |= Castlings.WQ;
-        }
-
-        if (castlingSpan.Contains("k", StringComparison.Ordinal))
-        {
-            position.castlings |= Castlings.BK;
-        }
-
-        if (castlingSpan.Contains("q", StringComparison.Ordinal))
-        {
-            position.castlings |= Castlings.BQ;
-        }
-        #endregion
-
-        #region EnPassant & HalfMoveClock & FullMoveNumber
-        if (AlgebraicNotation.TryParseSquare(enPassantSpan, out int enPassantSquare))
-        {
-            position.enpassant = enPassantSquare;
-        }
-        
-        if (int.TryParse(halfMoveClockSpan, out var halfMoveClock))
-        {
-            position.halfMoveClock = halfMoveClock;
-        }
-        
-        if (int.TryParse(fullMoveNumberSpan, out var fullMoveNumber))
-        {
-            position.fullMoveCount = fullMoveNumber;
-        }
-        #endregion
-
+        if (!TryCounter(fields[4], out candidate.halfMoveClock)
+            || !TryCounter(fields[5], out candidate.fullMoveCount) || candidate.fullMoveCount == 0) return false;
+        position = candidate;
         return true;
     }
 
-    [GeneratedRegex(
-        "^(?<PiecePlacement>((?<RankItem>[pnbrqkPNBRQK1-8]{1,8})\\/?){8})\\s+" +
-        "(?<SideToMove>b|w)\\s+" +
-        "(?<Castling>-|K?Q?k?q?)\\s+" +
-        "(?<EnPassant>-|[a-h][36])\\s+" +
-        "(?<HalfMoveClock>\\d+)\\s+" +
-        "(?<FullMoveNumber>\\d+)\\s*$", RegexOptions.Compiled | RegexOptions.ExplicitCapture)]
-    private static partial Regex FenRegex();
+    private static bool TryCounter(string text, out BigInteger value)
+    {
+        value = 0;
+        return text.All(c => c is >= '0' and <= '9')
+            && BigInteger.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out value);
+    }
+
+    public static string Format(Position position)
+    {
+        if (!PositionValidation.IsValid(position)) throw new ArgumentException("Invalid standard chess position.", nameof(position));
+        return FormatUnchecked(position);
+    }
+
+    internal static string FormatUnchecked(Position position)
+    {
+        var result = new StringBuilder();
+        for (int rank = 7; rank >= 0; rank--)
+        {
+            int empty = 0;
+            for (int file = 0; file < 8; file++)
+            {
+                var piece = position.GetPieceAt(rank * 8 + file, Colors.White);
+                if (!Piece.IsValid(piece)) piece = position.GetPieceAt(rank * 8 + file, Colors.Black);
+                if (!Piece.IsValid(piece)) { empty++; continue; }
+                if (empty != 0) { result.Append(empty); empty = 0; }
+                char c = "pnbrqk"[piece.Value];
+                result.Append(piece.Color == Colors.White ? char.ToUpperInvariant(c) : c);
+            }
+            if (empty != 0) result.Append(empty);
+            if (rank != 0) result.Append('/');
+        }
+        result.Append(position.color == Colors.White ? " w " : " b ");
+        if (position.castlings == Castlings.None) result.Append('-');
+        else for (int i = 0; i < 4; i++) if ((position.castlings & (1 << i)) != 0) result.Append("KQkq"[i]);
+        result.Append(' ').Append(position.enpassant == Squares.Empty ? "-" : SquareOps.ToAbbreviature(position.enpassant));
+        result.Append(' ').Append(position.halfMoveClock.ToString(CultureInfo.InvariantCulture));
+        result.Append(' ').Append(position.fullMoveCount.ToString(CultureInfo.InvariantCulture));
+        return result.ToString();
+    }
 }

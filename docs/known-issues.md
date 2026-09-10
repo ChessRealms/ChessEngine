@@ -1,40 +1,34 @@
-# Deferred game API issues
+# Game API status
 
-These scenarios describe missing or incorrect behavior for a later game-state/API stage.
-They are not assertions that the current behavior is correct. Perft exercises the core
-move generator and does not validate game history or the public promotion API.
+The deferred game-rules stage is implemented on `feature/complete-game-rules`.
+See [the API contracts and support boundaries](game-rules-api.md).
 
-## Promotion selection and repeated application
+| Previous defect | Resolution and regression coverage |
+| --- | --- |
+| Promotion suffix lost; several variants applied to one board | Promotion participates in move equality; exact matching applies one variant atomically. Both colors, four pieces, quiet/capture, missing suffix and undo are covered. |
+| Default castling rights/clocks incorrect | Starting FEN is exactly the standard position with KQkq, halfmove 0, fullmove 1. All castlings and rights loss on king/rook movement or rook capture are covered. |
+| Loaded mate/stalemate not classified; moves accepted after completion | Initialization evaluates endings; every successful move switches side; terminal moves are rejected without mutation. Both colors and undo from mate/draw are covered. |
+| Permissive FEN and numeric overflow | Strict structural and local semantic validation precedes generation. Invalid ranks, kings, material, castling and en passant are rejected. BigInteger counters preserve and advance values beyond Int32/Int64 exactly; malformed numbers are rejected. |
+| Clocks/history/repetition absent | Counters, successful-move snapshots, independent Clone and exact UndoMove are implemented. Repetition includes only legally available en passant. Claims at 3/50 and automatic endings at 5/75 are distinct, including intended-move claims and mate priority. |
+| Unchecked move-buffer writes and unproven capacity 218 | Every move write uses Span bounds checks. The full generator uses the conservative bound 434 for accepted positions; short-buffer sentinel tests cover safety. Position bitboards remain inline values and magic attacks are retained. |
 
-From `7k/P7/8/8/8/8/8/7K w - - 0 1`, request `a7a8q` (and separately
-`a7a8n`, `a7a8r`, `a7a8b`). Each should apply exactly one move and leave only
-the selected promoted piece on a8. `AlgebraicMove` currently stores only source
-and target; parsing ignores the suffix. `ChessGame.MakeMove` matches every
-generated promotion with those coordinates and continues applying them without
-stopping after the first match. Resolve promotion representation and selection
-together; do not bless an arbitrary default or the resulting overlapping pieces.
+Regression suites: `CompleteGameRulesTests`, `StrictFenTests`, the existing core
+tests, and unchanged fast/deep `PerftTests`. Tests also execute deterministic legal
+playouts, apply every offered move to independent copies, check bitboard invariants,
+and undo to equal full positions and repetition history.
 
-## Terminal positions and moves after completion
+## Remaining rule boundary
 
-Create from checkmate FEN `7k/6Q1/6K1/8/8/8/8/8 b - - 0 1`, or stalemate FEN
-`7k/5Q2/6K1/8/8/8/8/8 b - - 0 1`. `IsFinished` is not initialized from the
-position. A future completion model should classify both on creation.
+Dead-position recognition covers K–K, K+B–K, K+N–K and bishops-only material when
+all bishops occupy one square color. It does not prove arbitrary dead positions
+or blocked fortresses. Unrecognized dead positions can remain active until
+another supported ending condition; lack of a forced mate is never itself used
+to award a draw.
 
-From the initial position play `f2f3 e7e5 g2g4 d8h4` (Fool's Mate), then request
-`a7a6`. The mating move sets `IsFinished`, but leaves the current side as Black;
-`MakeMove` has no finished-state guard, allowing another Black move. Define the
-terminal side-to-move contract and reject subsequent moves without mutation.
+FEN validation establishes local invariants, not full historical reachability.
+A FEN does not preserve pre-import repetitions or claimed outcomes. Clone preserves
+both within a running process.
 
-## History, repetition and move clocks
-
-From the initial position repeat `g1f3 g8f6 f3g1 f6g8` twice. This produces the
-third occurrence of the initial position, but there is no position history or
-repetition/claim API. A future implementation must also compare side to move,
-castling rights and relevant en-passant rights, not just piece placement.
-
-From `4k3/8/8/8/8/8/8/R3K3 w - - 99 50`, play `a1a2`, then `e8e7`.
-The halfmove clock should advance to 100 then 101, and the fullmove number to 51
-after Black's move. `MoveDriver` currently updates neither clock. Pawn moves and
-captures must reset the halfmove clock. `Position.CreateDefault` also initializes
-the clocks to halfmove 1 / fullmove 0 rather than 0 / 1. Implement clock maintenance
-with the future history and draw-claim policy; perft deliberately ignores clocks.
+Tournament procedures, draw agreement, resignation, clocks, SAN/PGN, Chess960,
+AI/UCI, networking and UI remain outside this stage. These are support boundaries,
+not disabled tests or unimplemented claims of this API.

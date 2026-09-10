@@ -1,43 +1,66 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Debugs;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Numerics;
 
 namespace ChessRealms.ChessEngine.Core.Types;
 
-[StructLayout(LayoutKind.Sequential)]
-public unsafe struct Position
+
+/// <summary>A value snapshot. Assignment copies bitboards; its BigInteger counters are immutable.</summary>
+public struct Position : IEquatable<Position>
 {
-    internal fixed ulong pieceBBs[12];
-    internal fixed ulong blockers[3];
+    internal PieceBoards pieceBBs;
+    internal OccupancyBoards blockers;
 
     internal int color;
     internal int castlings;
     internal int enpassant;
 
-    internal int fullMoveCount;
-    internal int halfMoveClock;
+    internal BigInteger fullMoveCount;
+    internal BigInteger halfMoveClock;
+
+    public bool Equals(Position other)
+    {
+        for (int i = 0; i < 12; i++) if (pieceBBs[i] != other.pieceBBs[i]) return false;
+        for (int i = 0; i < 3; i++) if (blockers[i] != other.blockers[i]) return false;
+        return color == other.color && castlings == other.castlings && enpassant == other.enpassant
+            && fullMoveCount == other.fullMoveCount && halfMoveClock == other.halfMoveClock;
+    }
+
+    public override bool Equals(object? obj) => obj is Position other && Equals(other);
+    public override int GetHashCode()
+    {
+        HashCode hash = new();
+        for (int i = 0; i < 12; i++) hash.Add(pieceBBs[i]);
+        for (int i = 0; i < 3; i++) hash.Add(blockers[i]);
+        hash.Add(color); hash.Add(castlings); hash.Add(enpassant);
+        hash.Add(fullMoveCount); hash.Add(halfMoveClock);
+        return hash.ToHashCode();
+    }
+
+    public static bool operator ==(Position left, Position right) => left.Equals(right);
+    public static bool operator !=(Position left, Position right) => !left.Equals(right);
 
     public Position()
     {
         color = Colors.White;
         castlings = Castlings.None;
         enpassant = Squares.Empty;
-        fullMoveCount = 0;
-        halfMoveClock = 1;
+        fullMoveCount = 1;
+        halfMoveClock = 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SwitchColor() => color = Colors.Mirror(color);
+    internal void SwitchColor() => color = Colors.Mirror(color);
 
     public Piece GetPieceAt(int square, int color)
     {
-        DebugHelper.Assert.IsValidSquare(square);
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Squares.IsValid(square)) throw new ArgumentOutOfRangeException(nameof(square));
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         int bbIndex = BBIndex(Pieces.Pawn, color);
         int bbLastIndex = BBIndex(Pieces.King, color);
@@ -59,11 +82,11 @@ public unsafe struct Position
         return Piece.Empty;
     }
 
-    public void SetPieceAt(int square, int piece, int color)
+    internal void SetPieceAt(int square, int piece, int color)
     {
-        DebugHelper.Assert.IsValidSquare(square);
+        if (!Squares.IsValid(square)) throw new ArgumentOutOfRangeException(nameof(square));
         DebugHelper.Assert.IsValidPiece(piece);
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
@@ -73,11 +96,11 @@ public unsafe struct Position
         BitboardOps.SetBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
-    public void PopPieceAt(int square, int piece, int color)
+    internal void PopPieceAt(int square, int piece, int color)
     {
-        DebugHelper.Assert.IsValidSquare(square);
+        if (!Squares.IsValid(square)) throw new ArgumentOutOfRangeException(nameof(square));
         DebugHelper.Assert.IsValidPiece(piece);
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         int bbIndex = BBIndex(piece, color);
         Debug.Assert(IsValidBBIndex(bbIndex));
@@ -87,10 +110,10 @@ public unsafe struct Position
         BitboardOps.PopBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
-    public void PopPieceAt(int square, int color)
+    internal void PopPieceAt(int square, int color)
     {
-        DebugHelper.Assert.IsValidSquare(square);
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Squares.IsValid(square)) throw new ArgumentOutOfRangeException(nameof(square));
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         int i = BBIndex(Pieces.Pawn, color);
 
@@ -105,7 +128,7 @@ public unsafe struct Position
         BitboardOps.PopBitAt(ref blockers[BitboardIndicies.AllBlockers], square);
     }
 
-    public void MovePiece(int srcSquare, int trgSquare, int color, int piece)
+    internal void MovePiece(int srcSquare, int trgSquare, int color, int piece)
     {
         PopPieceAt(srcSquare, piece, color);
         SetPieceAt(trgSquare, piece, color);
@@ -115,7 +138,7 @@ public unsafe struct Position
     internal static int BBIndex(int piece, int color)
     {
         DebugHelper.Assert.IsValidPiece(piece);
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         return (color * 6) + piece;
     }
@@ -124,7 +147,7 @@ public unsafe struct Position
     internal static int PieceFromBBIndex(int bbIndex, int color)
     {
         Debug.Assert(IsValidBBIndex(bbIndex));
-        DebugHelper.Assert.IsValidColor(color);
+        if (!Colors.IsValid(color)) throw new ArgumentOutOfRangeException(nameof(color));
 
         return bbIndex - color * 6;
     }
@@ -135,9 +158,13 @@ public unsafe struct Position
         return bbIndex >= 0 && bbIndex < 12;
     }
 
-    public bool IsKingChecked() => IsKingChecked(color);
+    public bool IsKingChecked()
+    {
+        if (!PositionValidation.IsValid(this)) throw new InvalidOperationException("Invalid standard chess position.");
+        return IsKingChecked(color);
+    }
 
-    public bool IsKingChecked(int kingColor)
+    internal bool IsKingChecked(int kingColor)
     {
         if (kingColor == Colors.Black)
         {
@@ -156,7 +183,7 @@ public unsafe struct Position
     // Should run a bit faster than universal version
     // that calculates Bitboard indicies.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedByWhite(int square)
+    internal bool IsSquareAttackedByWhite(int square)
     {
         return IsAttackedByWhitePawn(square)
             || IsAttackedByWhiteKnight(square)
@@ -166,7 +193,7 @@ public unsafe struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedByBlack(int square)
+    internal bool IsSquareAttackedByBlack(int square)
     {
         return IsAttackedByBlackPawn(square)
             || IsAttackedByBlackKnight(square)
@@ -273,13 +300,7 @@ public unsafe struct Position
     }
     #endregion
 
-    public unsafe void CopyTo(Position* dst)
-    {
-        fixed (Position* src = &this)
-        {
-            Buffer.MemoryCopy(src, dst, sizeof(Position), sizeof(Position));
-        }
-    }
+    // Position assignment copies the inline bitboards; BigInteger is immutable.
 
     /// <summary>
     /// Creates default position filled with setuped pieces at its default positions.
@@ -324,11 +345,16 @@ public unsafe struct Position
         position.blockers[BitboardIndicies.AllBlockers] = bAll | wAll;
 
         position.color          = Colors.White;
-        position.castlings      = Castlings.None;
+        position.castlings      = Castlings.All;
         position.enpassant      = Squares.Empty;
-        position.fullMoveCount  = 0;
-        position.halfMoveClock  = 1;
+        position.fullMoveCount  = 1;
+        position.halfMoveClock  = 0;
 
         return position;
     }
 }
+[InlineArray(12)]
+internal struct PieceBoards { private ulong first; }
+
+[InlineArray(3)]
+internal struct OccupancyBoards { private ulong first; }

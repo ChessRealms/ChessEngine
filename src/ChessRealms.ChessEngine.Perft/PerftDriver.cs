@@ -27,13 +27,13 @@ namespace Perft
             }
         }
 
-        public static unsafe PerftResult Test(Position pos, int depth, bool upper = true)
+        public static PerftResult Test(Position pos, int depth, bool upper = true)
         {
             Position tmpPos = new();
-            int* moves = stackalloc int[218];
+            Span<int> moves = stackalloc int[MoveGen.MaxMoves];
 
-            int written = MoveGen.WriteMovesToPtrUnsafe(
-                &pos, pos.color, moves);
+            int written = MoveGen.WriteMoves(
+                ref pos, pos.color, moves);
 
             if (depth == 1)
             {
@@ -41,7 +41,7 @@ namespace Perft
 
                 for (int i = 0; i < written; ++i)
                 {
-                    pos.CopyTo(&tmpPos);
+                    tmpPos = pos;
 
                     MoveDriver.MakeMove(ref tmpPos, moves[i]);
 
@@ -74,7 +74,7 @@ namespace Perft
 
             for (int i = 0; i < written; ++i)
             {
-                pos.CopyTo(&tmpPos);
+                tmpPos = pos;
 
                 MoveDriver.MakeMove(ref tmpPos, moves[i]);
 

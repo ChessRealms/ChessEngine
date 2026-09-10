@@ -1,4 +1,4 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
+using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Debugs;
@@ -8,12 +8,12 @@ namespace ChessRealms.ChessEngine.Core.Movements;
 
 internal unsafe static class LeapingMovement
 {
-    public static int WriteMovesToPtrUnsafe(
-        Position* position, 
-        int color, 
+    public static int WriteMoves(
+        ref Position position,
+        int color,
         int piece,
         ulong* masksLookup,
-        int* dest, 
+        Span<int> dest,
         int offset = 0)
     {
         DebugHelper.Assert.IsValidColor(color);
@@ -23,9 +23,9 @@ internal unsafe static class LeapingMovement
         int cursor = offset;
 
         int enemyColor = Colors.Mirror(color);
-        ulong myBlockers = position->blockers[color];
-        ulong enemyBlockers = position->blockers[enemyColor];
-        ulong pieceBB = position->pieceBBs[Position.BBIndex(piece, color)];
+        ulong myBlockers = position.blockers[color];
+        ulong enemyBlockers = position.blockers[enemyColor];
+        ulong pieceBB = position.pieceBBs[Position.BBIndex(piece, color)];
 
         int srcSquare;
         int trgSquare;
@@ -42,7 +42,7 @@ internal unsafe static class LeapingMovement
             {
                 trgSquare = BitboardOps.Lsb(captures);
                 dest[cursor++] = BinaryMoveOps.EncodeMove(
-                    srcSquare, piece, color, trgSquare, 
+                    srcSquare, piece, color, trgSquare,
                     capture: 1);
                 captures = BitboardOps.PopBitAt(captures, trgSquare);
             }

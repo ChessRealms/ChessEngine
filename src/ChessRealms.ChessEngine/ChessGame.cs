@@ -1,196 +1,212 @@
-﻿using ChessRealms.ChessEngine.Core.Constants;
-using ChessRealms.ChessEngine.Core.Extensions;
+using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Math;
 using ChessRealms.ChessEngine.Core.Movements;
 using ChessRealms.ChessEngine.Core.Types;
 using ChessRealms.ChessEngine.Parsing;
+using System.Numerics;
 
 namespace ChessRealms.ChessEngine;
 
-public unsafe struct ChessGame
+/// <summary>A mutable game with exclusive history ownership. Use Clone for independent analysis.</summary>
+public sealed class ChessGame
 {
     private Position position;
+    private readonly List<MoveHistoryEntry> history = [];
+    private readonly List<Position> undo = [];
+    private readonly List<string> keys = [];
+    private readonly Dictionary<string, int> repetitions = new(StringComparer.Ordinal);
 
-    public readonly PieceColor CurrentColor => (PieceColor)position.color;
+    public PieceColor CurrentColor => (PieceColor)position.color;
+    public PieceColor EnemyColor => (PieceColor)Colors.Mirror(position.color);
+    public Position Position => position;
+    public BigInteger HalfmoveClock => position.halfMoveClock;
+    public BigInteger FullmoveNumber => position.fullMoveCount;
+    public GameOutcome Outcome { get; private set; } = GameOutcome.Ongoing;
+    public bool IsFinished => Outcome.Result != GameResult.Ongoing;
+    public bool IsInCheck => position.IsKingChecked();
+    public GameState State => IsFinished ? GameState.Finished : IsInCheck ? GameState.Check : GameState.Active;
+    public int RepetitionCount => repetitions[keys[^1]];
+    public IReadOnlyList<MoveHistoryEntry> History => Array.AsReadOnly(history.ToArray());
+    public DrawClaim AvailableDrawClaims => IsFinished ? DrawClaim.None : Claims(position, RepetitionCount);
 
-    public readonly PieceColor EnemyColor => (PieceColor)Colors.Mirror(position.color);
-
-    public bool IsFinished { get; private set; }
-
-    /// <summary>
-    /// Creates default chess board with init position setup.
-    /// </summary>
-    public ChessGame() : this(Position.CreateDefault())
-    {
-    }
+    public ChessGame() : this(Position.CreateDefault()) { }
 
     public ChessGame(Position position)
     {
+        if (!PositionValidation.IsValid(position)) throw new ArgumentException("Invalid standard chess position.", nameof(position));
         this.position = position;
+        var moves = LegalMoves(position);
+        string key = RepetitionKey(position, moves);
+        keys.Add(key);
+        repetitions.Add(key, 1);
+        Outcome = Evaluate(position, moves.Count, 1);
     }
 
-    public readonly void GetBoardToSpan(Span<ChessPiece> destination)
+    private ChessGame(ChessGame original)
     {
-        ulong allBlockers;
-        ulong whiteBlockers;
+        position = original.position;
+        Outcome = original.Outcome;
+        history.AddRange(original.history);
+        undo.AddRange(original.undo);
+        keys.AddRange(original.keys);
+        foreach (var pair in original.repetitions) repetitions.Add(pair.Key, pair.Value);
+    }
 
-        fixed (Position* position = &this.position)
+    public ChessGame Clone() => new(this);
+    public string ToFen() => FenStrings.FormatUnchecked(position);
+
+    public void GetBoardToSpan(Span<ChessPiece> destination)
+    {
+        if (destination.Length < 64) throw new ArgumentException("Board requires 64 squares.", nameof(destination));
+        for (int i = 0; i < 64; i++)
         {
-            allBlockers = position->blockers[BitboardIndicies.AllBlockers];
-            whiteBlockers = position->blockers[BitboardIndicies.WBlockers];
-        }
-
-        for (int i = 0; i < 64; ++i)
-        {
-            if (BitboardOps.GetBitAt(allBlockers, i).IsTrue())
-            {
-                Piece piece;
-                if (BitboardOps.GetBitAt(whiteBlockers, i).IsTrue())
-                    piece = position.GetPieceAt(square: i, Colors.White);
-                else
-                    piece = position.GetPieceAt(square: i, Colors.Black);
-
-                destination[i] = new ChessPiece(
-                    (PieceColor)piece.Color, 
-                    (PieceValue)piece.Value);
-            }
-            else
-            {
-                destination[i] = ChessPiece.Empty;
-            }
+            var piece = position.GetPieceAt(i, Colors.White);
+            if (!Piece.IsValid(piece)) piece = position.GetPieceAt(i, Colors.Black);
+            destination[i] = Piece.IsValid(piece) ? new((PieceColor)piece.Color, (PieceValue)piece.Value) : ChessPiece.Empty;
         }
     }
 
-    public MoveResult MakeMove(in AlgebraicMove algebraicMove) 
+    /// <summary>Snapshot of playable moves; empty after completion. Does not mutate the game.</summary>
+    public IReadOnlyList<AlgebraicMove> GetLegalMoves() => IsFinished
+        ? Array.Empty<AlgebraicMove>()
+        : Array.AsReadOnly(LegalMoves(position).Select(ToPublicMove).ToArray());
+
+    public bool HasMoves() => !IsFinished && LegalMoves(position).Count != 0;
+
+    public MoveResult MakeMove(in AlgebraicMove move)
     {
-        if (!algebraicMove.IsValid())
-        {
-            return MoveResult.None;
-        }
+        if (IsFinished || !TryFindMove(move, out int encoded)) return MoveResult.None;
+        var next = position;
+        MoveDriver.MakeMove(ref next, encoded);
+        next.SwitchColor();
+        var replies = LegalMoves(next);
+        string key = RepetitionKey(next, replies);
+        int count = repetitions.GetValueOrDefault(key) + 1;
+        var outcome = Evaluate(next, replies.Count, count);
+        MoveResult result = MoveResult.Move;
+        if (BinaryMoveOps.DecodeCapture(encoded) != 0) result |= MoveResult.Capture;
+        if (next.IsKingChecked()) result |= MoveResult.Check;
+        if (outcome.Reason == FinishReason.Checkmate) result |= MoveResult.Checkmate;
+        if (outcome.Reason == FinishReason.Stalemate) result |= MoveResult.Stalemate;
 
-        Position positionBackup;
-        position.CopyTo(&positionBackup);
-
-        int* moves = stackalloc int[218];
-        int written;
-
-        fixed (Position* position = &this.position)
-            written = MoveGen.WriteMovesToPtrUnsafe(position, position->color, moves);
-
-        int move = BinaryMoveOps.NoneMove;
-        for (int i = 0; i < written; ++i)
-        {
-            int mSrc = BinaryMoveOps.DecodeSrc(moves[i]);
-            int mTrg = BinaryMoveOps.DecodeTrg(moves[i]);
-
-            if (algebraicMove.Src == mSrc && algebraicMove.Trg == mTrg)
-            {
-                MoveDriver.MakeMove(ref position, moves[i]);
-
-                if (position.IsKingChecked())
-                {
-                    fixed (Position* position = &this.position)
-                        positionBackup.CopyTo(position);
-
-                    break;
-                }
-
-                move = moves[i];
-            }
-        }
-
-        if (move == BinaryMoveOps.NoneMove)
-        {
-            return MoveResult.None;
-        }
-
-        var moveResult = MoveResult.Move;
-
-        if (BinaryMoveOps.DecodeCapture(move).IsTrue())
-        {
-            moveResult |= MoveResult.Capture;
-        }
-
-        int enemyColor = Colors.Mirror(position.color);
-        fixed (Position* position = &this.position)
-            written = MoveGen.WriteMovesToPtrUnsafe(position, enemyColor, moves);
-
-        if (!HasMoves(enemyColor))
-        {
-            IsFinished = true;
-
-            if (position.IsKingChecked(enemyColor))
-                moveResult |= MoveResult.Checkmate;
-            else
-                moveResult |= MoveResult.Stalemate;
-        }
-        else
-        {
-            if (position.IsKingChecked(enemyColor))
-                moveResult |= MoveResult.Check;
-
-            position.SwitchColor();
-        }
-        
-        return moveResult;
+        var entry = new MoveHistoryEntry(move, ToFen(), FenStrings.FormatUnchecked(next), result);
+        undo.Add(position);
+        history.Add(entry);
+        keys.Add(key);
+        repetitions[key] = count;
+        position = next;
+        Outcome = outcome;
+        return result;
     }
 
-    public bool HasMoves()
+    /// <summary>Undo the last successful move, also clearing a later draw claim.</summary>
+    public bool UndoMove()
     {
-        return HasMoves(position.color);
+        if (undo.Count == 0) return false;
+        string key = keys[^1];
+        if (--repetitions[key] == 0) repetitions.Remove(key);
+        keys.RemoveAt(keys.Count - 1);
+        position = undo[^1];
+        undo.RemoveAt(undo.Count - 1);
+        history.RemoveAt(history.Count - 1);
+        Outcome = Evaluate(position, LegalMoves(position).Count, RepetitionCount);
+        return true;
     }
 
-    public bool HasMoves(PieceColor color)
+    /// <summary>Claims available after an intended legal move, without executing it.</summary>
+    public DrawClaim GetAvailableDrawClaims(in AlgebraicMove intendedMove)
     {
-        if (!color.IsBlackOrWhite())
-            return false;
-
-        return HasMoves((int)color);
+        if (IsFinished || !TryFindMove(intendedMove, out int encoded)) return DrawClaim.None;
+        var next = position;
+        MoveDriver.MakeMove(ref next, encoded);
+        next.SwitchColor();
+        var moves = LegalMoves(next);
+        return Claims(next, repetitions.GetValueOrDefault(RepetitionKey(next, moves)) + 1);
     }
 
-    private bool HasMoves(int color)
+    /// <summary>A valid intended-move claim ends the game at its current board; the move is not played.</summary>
+    public bool ClaimDraw(DrawClaim reason, AlgebraicMove? intendedMove = null)
     {
-        int* moves = stackalloc int[218];
-        int written;
+        if (reason is not (DrawClaim.ThreefoldRepetition or DrawClaim.FiftyMoveRule)) return false;
+        DrawClaim available = intendedMove is { } move ? GetAvailableDrawClaims(move) : AvailableDrawClaims;
+        if ((available & reason) == 0) return false;
+        Outcome = Draw(reason == DrawClaim.ThreefoldRepetition ? FinishReason.ThreefoldRepetition : FinishReason.FiftyMoveRule);
+        return true;
+    }
 
-        fixed (Position* position = &this.position)
-            written = MoveGen.WriteMovesToPtrUnsafe(position, color, moves);
-
-        Position tmpPosition;
-        
-        for (int i = 0; i < written; ++i)
+    private bool TryFindMove(AlgebraicMove move, out int encoded)
+    {
+        encoded = 0;
+        if (!move.IsValid()) return false;
+        foreach (int candidate in LegalMoves(position))
         {
-            position.CopyTo(&tmpPosition);
-            MoveDriver.MakeMove(ref tmpPosition, moves[i]);
-            
-            if (!tmpPosition.IsKingChecked(color))
-            {
-                return true;
-            }
+            if (ToPublicMove(candidate) != move) continue;
+            encoded = candidate;
+            return true;
         }
-
         return false;
     }
 
-    /// <summary>
-    /// Try create chess game from FEN string. Creates default chess game if FEN is invalid.
-    /// </summary>
-    /// <param name="fen"> FEN string. </param>
-    /// <param name="chessGame"> Created chess game. </param>
-    /// <returns></returns>
-    public static bool TryCreateFromFen(string fen, out ChessGame chessGame)
+    private static AlgebraicMove ToPublicMove(int move) => new(BinaryMoveOps.DecodeSrc(move),
+        BinaryMoveOps.DecodeTrg(move), BinaryMoveOps.DecodePromotion(move) == Promotions.None
+            ? PieceValue.None : (PieceValue)BinaryMoveOps.DecodePromotion(move));
+
+    private static List<int> LegalMoves(Position p)
     {
-        var parsed = FenStrings.TryParse(fen, out Position position);
-
-        if (parsed)
+        Span<int> buffer = stackalloc int[MoveGen.MaxMoves];
+        int written = MoveGen.WriteMoves(ref p, p.color, buffer);
+        List<int> legal = [];
+        for (int i = 0; i < written; i++)
         {
-            chessGame = new ChessGame(position);
+            var next = p;
+            // Move legality is independent of FEN counters.
+            MoveDriver.MakeMove(ref next, buffer[i], updateCounters: false);
+            if (!next.IsKingChecked(p.color)) legal.Add(buffer[i]);
         }
-        else
-        {
-            chessGame = new ChessGame();
-        }
+        return legal;
+    }
 
-        return parsed;
+    private static string RepetitionKey(Position p, List<int> moves)
+    {
+        if (!moves.Any(m => BinaryMoveOps.DecodeEnpassant(m) != 0)) p.enpassant = Squares.Empty;
+        string fen = FenStrings.FormatUnchecked(p);
+        return fen[..fen.LastIndexOf(' ', fen.LastIndexOf(' ') - 1)];
+    }
+
+    private static DrawClaim Claims(Position p, int count) =>
+        (count >= 3 ? DrawClaim.ThreefoldRepetition : DrawClaim.None)
+        | (p.halfMoveClock >= 100 ? DrawClaim.FiftyMoveRule : DrawClaim.None);
+
+    private static GameOutcome Evaluate(Position p, int legalCount, int repetitions)
+    {
+        if (legalCount == 0)
+        {
+            if (!p.IsKingChecked()) return Draw(FinishReason.Stalemate);
+            PieceColor winner = (PieceColor)Colors.Mirror(p.color);
+            return new(winner == PieceColor.White ? GameResult.WhiteWin : GameResult.BlackWin, winner, FinishReason.Checkmate);
+        }
+        if (IsBasicDeadPosition(p)) return Draw(FinishReason.DeadPosition);
+        if (repetitions >= 5) return Draw(FinishReason.FivefoldRepetition);
+        if (p.halfMoveClock >= 150) return Draw(FinishReason.SeventyFiveMoveRule);
+        return GameOutcome.Ongoing;
+    }
+
+    private static GameOutcome Draw(FinishReason reason) => new(GameResult.Draw, PieceColor.None, reason);
+
+    private static bool IsBasicDeadPosition(Position p)
+    {
+        if ((p.pieceBBs[0] | p.pieceBBs[6] | p.pieceBBs[3] | p.pieceBBs[9]
+            | p.pieceBBs[4] | p.pieceBBs[10]) != 0) return false;
+        ulong knights = p.pieceBBs[1] | p.pieceBBs[7];
+        ulong bishops = p.pieceBBs[2] | p.pieceBBs[8];
+        if (BitOperations.PopCount(knights | bishops) <= 1) return true;
+        // Bishops alone, all on one square color. Never infer deadness from inability to force mate.
+        return knights == 0 && ((bishops & 0x55aa55aa55aa55aaUL) == 0 || (bishops & 0xaa55aa55aa55aa55UL) == 0);
+    }
+
+    public static bool TryCreateFromFen(string? fen, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ChessGame? chessGame)
+    {
+        chessGame = FenStrings.TryParse(fen, out var position) ? new ChessGame(position) : null;
+        return chessGame is not null;
     }
 }

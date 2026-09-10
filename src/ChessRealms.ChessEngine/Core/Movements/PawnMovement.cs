@@ -1,4 +1,4 @@
-﻿using ChessRealms.ChessEngine.Core.Attacks;
+using ChessRealms.ChessEngine.Core.Attacks;
 using ChessRealms.ChessEngine.Core.Constants;
 using ChessRealms.ChessEngine.Core.Extensions;
 using ChessRealms.ChessEngine.Core.Math;
@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace ChessRealms.ChessEngine.Core.Movements;
 
-internal unsafe static class PawnMovement
+internal static class PawnMovement
 {
     public const int HorizontalRotateStep = 8;
 
@@ -25,20 +25,20 @@ internal unsafe static class PawnMovement
         return bitboard >> HorizontalRotateStep;
     }
 
-    public static int WriteMovesToPtrUnsafe(Position* position, int color, int* dest, int offset = 0)
+    public static int WriteMoves(ref Position position, int color, Span<int> dest, int offset = 0)
     {
         DebugHelper.Assert.IsValidColor(color);
         Debug.Assert(offset >= 0);
-        
+
         int cursor = offset;
         int BBIndex = Position.BBIndex(Pieces.Pawn, color);
 
-        ulong empty = ~position->blockers[Colors.None];
-        ulong pawns = position->pieceBBs[BBIndex];
-        int enpassant = position->enpassant;
+        ulong empty = ~position.blockers[Colors.None];
+        ulong pawns = position.pieceBBs[BBIndex];
+        int enpassant = position.enpassant;
 
         int enemyColor = Colors.Mirror(color);
-        ulong enemyPieces = position->blockers[enemyColor];
+        ulong enemyPieces = position.blockers[enemyColor];
 
         ulong singlePush;
         ulong doublePush;
@@ -99,7 +99,7 @@ internal unsafe static class PawnMovement
             int srcSquare = trgSquare + (2 * stepBack);
 
             dest[cursor++] = BinaryMoveOps.EncodeMove(
-                srcSquare, Pieces.Pawn, color, trgSquare, 
+                srcSquare, Pieces.Pawn, color, trgSquare,
                 doublePush: 1);
 
             BitboardOps.PopBitAt(ref doublePush, trgSquare);

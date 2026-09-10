@@ -18,12 +18,12 @@ internal class ChessGameTests
     public void NewGame_HasCompleteInitialBoardAndWhiteToMove()
     {
         ChessGame game = new();
-        var board = Board(game);
+        var board = Board(game!);
         PieceValue[] backRank = [PieceValue.Rook, PieceValue.Knight, PieceValue.Bishop, PieceValue.Queen,
             PieceValue.King, PieceValue.Bishop, PieceValue.Knight, PieceValue.Rook];
         Assert.Multiple(() =>
         {
-            Assert.That(game.CurrentColor, Is.EqualTo(PieceColor.White));
+            Assert.That(game!.CurrentColor, Is.EqualTo(PieceColor.White));
             Assert.That(game.EnemyColor, Is.EqualTo(PieceColor.Black));
             Assert.That(game.IsFinished, Is.False);
             Assert.That(game.HasMoves(), Is.True);
@@ -42,10 +42,10 @@ internal class ChessGameTests
     public void CreateFromFen_PreservesBoardAndBlackToMove()
     {
         Assert.That(ChessGame.TryCreateFromFen("4k3/8/8/8/8/8/4P3/4K3 b - - 0 1", out var game), Is.True);
-        var board = Board(game);
+        var board = Board(game!);
         Assert.Multiple(() =>
         {
-            Assert.That(game.CurrentColor, Is.EqualTo(PieceColor.Black));
+            Assert.That(game!.CurrentColor, Is.EqualTo(PieceColor.Black));
             Assert.That(board.Count(piece => !piece.IsEmpty()), Is.EqualTo(3));
             AssertPiece(board, "e8", PieceColor.Black, PieceValue.King);
             AssertPiece(board, "e1", PieceColor.White, PieceValue.King);
@@ -58,7 +58,7 @@ internal class ChessGameTests
     {
         ChessGame game = new();
         Assert.That(game.MakeMove(AlgebraicMove.Parse("e2e4")), Is.EqualTo(MoveResult.Move));
-        Assert.That(game.CurrentColor, Is.EqualTo(PieceColor.Black));
+        Assert.That(game!.CurrentColor, Is.EqualTo(PieceColor.Black));
         var expected = Board(new ChessGame());
         expected[AlgebraicNotation.ParseSquare("e2")] = ChessPiece.Empty;
         expected[AlgebraicNotation.ParseSquare("e4")] = new(PieceColor.White, PieceValue.Pawn);
@@ -67,7 +67,7 @@ internal class ChessGameTests
         expected[AlgebraicNotation.ParseSquare("e7")] = ChessPiece.Empty;
         expected[AlgebraicNotation.ParseSquare("e5")] = new(PieceColor.Black, PieceValue.Pawn);
         Assert.That(Board(game), Is.EqualTo(expected));
-        Assert.That(game.CurrentColor, Is.EqualTo(PieceColor.White));
+        Assert.That(game!.CurrentColor, Is.EqualTo(PieceColor.White));
     }
 
     [Test]
@@ -76,12 +76,12 @@ internal class ChessGameTests
         ChessGame game = new();
         Assert.That(game.MakeMove(AlgebraicMove.Parse("e2e4")), Is.EqualTo(MoveResult.Move));
         Assert.That(game.MakeMove(AlgebraicMove.Parse("d7d5")), Is.EqualTo(MoveResult.Move));
-        var expected = Board(game);
+        var expected = Board(game!);
         expected[AlgebraicNotation.ParseSquare("e4")] = ChessPiece.Empty;
         expected[AlgebraicNotation.ParseSquare("d5")] = new(PieceColor.White, PieceValue.Pawn);
         Assert.That(game.MakeMove(AlgebraicMove.Parse("e4d5")), Is.EqualTo(MoveResult.Move | MoveResult.Capture));
         Assert.That(Board(game), Is.EqualTo(expected));
-        Assert.That(game.CurrentColor, Is.EqualTo(PieceColor.Black));
+        Assert.That(game!.CurrentColor, Is.EqualTo(PieceColor.Black));
     }
 
     [TestCase(FenStrings.StartPosition, "e2e5")]
@@ -91,14 +91,14 @@ internal class ChessGameTests
     public void IllegalMove_PreservesBoardTurnAndFinishedState(string fen, string move)
     {
         Assert.That(ChessGame.TryCreateFromFen(fen, out var game), Is.True);
-        var before = Board(game);
-        var color = game.CurrentColor;
+        var before = Board(game!);
+        var color = game!.CurrentColor;
         var finished = game.IsFinished;
         Assert.That(game.MakeMove(AlgebraicMove.Parse(move)), Is.EqualTo(MoveResult.None));
         Assert.Multiple(() =>
         {
             Assert.That(Board(game), Is.EqualTo(before));
-            Assert.That(game.CurrentColor, Is.EqualTo(color));
+            Assert.That(game!.CurrentColor, Is.EqualTo(color));
             Assert.That(game.IsFinished, Is.EqualTo(finished));
         });
     }
