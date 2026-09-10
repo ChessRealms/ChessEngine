@@ -1,5 +1,10 @@
 # Game-rules validation — 2026-09-10
 
+> Repository organization note: the solution now lives at the repository root
+> as `ChessRealms.ChessEngine.slnx`.
+> Commands and results below preserve the paths used at the time of validation.
+> See [CONTRIBUTING.md](../CONTRIBUTING.md) for current commands.
+
 Base: `origin/main` at `49fc3a5` (`.NET 10` migration), containing `d8eb1e3`
 (restored tests and CI). Work branch: `feature/complete-game-rules`.
 No applicable AGENTS.md was present in the repository or ancestor directories.

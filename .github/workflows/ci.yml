@@ -19,9 +19,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+      - name: Verify solution structure
+        shell: pwsh
+        run: ./scripts/Verify-SolutionStructure.ps1
       - name: Restore
-        run: dotnet restore src/ChessRealms.ChessEngine.sln --locked-mode
+        run: dotnet restore ChessRealms.ChessEngine.slnx --locked-mode
       - name: Release build
-        run: dotnet build src/ChessRealms.ChessEngine.sln --configuration Release --no-restore
+        run: dotnet build ChessRealms.ChessEngine.slnx --configuration Release --no-restore
       - name: Fast tests
-        run: dotnet test src/ChessRealms.ChessEngine.sln --configuration Release --no-build --filter "TestCategory!=Deep"
+        run: dotnet test ChessRealms.ChessEngine.slnx --configuration Release --no-build --filter "TestCategory!=Deep"

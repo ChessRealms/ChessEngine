@@ -1,5 +1,10 @@
 # .NET 10 migration
 
+> Repository organization note: the solution now lives at the repository root
+> as `ChessRealms.ChessEngine.slnx`.
+> Commands and results below preserve the paths used at the time of validation.
+> See [CONTRIBUTING.md](../CONTRIBUTING.md) for current commands.
+
 Validated on 2026-09-10, Windows 11 x64. The starting commit was `d8eb1e3`
 (`test: add regression test foundation and .NET 8 CI`), confirmed as `origin/main`
 after fetching. The working tree was clean; no applicable `AGENTS.md` was found.
